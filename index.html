@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ATM Cash</title>
+  <link rel="stylesheet" href="style.css?v=1.1" />
+</head>
+<body>
+  <main class="phone">
+
+    <section id="homePage" class="page active">
+      <header class="header">
+        <div class="logo">
+          <div>
+            <div class="logo-symbol"></div>
+            <div class="logo-word">ATM<br><span>CASH</span></div>
+          </div>
+        </div>
+
+        <div>
+          <h1>ATM Cash</h1>
+          <div class="subtitle">Find den billigste måde at hæve kontanter i udlandet.</div>
+        </div>
+
+        <div class="language-switcher" aria-label="Skift sprog"><button class="language-toggle" type="button" data-lang="da" aria-label="Dansk"><span class="language-flag-da" aria-hidden="true"></span><span class="language-code">DA</span></button><button class="language-toggle" type="button" data-lang="en" aria-label="English"><span class="language-globe" aria-hidden="true">🌐</span><span class="language-code">EN</span></button></div>
+      </header>
+
+      <section class="card amount-card">
+        <div class="amount-row">
+          <div>
+            <div class="field-label">Beløb</div>
+            <div class="amount-box">
+              <input id="dkkAmount" inputmode="decimal" value="2.500" />
+              <div class="currency-row">
+                <div class="currency-left"><span id="homeCurrencyFlag" class="flag dk"></span>
+                  <select id="homeCurrency" class="currency-select" aria-label="Hjemvaluta">
+                    <option value="DKK">DKK</option>
+                    <option value="EUR">EUR</option>
+                    <option value="USD">USD</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="arrow" id="directionArrow">→</div>
+
+          <div>
+            <div class="field-label">Beløb</div>
+            <div class="amount-box">
+              <input id="bestThb" inputmode="decimal" value="0" />
+              <div class="currency-row">
+                <div class="currency-left"><span class="flag th"></span> THB</div>
+                <span>⌄</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="results-fixed">
+        <div class="result-head">
+          <h2>↗ Resultat</h2>
+          <button class="update" type="button" id="calculateBtn">☰ Vælg metoder</button>
+        </div>
+        <div class="rate"><span id="rateStatus">Kurser opdateres hver time.</span><br>Kurser og gebyrer er vejledende og kan ændres.</div>
+
+        <section id="results"></section>
+      </div>
+
+      <nav class="bottom-nav" aria-label="Navigation">
+        <button class="nav-tab" type="button" data-nav="converter"><span class="currency-nav-icon">⇄</span><strong>Valuta</strong></button>
+        <button class="nav-tab" type="button" data-nav="tips"><span>ⓘ</span><strong>Tips</strong></button>
+      </nav>
+    </section>
+
+
+    <section id="converterPage" class="page">
+      <header class="simple-header page-header-center">
+        <div>
+          <h1>Valutaomregner</h1>
+          <div class="subtitle">Skriv i ét felt – alle valutaer opdateres automatisk.</div>
+        </div>
+      </header>
+
+      <section class="card converter-card">
+        <div class="converter-row">
+          <div class="converter-info"><span class="flag dk"></span><div><strong>DKK</strong><small>Danske kroner</small></div></div>
+          <input id="convDKK" class="converter-input" inputmode="decimal" value="1.000,00" data-currency="DKK" />
+        </div>
+        <div class="converter-row">
+          <div class="converter-info"><span class="flag th"></span><div><strong>THB</strong><small>Thailandsk baht</small></div></div>
+          <input id="convTHB" class="converter-input" inputmode="decimal" value="0,00" data-currency="THB" />
+        </div>
+        <div class="converter-row">
+          <div class="converter-info"><span class="flag eu"></span><div><strong>EUR</strong><small>Euro</small></div></div>
+          <input id="convEUR" class="converter-input" inputmode="decimal" value="0,00" data-currency="EUR" />
+        </div>
+        <div class="converter-row">
+          <div class="converter-info"><span class="flag us"></span><div><strong>USD</strong><small>Amerikansk dollar</small></div></div>
+          <input id="convUSD" class="converter-input" inputmode="decimal" value="0,00" data-currency="USD" />
+        </div>
+        <div class="converter-row">
+          <div class="converter-info"><span class="flag gb"></span><div><strong>GBP</strong><small>Britisk pund</small></div></div>
+          <input id="convGBP" class="converter-input" inputmode="decimal" value="0,00" data-currency="GBP" />
+        </div>
+      </section>
+
+      <section class="card small-note">
+        <div id="converterRateStatus">Kurser opdateres hver time.</div>
+        <div>Kurserne er vejledende.</div>
+      </section>
+
+      <nav class="bottom-nav" aria-label="Navigation">
+        <button class="nav-tab back-tab" type="button" data-nav="home"><span>‹</span></button>
+        <button class="nav-tab" type="button" data-nav="tips"><span>ⓘ</span><strong>Tips</strong></button>
+      </nav>
+    </section>
+
+    <section id="tipsPage" class="page">
+      <header class="simple-header page-header-center">
+        <div>
+          <h1>ATM tips</h1>
+          <div class="subtitle">Kort guide til hævning i Thailand.</div>
+        </div>
+      </header>
+      <section class="tips-list">
+        <article class="card tip-card">
+          <div class="tip-icon">🏧</div>
+          <div>
+            <div class="tip-title">Brug de gule Krungsri ATM’er</div>
+            <p>De gule Krungsri automater er ofte et godt valg i Thailand. De er nemme at finde, stabile og kan normalt hæve op til 30.000 THB pr. gang, hvis dit kort tillader det.</p>
+          </div>
+        </article>
+
+        <article class="card tip-card">
+          <div class="tip-icon">💸</div>
+          <div>
+            <div class="tip-title">Hæv så meget som muligt pr. gang</div>
+            <p>Thai ATM’er tager typisk et fast gebyr pr. hævning. Derfor bliver det billigere at hæve ét stort beløb end flere små beløb.</p>
+          </div>
+        </article>
+
+        <article class="card tip-card">
+          <div class="tip-icon">✕</div>
+          <div>
+            <div class="tip-title">Sig nej til Conversion</div>
+            <p>Hvis automaten spørger om Conversion eller Dynamic Currency Conversion, så vælg nej. Lad altid dit eget kort/bank lave omregningen til THB.</p>
+          </div>
+        </article>
+
+        <article class="card tip-card">
+          <div class="tip-icon">💳</div>
+          <div>
+            <div class="tip-title">Pas på dyre Visa/Mastercard hævninger</div>
+            <p>Almindelige bankkort kan være dyre i udlandet, fordi der både kan komme bankgebyr og dårligere valutakurs. Sammenlign med Wise/Revolut før du hæver.</p>
+          </div>
+        </article>
+
+        <article class="card tip-card">
+          <div class="tip-icon">R</div>
+          <div>
+            <div class="tip-title">Revolut i weekenden</div>
+            <p>Revolut kan lægge ekstra vekselgebyr på i weekenden, især på Standard og Plus. Hvis du kan, så hæv eller veksl på hverdage.</p>
+          </div>
+        </article>
+
+        <article class="card tip-card">
+          <div class="tip-icon">🛡</div>
+          <div>
+            <div class="tip-title">Vælg sikre automater</div>
+            <p>Brug helst automater ved banker, shoppingcentre eller steder med god belysning. Undgå tomme gadeautomater sent om aftenen.</p>
+          </div>
+        </article>
+      </section>
+      <nav class="bottom-nav" aria-label="Navigation">
+        <button class="nav-tab back-tab" type="button" data-nav="home"><span>‹</span></button>
+        <span class="nav-tab nav-spacer" aria-hidden="true"></span>
+      </nav>
+    </section>
+
+
+    <section id="revolutCalcPage" class="page">
+      <div class="topbar">
+        <button class="icon-btn back-btn" type="button">‹</button>
+        <div class="title"><h1>Revolut</h1><div>Beregning af ATM-hævning</div></div>
+        <button class="icon-btn" type="button" id="openRevolutSettings">⚙︎</button>
+      </div>
+
+      <section class="card calc-summary">
+        <div class="method-logo revolut-logo">R</div>
+        <div>
+          <div class="main-title" id="revolutCalcPlan">Revolut Premium</div>
+          <div class="main-sub" id="revolutCalcSubtitle">Beregning ud fra forsiden</div>
+        </div>
+        <div class="main-value" id="revolutCalcTotal">0 DKK<span>Total pris</span></div>
+      </section>
+
+      <div class="calc-scroll">
+        <section class="card">
+          <div class="section-label">Hævning</div>
+          <div class="fee-grid">
+            <div class="fee-box">
+              <div class="calc-value" id="revolutCalcCash">0</div>
+              <div class="unit">Kontanter · THB</div>
+            </div>
+
+          <div class="fee-box">
+            <input id="revolutMaxPerWithdrawal" inputmode="decimal" value="20.000" />
+            <div class="unit">Maks pr. hævning · THB</div>
+          </div>
+
+          <div class="fee-box">
+            <div class="calc-value" id="revolutCalcCount">0</div>
+            <div class="unit">Antal hævninger</div>
+          </div>
+
+          <div class="fee-box">
+            <div class="calc-value" id="revolutCalcAtm">0</div>
+            <div class="unit">ATM-gebyr total · THB</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-label">Udregning</div>
+
+        <div class="calc-line">
+          <div>Kontanter ønsket</div>
+          <strong id="lineWanted">0 THB</strong>
+        </div>
+
+        <div class="calc-line">
+          <div>ATM-gebyr</div>
+          <strong id="lineAtm">0 THB</strong>
+        </div>
+
+        <div class="calc-line">
+          <div>Total THB inkl. gebyr</div>
+          <strong id="lineTotalThb">0 THB</strong>
+        </div>
+
+        <div class="calc-line">
+          <div>Kurs</div>
+          <strong id="lineRate">0 THB/DKK</strong>
+        </div>
+
+        <div class="calc-line">
+          <div>Pris før Revolut-gebyr</div>
+          <strong id="lineBeforeFee">0 DKK</strong>
+        </div>
+
+        <div class="calc-line">
+          <div>Gebyrfri hævegrænse</div>
+          <strong id="lineLimit">0 DKK</strong>
+        </div>
+
+        <div class="calc-line">
+          <div>Beløb over grænse</div>
+          <strong id="lineOverLimit">0 DKK</strong>
+        </div>
+
+        <div class="calc-line">
+          <div>Revolut-gebyr over grænse</div>
+          <strong id="lineRevolutFee">0 DKK</strong>
+        </div>
+
+        <div class="calc-line total-line">
+          <div>Total pris</div>
+          <strong id="lineFinalTotal">0 DKK</strong>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-label">Sådan er det beregnet</div>
+        <div class="formula" id="revolutFormula"></div>
+      </section>
+
+        <button type="button" id="editRevolutSettingsBtn">Rediger Revolut-indstillinger</button>
+      </div>
+    </section>
+
+    <section id="revolutPage" class="page">
+      <div class="topbar">
+        <button class="icon-btn back-btn" type="button">‹</button>
+        <div class="title"><h1>Revolut</h1><div>Gebyrfri hævegrænse pr. måned</div></div>
+        <button class="icon-btn" type="button" data-save="revolut">✓</button>
+      </div>
+
+      <section class="card">
+        <div class="header-row">
+          <span>Plan</span>
+          <span>Gebyrfri hævegrænse</span>
+        </div>
+
+        <div class="plans">
+          <button class="plan" type="button" data-plan="Standard" data-limit="1500">
+            <div class="radio"></div>
+            <div><div class="plan-name">Standard</div><div class="plan-fees">Over grænse: 2% · Weekend: 1%</div></div>
+            <div class="limit">1.500 DKK</div>
+          </button>
+
+          <button class="plan" type="button" data-plan="Plus" data-limit="1500">
+            <div class="radio"></div>
+            <div><div class="plan-name">Plus</div><div class="plan-fees">Over grænse: 2% · Weekend: 1%</div></div>
+            <div class="limit">1.500 DKK</div>
+          </button>
+
+          <button class="plan active" type="button" data-plan="Premium" data-limit="3000">
+            <div class="radio"></div>
+            <div><div class="plan-name">Premium</div><div class="plan-fees">Over grænse: 2%</div></div>
+            <div class="limit">3.000 DKK</div>
+          </button>
+
+          <button class="plan" type="button" data-plan="Metal" data-limit="6000">
+            <div class="radio"></div>
+            <div><div class="plan-name">Metal</div><div class="plan-fees">Over grænse: 2%</div></div>
+            <div class="limit">6.000 DKK</div>
+          </button>
+
+          <button class="plan" type="button" data-plan="Ultra" data-limit="15000">
+            <div class="radio"></div>
+            <div><div class="plan-name">Ultra</div><div class="plan-fees">Over grænse: 2%</div></div>
+            <div class="limit">15.000 DKK</div>
+          </button>
+        </div>
+      </section>
+
+      <section class="card atm-card">
+        <div class="atm-icon">▣</div>
+        <div>
+          <div class="atm-title">Thailand standard ATM-gebyr</div>
+          <div class="atm-sub">Fast gebyr ved hævning i automat</div>
+        </div>
+        <div class="atm-value"><input id="revolutAtm" inputmode="decimal" value="220" /><span>THB</span></div>
+      </section>
+
+      <button type="button" data-save="revolut">Gem Revolut-indstillinger</button>
+    </section>
+
+
+    <section id="wiseCalcPage" class="page">
+      <div class="topbar">
+        <button class="icon-btn back-btn" type="button">‹</button>
+        <div class="title"><h1>Wise</h1><div>Beregning af ATM-hævning</div></div>
+        <button class="icon-btn" type="button" id="openWiseSettings">⚙︎</button>
+      </div>
+
+      <section class="card calc-summary">
+        <div class="method-logo wise-logo">W</div>
+        <div>
+          <div class="main-title">Wise kort</div>
+          <div class="main-sub" id="wiseCalcSubtitle">Beregning ud fra forsiden</div>
+        </div>
+        <div class="main-value" id="wiseCalcTotal">0 DKK<span>Total pris</span></div>
+      </section>
+
+      <div class="calc-scroll">
+        <section class="card">
+          <div class="section-label">Hævning</div>
+          <div class="fee-grid">
+            <div class="fee-box">
+              <div class="calc-value" id="wiseCalcCash">0</div>
+              <div class="unit">Kontanter · THB</div>
+            </div>
+
+          <div class="fee-box">
+            <input id="wiseMaxPerWithdrawal" inputmode="decimal" value="20.000" />
+            <div class="unit">Maks pr. hævning · THB</div>
+          </div>
+
+          <div class="fee-box">
+            <div class="calc-value" id="wiseCalcCount">0</div>
+            <div class="unit">Antal hævninger</div>
+          </div>
+
+          <div class="fee-box">
+            <div class="calc-value" id="wiseCalcAtm">0</div>
+            <div class="unit">ATM-gebyr total · THB</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-label">Udregning</div>
+
+        <div class="calc-line">
+          <div>Kontanter ønsket</div>
+          <strong id="wiseLineWanted">0 THB</strong>
+        </div>
+
+        <div class="calc-line">
+          <div>ATM-gebyr</div>
+          <strong id="wiseLineAtm">0 THB</strong>
+        </div>
+
+        <div class="calc-line">
+          <div>Total THB inkl. gebyr</div>
+          <strong id="wiseLineTotalThb">0 THB</strong>
+        </div>
+
+        <div class="calc-line">
+          <div>Kurs</div>
+          <strong id="wiseLineRate">0 THB/DKK</strong>
+        </div>
+
+        <div class="calc-line">
+          <div>Pris før Wise-gebyr</div>
+          <strong id="wiseLineBeforeFee">0 DKK</strong>
+        </div>
+
+        <div class="calc-line">
+          <div>Gebyrfri hævegrænse</div>
+          <strong id="wiseLineLimit">0 DKK</strong>
+        </div>
+
+        <div class="calc-line">
+          <div>Beløb over grænse</div>
+          <strong id="wiseLineOverLimit">0 DKK</strong>
+        </div>
+
+        <div class="calc-line">
+          <div>Wise-gebyr over grænse</div>
+          <strong id="wiseLineWiseFee">0 DKK</strong>
+        </div>
+
+        <div class="calc-line total-line">
+          <div>Total pris</div>
+          <strong id="wiseLineFinalTotal">0 DKK</strong>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-label">Sådan er det beregnet</div>
+        <div class="formula" id="wiseFormula"></div>
+      </section>
+
+        <button type="button" id="editWiseSettingsBtn">Rediger Wise-indstillinger</button>
+      </div>
+    </section>
+
+    <section id="wisePage" class="page">
+      <div class="topbar">
+        <button class="icon-btn back-btn" type="button">‹</button>
+        <div class="title"><h1>Wise</h1><div>Gebyrfri hævegrænse pr. måned</div></div>
+        <button class="icon-btn" type="button" data-save="wise">✓</button>
+      </div>
+
+      <section class="card wise-main">
+        <div class="wise-icon">W</div>
+        <div>
+          <div class="main-title">Wise kort</div>
+          <div class="main-sub">Gebyrfri hævning op til månedsgrænsen</div>
+        </div>
+        <div class="main-value">1.800 DKK<span>pr. måned</span></div>
+      </section>
+
+      <section class="card">
+        <div class="fee-grid">
+          <div class="fee-box">
+            <input id="wiseOver" inputmode="decimal" value="2,69" />
+            <div class="unit">Over grænse · %</div>
+          </div>
+
+          <div class="fee-box">
+            <input id="wiseRate" inputmode="decimal" value="4,85" />
+            <div class="unit">Kurs · THB pr. DKK (markedskurs)</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card atm-card">
+        <div class="atm-icon">▣</div>
+        <div>
+          <div class="atm-title">Thailand standard ATM-gebyr</div>
+          <div class="atm-sub">Fast gebyr ved hævning i automat</div>
+        </div>
+        <div class="atm-value"><input id="wiseAtm" inputmode="decimal" value="220" /><span>THB</span></div>
+      </section>
+
+      <button type="button" data-save="wise">Gem Wise-indstillinger</button>
+    </section>
+
+
+    <section id="visaCalcPage" class="page">
+      <div class="topbar">
+        <button class="icon-btn back-btn" type="button">‹</button>
+        <div class="title"><h1>Visa</h1><div>Beregning af ATM-hævning</div></div>
+        <button class="icon-btn" type="button" id="openVisaSettings">⚙︎</button>
+      </div>
+
+      <section class="card calc-summary">
+        <div class="method-logo visa-logo">VISA</div>
+        <div>
+          <div class="main-title" id="visaCalcCard">Visa Debit</div>
+          <div class="main-sub" id="visaCalcSubtitle">Beregning ud fra forsiden</div>
+        </div>
+        <div class="main-value" id="visaCalcTotal">0 DKK<span>Total pris</span></div>
+      </section>
+
+      <div class="calc-scroll">
+        <section class="card">
+          <div class="section-label">Hævning</div>
+          <div class="fee-grid">
+            <div class="fee-box">
+              <div class="calc-value" id="visaCalcCash">0</div>
+              <div class="unit">Kontanter · THB</div>
+            </div>
+
+            <div class="fee-box">
+              <input id="visaMaxPerWithdrawal" inputmode="decimal" value="2.000" />
+              <div class="unit">Maks pr. hævning · DKK</div>
+            </div>
+
+            <div class="fee-box">
+              <div class="calc-value" id="visaCalcCount">0</div>
+              <div class="unit">Antal hævninger</div>
+            </div>
+
+            <div class="fee-box">
+              <div class="calc-value" id="visaCalcAtm">0</div>
+              <div class="unit">ATM-gebyr total · THB</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="section-label">Udregning</div>
+
+          <div class="calc-line">
+            <div>Kontanter ønsket</div>
+            <strong id="visaLineWanted">0 THB</strong>
+          </div>
+
+          <div class="calc-line">
+            <div>ATM-gebyr</div>
+            <strong id="visaLineAtm">0 THB</strong>
+          </div>
+
+          <div class="calc-line">
+            <div>Total THB inkl. ATM-gebyr</div>
+            <strong id="visaLineTotalThb">0 THB</strong>
+          </div>
+
+          <div class="calc-line">
+            <div>Kurs efter Visa-spread</div>
+            <strong id="visaLineRate">0 THB/DKK</strong>
+          </div>
+
+          <div class="calc-line">
+            <div>Visa valutaspread</div>
+            <strong id="visaLineSpread">0%</strong>
+          </div>
+
+          <div class="calc-line">
+            <div>Pris før bankgebyr</div>
+            <strong id="visaLineBeforeFee">0 DKK</strong>
+          </div>
+
+          <div class="calc-line" id="visaLineFixedRow">
+            <div>Fast bankgebyr</div>
+            <strong id="visaLineFixed">0 DKK</strong>
+          </div>
+
+          <div class="calc-line">
+            <div>Bankgebyr</div>
+            <strong id="visaLinePercent">0 DKK</strong>
+          </div>
+
+          <div class="calc-line total-line">
+            <div>Total pris</div>
+            <strong id="visaLineFinalTotal">0 DKK</strong>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="section-label">Sådan er det beregnet</div>
+          <div class="formula" id="visaFormula"></div>
+        </section>
+
+        <button type="button" id="editVisaSettingsBtn">Rediger Visa-indstillinger</button>
+      </div>
+    </section>
+
+    <section id="visaPage" class="page">
+      <div class="topbar">
+        <button class="icon-btn back-btn" type="button">‹</button>
+        <div class="title"><h1>Visa</h1><div>Bankgebyrer og hævning</div></div>
+        <button class="icon-btn" type="button" data-save="visa">✓</button>
+      </div>
+
+      <section class="card">
+        <div class="section-label">Bank og kort</div>
+        <div class="select-grid">
+          <select id="visaBank">
+            <option>Danske Bank</option>
+            <option>Nordea</option>
+            <option>Jyske Bank</option>
+            <option>Lunar</option>
+            <option>Sydbank</option>
+            <option>Anden bank</option>
+          </select>
+
+          <select id="visaType">
+            <option value="Visa Debit">Visa Debit</option>
+            <option value="Visa Credit">Visa Credit</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-label">Gebyrer</div>
+        <div class="fee-grid">
+          <div class="fee-box">
+            <input id="visaPercent" inputmode="decimal" value="1,75" />
+            <div class="unit">Bankgebyr · %</div>
+          </div>
+
+          <div class="fee-box">
+            <input id="visaSpread" inputmode="decimal" value="1,5" />
+            <div class="unit">Visa valutaspread · %</div>
+          </div>
+
+          <div class="fee-box">
+            <input id="visaFixed" inputmode="decimal" value="0" />
+            <div class="unit" id="visaFixedLabel">Fast bankgebyr · DKK</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card atm-card">
+        <div class="atm-icon">▣</div>
+        <div>
+          <div class="atm-title">Thailand standard ATM-gebyr</div>
+          <div class="atm-sub">Fast gebyr ved hævning i automat</div>
+        </div>
+        <div class="atm-value"><input id="visaAtm" inputmode="decimal" value="220" /><span>THB</span></div>
+      </section>
+
+      <button type="button" data-save="visa">Gem Visa-indstillinger</button>
+    </section>
+
+
+    <section id="mastercardCalcPage" class="page">
+      <div class="topbar">
+        <button class="icon-btn back-btn" type="button">‹</button>
+        <div class="title"><h1>Mastercard</h1><div>Beregning af ATM-hævning</div></div>
+        <button class="icon-btn" type="button" id="openMastercardSettings">⚙︎</button>
+      </div>
+
+      <section class="card calc-summary">
+        <div class="method-logo mastercard-logo">MC</div>
+        <div>
+          <div class="main-title" id="mcCalcCard">Mastercard Debit</div>
+          <div class="main-sub" id="mcCalcSubtitle">Beregning ud fra forsiden</div>
+        </div>
+        <div class="main-value" id="mcCalcTotal">0 DKK<span>Total pris</span></div>
+      </section>
+
+      <div class="calc-scroll">
+        <section class="card">
+          <div class="section-label">Hævning</div>
+          <div class="fee-grid">
+            <div class="fee-box">
+              <div class="calc-value" id="mcCalcCash">0</div>
+              <div class="unit">Kontanter · THB</div>
+            </div>
+
+            <div class="fee-box">
+              <input id="mcMaxPerWithdrawal" inputmode="decimal" value="20.000" />
+              <div class="unit">Maks pr. hævning · THB</div>
+            </div>
+
+            <div class="fee-box">
+              <div class="calc-value" id="mcCalcCount">0</div>
+              <div class="unit">Antal hævninger</div>
+            </div>
+
+            <div class="fee-box">
+              <div class="calc-value" id="mcCalcAtm">0</div>
+              <div class="unit">ATM-gebyr total · THB</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="section-label">Udregning</div>
+
+          <div class="calc-line"><div>Kontanter ønsket</div><strong id="mcLineWanted">0 THB</strong></div>
+          <div class="calc-line"><div>ATM-gebyr</div><strong id="mcLineAtm">0 THB</strong></div>
+          <div class="calc-line"><div>Total THB inkl. ATM-gebyr</div><strong id="mcLineTotalThb">0 THB</strong></div>
+          <div class="calc-line"><div>Kurs</div><strong id="mcLineRate">0 THB/DKK</strong></div>
+          <div class="calc-line"><div>Valutakurs-spread</div><strong id="mcLineSpread">0%</strong></div>
+          <div class="calc-line"><div>Pris før bankgebyr</div><strong id="mcLineBeforeFee">0 DKK</strong></div>
+          <div class="calc-line"><div>Fast bankgebyr</div><strong id="mcLineFixed">0 DKK</strong></div>
+          <div class="calc-line"><div>Bankgebyr</div><strong id="mcLinePercent">0 DKK</strong></div>
+          <div class="calc-line total-line"><div>Total pris</div><strong id="mcLineFinalTotal">0 DKK</strong></div>
+        </section>
+
+        <section class="card">
+          <div class="section-label">Sådan er det beregnet</div>
+          <div class="formula" id="mcFormula"></div>
+        </section>
+
+        <button type="button" id="editMastercardSettingsBtn">Rediger Mastercard-indstillinger</button>
+      </div>
+    </section>
+
+    <section id="mastercardPage" class="page">
+      <div class="topbar">
+        <button class="icon-btn back-btn" type="button">‹</button>
+        <div class="title"><h1>Mastercard</h1><div>Bankgebyrer og hævning</div></div>
+        <button class="icon-btn" type="button" data-save="mastercard">✓</button>
+      </div>
+
+      <section class="card">
+        <div class="section-label">Bank og kort</div>
+        <div class="select-grid">
+          <select id="mastercardBank">
+            <option>Danske Bank</option>
+            <option>Nordea</option>
+            <option>Jyske Bank</option>
+            <option>Lunar</option>
+            <option>Sydbank</option>
+            <option>Anden bank</option>
+          </select>
+
+          <select id="mastercardType">
+            <option>Mastercard Debit</option>
+            <option>Mastercard Credit</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-label">Gebyrer</div>
+        <div class="fee-grid">
+          <div class="fee-box">
+            <input id="mastercardPercent" inputmode="decimal" value="1,75" />
+            <div class="unit">Bankgebyr · %</div>
+          </div>
+
+          <div class="fee-box">
+            <input id="mastercardSpread" inputmode="decimal" value="1,5" />
+            <div class="unit">Valutakurs-spread · %</div>
+          </div>
+
+          <div class="fee-box">
+            <input id="mastercardFixed" inputmode="decimal" value="0" />
+            <div class="unit">Fast bankgebyr · DKK</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card atm-card">
+        <div class="atm-icon">▣</div>
+        <div>
+          <div class="atm-title">Thailand standard ATM-gebyr</div>
+          <div class="atm-sub">Fast gebyr ved hævning i automat</div>
+        </div>
+        <div class="atm-value"><input id="mastercardAtm" inputmode="decimal" value="220" /><span>THB</span></div>
+      </section>
+
+      <button type="button" data-save="mastercard">Gem Mastercard-indstillinger</button>
+    </section>
+
+
+    <section id="loomisCalcPage" class="page">
+      <div class="topbar">
+        <button class="icon-btn back-btn" type="button">‹</button>
+        <div class="title"><h1>Loomis</h1><div>Beregning af kontant valuta</div></div>
+        <button class="icon-btn" type="button" id="openLoomisSettings">⚙︎</button>
+      </div>
+
+      <section class="card calc-summary">
+        <div class="method-logo loomis-logo">L</div>
+        <div>
+          <div class="main-title">Loomis</div>
+          <div class="main-sub" id="loomisCalcSubtitle">Beregning ud fra forsiden</div>
+        </div>
+        <div class="main-value" id="loomisCalcTotal">0 DKK<span>Total pris</span></div>
+      </section>
+
+      <div class="calc-scroll">
+        <section class="card">
+          <div class="section-label">Kontanter</div>
+          <div class="fee-grid">
+            <div class="fee-box">
+              <div class="calc-value" id="loomisCalcCash">0</div>
+              <div class="unit">Kontanter · THB</div>
+            </div>
+
+            <div class="fee-box">
+              <div class="calc-value" id="loomisCalcRate">0</div>
+              <div class="unit">Kurs · THB pr. DKK</div>
+            </div>
+
+            <div class="fee-box">
+              <div class="calc-value" id="loomisCalcFees">0</div>
+              <div class="unit">Gebyrer · DKK</div>
+            </div>
+
+            <div class="fee-box">
+              <div class="calc-value" id="loomisCalcPlace">-</div>
+              <div class="unit">Vekslingssted</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="section-label">Udregning</div>
+
+          <div class="calc-line"><div>Kontanter ønsket</div><strong id="loomisLineWanted">0 THB</strong></div>
+          <div class="calc-line"><div>Kurs</div><strong id="loomisLineRate">0 THB/DKK</strong></div>
+          <div class="calc-line"><div>Pris før gebyrer</div><strong id="loomisLineBeforeFees">0 DKK</strong></div>
+          <div class="calc-line"><div>Fast gebyr</div><strong id="loomisLineFixed">0 DKK</strong></div>
+          <div class="calc-line"><div>Levering</div><strong id="loomisLineDelivery">0 DKK</strong></div>
+          <div class="calc-line"><div>Øvrige gebyrer</div><strong id="loomisLineOther">0 DKK</strong></div>
+          <div class="calc-line total-line"><div>Total pris</div><strong id="loomisLineFinalTotal">0 DKK</strong></div>
+        </section>
+
+        <section class="card">
+          <div class="section-label">Sådan er det beregnet</div>
+          <div class="formula" id="loomisFormula"></div>
+        </section>
+
+        <button type="button" id="editLoomisSettingsBtn">Rediger Loomis-indstillinger</button>
+      </div>
+    </section>
+
+    <section id="loomisPage" class="page">
+      <div class="topbar">
+        <button class="icon-btn back-btn" type="button">‹</button>
+        <div class="title"><h1>Loomis</h1><div>Kontant valuta hjemmefra</div></div>
+        <button class="icon-btn" type="button" data-save="loomis">✓</button>
+      </div>
+
+      <section class="card">
+        <div class="section-label">Vekslingssted</div>
+        <select id="loomisPlace">
+          <option value="Loomis online">Loomis levering</option>
+          <option value="Loomis butik">Loomis butik / afhentning</option>
+        </select>
+      </section>
+
+      <section class="card">
+        <div class="section-label">Kurs og gebyr</div>
+        <div class="fee-grid">
+          <div class="fee-box">
+            <input id="loomisRate" inputmode="decimal" value="4,65" />
+            <div class="unit">Kurs · THB pr. DKK</div>
+          </div>
+
+          <div class="fee-box">
+            <input id="loomisMargin" inputmode="decimal" value="1,2" />
+            <div class="unit">Margin fra markedskurs · %</div>
+          </div>
+
+          <div class="fee-box">
+            <input id="loomisFixed" inputmode="decimal" value="49,95" />
+            <div class="unit">Fast gebyr · DKK</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card info-card">
+        <div class="info-icon">💵</div>
+        <div>
+          <div class="info-title">Ingen ATM-gebyr</div>
+          <div class="info-sub">Loomis regnes som kontanter hjemmefra, ikke hævning i Thailand.</div>
+        </div>
+      </section>
+
+      <button type="button" data-save="loomis">Gem Loomis-indstillinger</button>
+    </section>
+
+
+    <section id="forexCalcPage" class="page">
+      <div class="topbar">
+        <button class="icon-btn back-btn" type="button">‹</button>
+        <div class="title"><h1>FOREX</h1><div>Beregning af kontant valuta</div></div>
+        <button class="icon-btn" type="button" id="openFOREXSettings">⚙︎</button>
+      </div>
+
+      <section class="card calc-summary">
+        <div class="method-logo forex-logo">FOREX</div>
+        <div>
+          <div class="main-title">FOREX</div>
+          <div class="main-sub" id="forexCalcSubtitle">Beregning ud fra forsiden</div>
+        </div>
+        <div class="main-value" id="forexCalcTotal">0 DKK<span>Total pris</span></div>
+      </section>
+
+      <div class="calc-scroll">
+        <section class="card">
+          <div class="section-label">Kontanter</div>
+          <div class="fee-grid">
+            <div class="fee-box">
+              <div class="calc-value" id="forexCalcCash">0</div>
+              <div class="unit">Kontanter · THB</div>
+            </div>
+
+            <div class="fee-box">
+              <div class="calc-value" id="forexCalcRate">0</div>
+              <div class="unit">Kurs · THB pr. DKK</div>
+            </div>
+
+            <div class="fee-box">
+              <div class="calc-value" id="forexCalcFees">0</div>
+              <div class="unit">Gebyrer · DKK</div>
+            </div>
+
+            <div class="fee-box">
+              <div class="calc-value" id="forexCalcPlace">-</div>
+              <div class="unit">Vekslingssted</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="section-label">Udregning</div>
+
+          <div class="calc-line"><div>Kontanter ønsket</div><strong id="forexLineWanted">0 THB</strong></div>
+          <div class="calc-line"><div>Kurs</div><strong id="forexLineRate">0 THB/DKK</strong></div>
+          <div class="calc-line"><div>Pris før gebyrer</div><strong id="forexLineBeforeFees">0 DKK</strong></div>
+          <div class="calc-line"><div>Fast gebyr</div><strong id="forexLineFixed">0 DKK</strong></div>
+          <div class="calc-line"><div>Levering</div><strong id="forexLineDelivery">0 DKK</strong></div>
+          <div class="calc-line"><div>Øvrige gebyrer</div><strong id="forexLineOther">0 DKK</strong></div>
+          <div class="calc-line total-line"><div>Total pris</div><strong id="forexLineFinalTotal">0 DKK</strong></div>
+        </section>
+
+        <section class="card">
+          <div class="section-label">Sådan er det beregnet</div>
+          <div class="formula" id="forexFormula"></div>
+        </section>
+
+        <button type="button" id="editFOREXSettingsBtn">Rediger FOREX-indstillinger</button>
+      </div>
+    </section>
+
+    <section id="forexPage" class="page">
+      <div class="topbar">
+        <button class="icon-btn back-btn" type="button">‹</button>
+        <div class="title"><h1>FOREX</h1><div>Kontant valuta hjemmefra</div></div>
+        <button class="icon-btn" type="button" data-save="forex">✓</button>
+      </div>
+
+      <section class="card">
+        <div class="section-label">Vekslingssted</div>
+        <select id="forexPlace">
+          <option>FOREX afhentning</option>
+        </select>
+      </section>
+
+      <section class="card">
+        <div class="section-label">Kurs og gebyr</div>
+        <div class="fee-grid">
+          <div class="fee-box">
+            <input id="forexRate" inputmode="decimal" value="4,62" />
+            <div class="unit">Kurs · THB pr. DKK</div>
+          </div>
+
+          <div class="fee-box">
+            <input id="forexMargin" inputmode="decimal" value="2,65" />
+            <div class="unit">Margin fra markedskurs · %</div>
+          </div>
+
+          <div class="fee-box">
+            <input id="forexFixed" inputmode="decimal" value="0" />
+            <div class="unit">Fast gebyr · DKK</div>
+          </div>
+
+          <div class="fee-box">
+            <input id="forexOther" inputmode="decimal" value="0" />
+            <div class="unit">Øvrige gebyrer · DKK</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card info-card">
+        <div class="info-icon">💵</div>
+        <div>
+          <div class="info-title">Ingen ATM-gebyr</div>
+          <div class="info-sub">FOREX regnes som kontanter hjemmefra, ikke hævning i Thailand.</div>
+        </div>
+      </section>
+
+      <section class="card info-card">
+        <div class="info-icon">🏬</div>
+        <div>
+          <div class="info-title">Kun afhentning</div>
+          <div class="info-sub">FOREX kan ikke leveres. Valuta afhentes i butik.</div>
+        </div>
+      </section>
+
+      <button type="button" data-save="forex">Gem FOREX-indstillinger</button>
+    </section>
+
+
+    <section id="tavexCalcPage" class="page">
+      <div class="topbar">
+        <button class="icon-btn back-btn" type="button">‹</button>
+        <div class="title"><h1>Tavex</h1><div>Beregning af kontant valuta</div></div>
+        <button class="icon-btn" type="button" id="openTavexSettings">⚙︎</button>
+      </div>
+
+      <section class="card calc-summary">
+        <div class="method-logo tavex-logo">TAVEX</div>
+        <div>
+          <div class="main-title">Tavex</div>
+          <div class="main-sub" id="tavexCalcSubtitle">Beregning ud fra forsiden</div>
+        </div>
+        <div class="main-value" id="tavexCalcTotal">0 DKK<span>Total pris</span></div>
+      </section>
+
+      <div class="calc-scroll">
+        <section class="card">
+          <div class="section-label">Kontanter</div>
+          <div class="fee-grid">
+            <div class="fee-box">
+              <div class="calc-value" id="tavexCalcCash">0</div>
+              <div class="unit">Kontanter · THB</div>
+            </div>
+
+            <div class="fee-box">
+              <div class="calc-value" id="tavexCalcRate">0</div>
+              <div class="unit">Kurs · THB pr. DKK</div>
+            </div>
+
+            <div class="fee-box">
+              <div class="calc-value" id="tavexCalcFees">0</div>
+              <div class="unit">Gebyrer · DKK</div>
+            </div>
+
+            <div class="fee-box">
+              <div class="calc-value" id="tavexCalcPlace">-</div>
+              <div class="unit">Vekslingssted</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="section-label">Udregning</div>
+
+          <div class="calc-line"><div>Kontanter ønsket</div><strong id="tavexLineWanted">0 THB</strong></div>
+          <div class="calc-line"><div>Kurs</div><strong id="tavexLineRate">0 THB/DKK</strong></div>
+          <div class="calc-line"><div>Margin fra markedskurs</div><strong id="tavexLineMargin">0%</strong></div>
+          <div class="calc-line"><div>Pris før gebyrer</div><strong id="tavexLineBeforeFees">0 DKK</strong></div>
+          <div class="calc-line"><div>Fast gebyr</div><strong id="tavexLineFixed">0 DKK</strong></div>
+          <div class="calc-line"><div>Levering</div><strong id="tavexLineDelivery">0 DKK</strong></div>
+          <div class="calc-line"><div>Øvrige gebyrer</div><strong id="tavexLineOther">0 DKK</strong></div>
+          <div class="calc-line total-line"><div>Total pris</div><strong id="tavexLineFinalTotal">0 DKK</strong></div>
+        </section>
+
+        <section class="card">
+          <div class="section-label">Sådan er det beregnet</div>
+          <div class="formula" id="tavexFormula"></div>
+        </section>
+
+        <button type="button" id="editTavexSettingsBtn">Rediger Tavex-indstillinger</button>
+      </div>
+    </section>
+
+    <section id="tavexPage" class="page">
+      <div class="topbar">
+        <button class="icon-btn back-btn" type="button">‹</button>
+        <div class="title"><h1>TAVEX</h1><div>Kontant valuta hjemmefra</div></div>
+        <button class="icon-btn" type="button" data-save="tavex">✓</button>
+      </div>
+
+      <section class="card">
+        <div class="section-label">Vekslingssted</div>
+        <select id="tavexPlace">
+          <option value="Tavex webshop">Tavex levering</option>
+          <option value="Tavex butik">Tavex butik / afhentning</option>
+        </select>
+      </section>
+
+      <section class="card">
+        <div class="section-label">Kurs og gebyr</div>
+        <div class="fee-grid">
+          <div class="fee-box">
+            <input id="tavexRate" inputmode="decimal" value="4,72875" readonly />
+            <div class="unit">Auto-kurs · THB pr. DKK</div>
+          </div>
+
+          <div class="fee-box">
+            <input id="tavexMargin" inputmode="decimal" value="2,5" />
+            <div class="unit">Margin fra markedskurs · %</div>
+          </div>
+
+          <div class="fee-box">
+            <input id="tavexFixed" inputmode="decimal" value="0" />
+            <div class="unit">Fast gebyr · DKK</div>
+          </div>
+
+          <div class="fee-box">
+            <input id="tavexDelivery" inputmode="decimal" value="99" />
+            <div class="unit">Levering · DKK (automatisk efter beløb)</div>
+          </div>
+
+          <div class="fee-box">
+            <input id="tavexOther" inputmode="decimal" value="0" />
+            <div class="unit">Øvrige gebyrer · DKK</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card info-card">
+        <div class="info-icon">💵</div>
+        <div>
+          <div class="info-title">Ingen ATM-gebyr</div>
+          <div class="info-sub">Tavex regnes som kontanter hjemmefra, ikke hævning i Thailand.</div>
+        </div>
+      </section>
+
+      <button type="button" data-save="tavex">Gem Tavex-indstillinger</button>
+    </section>
+
+
+    <section id="filterPage" class="page">
+      <div class="topbar">
+        <button class="icon-btn back-btn" type="button">‹</button>
+        <div class="title"><h1>Vælg metoder</h1><div>Vis kun de metoder du bruger</div></div>
+        <button class="icon-btn" type="button" id="saveFiltersTop">✓</button>
+      </div>
+
+      <section class="card">
+        <div class="section-label">Metoder på forsiden</div>
+
+        <label class="filter-row"><span class="method-logo revolut-logo">R</span><span>Revolut</span><input type="checkbox" id="filterRevolut" value="revolut" /></label>
+        <label class="filter-row"><span class="method-logo wise-logo">W</span><span>Wise</span><input type="checkbox" id="filterWise" value="wise" /></label>
+        <label class="filter-row"><span class="method-logo visa-logo">VISA</span><span>Visa</span><input type="checkbox" id="filterVisa" value="visa" /></label>
+        <label class="filter-row"><span class="method-logo mastercard-logo"></span><span>Mastercard</span><input type="checkbox" id="filterMastercard" value="mastercard" /></label>
+        <label class="filter-row"><span class="method-logo loomis-logo">L</span><span>Loomis</span><input type="checkbox" id="filterLoomis" value="loomis" /></label>
+        <label class="filter-row"><span class="method-logo forex-logo">FOREX</span><span>FOREX</span><input type="checkbox" id="filterForex" value="forex" /></label>
+        <label class="filter-row"><span class="method-logo tavex-logo">TAVEX</span><span>Tavex</span><input type="checkbox" id="filterTavex" value="tavex" /></label>
+      </section>
+
+      <button type="button" id="saveFiltersBtn">Gem valg</button>
+    </section>
+
+  </main>
+
+  <script src="modules/conversions.js?v=1.1"></script>
+  <script src="modules/banks.js?v=1.1"></script>
+  <script src="modules/methods.js?v=1.1"></script>
+  <script src="modules/calculations.js?v=1.1"></script>
+  <script src="modules/ui.js?v=1.1"></script>
+</body>
+</html>
