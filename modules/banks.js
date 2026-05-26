@@ -146,16 +146,16 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v1.4-tavex-rate-reset";
+const RATE_VERSION = "v1.5-tavex-webshop-rate";
 // Revolut must follow the same DKK/THB rate shown in Revolut's own converter.
 // Keep this at 0 unless Revolut changes their public converter logic.
 const REVOLUT_REFERENCE_MARGIN = 0;
 // Wise is calibrated from the same hourly base rate to match Wise mid-market reference.
 // Reference: Wise showed 1 DKK = 5.083 THB while the hourly base source was around 5.0679 THB/DKK.
 const WISE_REFERENCE_MARGIN = -0.298;
-// Tavex calibrated from Tavex webshop: 10.000 THB = 2.091 DKK (rate 0,2091 DKK/THB).
-// Delivery is set to 0 so total follows the visible Tavex subtotal.
-const TAVEX_REFERENCE_MARGIN = 5.636;
+// Tavex calibrated from Tavex webshop: 10.000 THB = 2.066 DKK before delivery (rate 0,2066 DKK/THB).
+// Delivery remains calculated separately like Tavex checkout.
+const TAVEX_REFERENCE_MARGIN = 4.492;
 const RATE_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 
 function todayKey() {
@@ -221,7 +221,7 @@ function applyMarketRates() {
     if (Math.abs((data.loomis.margin || 0) - 1.2) < 0.05) data.loomis.margin = 5.23;
     if (Math.abs((data.forex.margin || 0) - 2.65) < 0.05) data.forex.margin = 6.62;
     if (Math.abs((data.tavex.margin || 0) - 2.5) < 0.05 || Math.abs((data.tavex.margin || 0) - 4.79) < 0.05) data.tavex.margin = TAVEX_REFERENCE_MARGIN;
-    if (!data.tavex.delivery || Math.abs(data.tavex.delivery - 99) < 0.5 || Math.abs(data.tavex.delivery - 50) < 0.5) data.tavex.delivery = 0;
+    if (!data.tavex.delivery || Math.abs(data.tavex.delivery - 99) < 0.5 || Math.abs(data.tavex.delivery - 50) < 0.5) data.tavex.delivery = 50;
     data.v70RateMigrationDone = true;
   }
 
@@ -239,7 +239,7 @@ function applyMarketRates() {
     data.tavex.place = "Tavex webshop";
     data.tavex.margin = TAVEX_REFERENCE_MARGIN;
     data.tavex.fixedDkk = 0;
-    data.tavex.delivery = 0;
+    data.tavex.delivery = 50;
     data.tavex.other = 0;
 
     data.v73CashRestoreDone = true;
@@ -268,7 +268,7 @@ function applyMarketRates() {
   data.loomis.rate = marketRate * (1 - (data.loomis.margin || 0) / 100);
   data.forex.rate = marketRate * (1 - (data.forex.margin || 0) / 100);
   data.tavex.margin = TAVEX_REFERENCE_MARGIN;
-  data.tavex.delivery = 0;
+  data.tavex.delivery = 50;
   data.tavex.rate = marketRate * (1 - TAVEX_REFERENCE_MARGIN / 100);
 }
 
