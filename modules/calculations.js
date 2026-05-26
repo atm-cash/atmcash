@@ -1,4 +1,35 @@
-// ATM Cash v1.1 - price calculations and detail views
+// ATM Cash v1.9 - price calculations and detail views
+// v1.9: Cash suppliers use fixed webshop prices in DKK per THB.
+// This avoids old localStorage/cache giving different rates on PC, tablet and iPhone.
+const CASH_SUPPLIER_PRICES = {
+  forex: { dkkPerThb: 0.211671, fixedDkk: 0, delivery: 0, other: 0 },
+  tavex: { dkkPerThb: 0.2066, fixedDkk: 0, delivery: 50, other: 0 },
+  loomis: { dkkPerThb: 0.208767, fixedDkk: 49.95, delivery: 0, other: 0 }
+};
+
+function cashSupplierPrice(method) {
+  return CASH_SUPPLIER_PRICES[method] || null;
+}
+
+function cashSupplierRate(method, fallbackRate) {
+  const official = cashSupplierPrice(method);
+  return official ? 1 / official.dkkPerThb : fallbackRate;
+}
+
+function cashSupplierFees(method, wantedThb = 0) {
+  const official = cashSupplierPrice(method);
+  if (official) {
+    return {
+      fixed: official.fixedDkk || 0,
+      delivery: typeof official.delivery === "function" ? official.delivery(wantedThb) : (official.delivery || 0),
+      other: official.other || 0
+    };
+  }
+  const cfg = data[method];
+  const delivery = getDeliveryForMethod(method, wantedThb);
+  return { fixed: cfg.fixedDkk || 0, delivery, other: cfg.other || 0 };
+}
+
 function calculateResults(dkk) {
   applyVisaBankPresetToData();
   const revolut = data.revolut;
@@ -16,14 +47,17 @@ function calculateResults(dkk) {
   const mastercard = data.mastercard;
   const mastercardThb = (dkk - mastercard.fixedDkk) * mastercard.rate * (1 - mastercard.percent / 100) - mastercard.atm;
 
-  const loomis = data.loomis;
-  const loomisThb = (dkk - loomis.fixedDkk) * loomis.rate;
+  const loomisRate = cashSupplierRate("loomis", data.loomis.rate);
+  const loomisFees = cashSupplierFees("loomis");
+  const loomisThb = Math.max(0, (dkk - loomisFees.fixed - loomisFees.delivery - loomisFees.other) * loomisRate);
 
-  const forex = data.forex;
-  const forexThb = (dkk - forex.fixedDkk - forex.delivery - forex.other) * forex.rate;
+  const forexRate = cashSupplierRate("forex", data.forex.rate);
+  const forexFees = cashSupplierFees("forex");
+  const forexThb = Math.max(0, (dkk - forexFees.fixed - forexFees.delivery - forexFees.other) * forexRate);
 
-  const tavex = data.tavex;
-  const tavexThb = (dkk - tavex.fixedDkk - tavex.delivery - tavex.other) * tavex.rate;
+  const tavexRate = cashSupplierRate("tavex", data.tavex.rate);
+  const tavexFees = cashSupplierFees("tavex");
+  const tavexThb = Math.max(0, (dkk - tavexFees.fixed - tavexFees.delivery - tavexFees.other) * tavexRate);
 
   return [
     { id: "revolut", logoText: "R", logoClass: "revolut-logo", name: "Revolut", sub: `${revolut.plan} · ATM ${revolut.atm} THB`, thb: revolutThb },
@@ -569,10 +603,12 @@ function calculateMastercardDetails() {
 
 function calculateCashDetails(method, title) {
   const cfg = data[method];
-  const rate = cfg.rate || 0;
-  const fixed = cfg.fixedDkk || 0;
-  let delivery = cfg.delivery || 0;
-  let other = cfg.other || 0;
+  const official = cashSupplierPrice(method);
+  const rate = cashSupplierRate(method, cfg.rate || 0);
+  let feesForZero = cashSupplierFees(method, 0);
+  const fixed = feesForZero.fixed;
+  let delivery = feesForZero.delivery;
+  let other = feesForZero.other;
 
   let wantedCashThb;
   let beforeFeesDkk;
@@ -581,18 +617,22 @@ function calculateCashDetails(method, title) {
 
   if (lastEditedCurrency === "thb") {
     wantedCashThb = parseNumber(document.getElementById("bestThb").value);
-    delivery = getDeliveryForMethod(method, wantedCashThb);
+    const currentFees = cashSupplierFees(method, wantedCashThb);
+    delivery = currentFees.delivery;
+    other = currentFees.other;
     fees = fixed + delivery + other;
-    beforeFeesDkk = rate > 0 ? wantedCashThb / rate : 0;
+    beforeFeesDkk = official ? wantedCashThb * official.dkkPerThb : (rate > 0 ? wantedCashThb / rate : 0);
     finalTotalDkk = beforeFeesDkk + fees;
   } else {
     const dkk = amountToDkk(parseNumber(document.getElementById("dkkAmount").value));
     const preliminaryFees = fixed + delivery + other;
     const preliminaryThb = Math.max(0, (dkk - preliminaryFees) * rate);
-    delivery = getDeliveryForMethod(method, preliminaryThb);
+    const currentFees = cashSupplierFees(method, preliminaryThb);
+    delivery = currentFees.delivery;
+    other = currentFees.other;
     fees = fixed + delivery + other;
     wantedCashThb = Math.max(0, (dkk - fees) * rate);
-    beforeFeesDkk = rate > 0 ? wantedCashThb / rate : 0;
+    beforeFeesDkk = official ? wantedCashThb * official.dkkPerThb : (rate > 0 ? wantedCashThb / rate : 0);
     finalTotalDkk = beforeFeesDkk + fees;
   }
 

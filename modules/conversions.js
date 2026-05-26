@@ -1,4 +1,4 @@
-// ATM Cash v1.8 - conversions, defaults, config, language and currency helpers
+// ATM Cash v1.9 - conversions, defaults, config, language and currency helpers
 let defaults = {
   market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v73", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
