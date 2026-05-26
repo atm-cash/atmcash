@@ -101,11 +101,10 @@ function saveMethod(method) {
 
   if (method === "tavex") {
     data.tavex.place = document.getElementById("tavexPlace").value;
-    data.tavex.margin = parseNumber(document.getElementById("tavexMargin").value);
-    data.tavex.fixedDkk = parseNumber(document.getElementById("tavexFixed").value);
-    data.tavex.delivery = parseNumber(document.getElementById("tavexDelivery").value);
-    data.tavex.other = parseNumber(document.getElementById("tavexOther").value);
-    data.tavex.rate = (data.market?.rate || 5.05441) * (1 - data.tavex.margin / 100);
+    data.tavex.fixedDkk = 0;
+    data.tavex.delivery = 50;
+    data.tavex.other = 0;
+    applyMarketRates();
   }
 
   persist();

@@ -146,16 +146,17 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v1.5-tavex-webshop-rate";
+const RATE_VERSION = "v1.6-unified-calculation";
 // Revolut must follow the same DKK/THB rate shown in Revolut's own converter.
 // Keep this at 0 unless Revolut changes their public converter logic.
 const REVOLUT_REFERENCE_MARGIN = 0;
 // Wise is calibrated from the same hourly base rate to match Wise mid-market reference.
 // Reference: Wise showed 1 DKK = 5.083 THB while the hourly base source was around 5.0679 THB/DKK.
 const WISE_REFERENCE_MARGIN = -0.298;
-// Tavex calibrated from Tavex webshop: 10.000 THB = 2.066 DKK before delivery (rate 0,2066 DKK/THB).
-// Delivery remains calculated separately like Tavex checkout.
-const TAVEX_REFERENCE_MARGIN = 4.492;
+// Tavex is calculated from Tavex webshop cash price, not from each browser's saved mid-market rate.
+// Reference: 10.000 THB = 2.066 DKK before delivery, so 1 DKK = 4.840271055 THB.
+const TAVEX_DKK_PER_THB = 0.2066;
+const TAVEX_DIRECT_RATE = 1 / TAVEX_DKK_PER_THB;
 const RATE_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 
 function todayKey() {
@@ -220,7 +221,7 @@ function applyMarketRates() {
     if (Math.abs((data.mastercard.spread || 0) - 1.5) < 0.01) data.mastercard.spread = 0;
     if (Math.abs((data.loomis.margin || 0) - 1.2) < 0.05) data.loomis.margin = 5.23;
     if (Math.abs((data.forex.margin || 0) - 2.65) < 0.05) data.forex.margin = 6.62;
-    if (Math.abs((data.tavex.margin || 0) - 2.5) < 0.05 || Math.abs((data.tavex.margin || 0) - 4.79) < 0.05) data.tavex.margin = TAVEX_REFERENCE_MARGIN;
+    if (Math.abs((data.tavex.margin || 0) - 2.5) < 0.05 || Math.abs((data.tavex.margin || 0) - 4.79) < 0.05) data.tavex.margin = Math.max(0, (1 - TAVEX_DIRECT_RATE / marketRate) * 100);
     if (!data.tavex.delivery || Math.abs(data.tavex.delivery - 99) < 0.5 || Math.abs(data.tavex.delivery - 50) < 0.5) data.tavex.delivery = 50;
     data.v70RateMigrationDone = true;
   }
@@ -237,7 +238,7 @@ function applyMarketRates() {
     data.forex.other = 0;
 
     data.tavex.place = "Tavex webshop";
-    data.tavex.margin = TAVEX_REFERENCE_MARGIN;
+    data.tavex.margin = Math.max(0, (1 - TAVEX_DIRECT_RATE / marketRate) * 100);
     data.tavex.fixedDkk = 0;
     data.tavex.delivery = 50;
     data.tavex.other = 0;
@@ -267,9 +268,13 @@ function applyMarketRates() {
 
   data.loomis.rate = marketRate * (1 - (data.loomis.margin || 0) / 100);
   data.forex.rate = marketRate * (1 - (data.forex.margin || 0) / 100);
-  data.tavex.margin = TAVEX_REFERENCE_MARGIN;
+  data.tavex.rate = TAVEX_DIRECT_RATE;
+  data.tavex.margin = Math.max(0, (1 - data.tavex.rate / marketRate) * 100);
   data.tavex.delivery = 50;
-  data.tavex.rate = marketRate * (1 - TAVEX_REFERENCE_MARGIN / 100);
+  data.tavex.fixedDkk = 0;
+  data.tavex.other = 0;
+  data.tavex.place = "Tavex webshop";
+  data.market.rateVersion = RATE_VERSION;
 }
 
 async function updateMarketRateIfNeeded() {

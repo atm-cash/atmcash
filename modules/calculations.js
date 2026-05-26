@@ -582,8 +582,6 @@ function calculateCashDetails(method, title) {
   if (lastEditedCurrency === "thb") {
     wantedCashThb = parseNumber(document.getElementById("bestThb").value);
     delivery = getDeliveryForMethod(method, wantedCashThb);
-    if (method === "tavex") { other = 0.21; }
-    if (method === "tavex") { other = 0.21; }
     fees = fixed + delivery + other;
     beforeFeesDkk = rate > 0 ? wantedCashThb / rate : 0;
     finalTotalDkk = beforeFeesDkk + fees;
