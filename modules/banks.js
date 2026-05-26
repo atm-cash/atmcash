@@ -146,7 +146,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v1.11-unified-visa-calculation";
+const RATE_VERSION = "v1.13-nav-layout";
 // Revolut must follow the same DKK/THB rate shown in Revolut's own converter.
 // Keep this at 0 unless Revolut changes their public converter logic.
 const REVOLUT_REFERENCE_MARGIN = 0;
