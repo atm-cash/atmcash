@@ -3,7 +3,7 @@
     "rate": 5.057,
     "date": "",
     "source": "standard",
-    "rateVersion": "v1.8-unified-forex-calculation",
+    "rateVersion": "v1.9-unified-cash-supplier-calculation",
     "rates": {
       "DKK": 1,
       "THB": 5.057,
