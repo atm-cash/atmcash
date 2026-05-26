@@ -41,12 +41,12 @@ button { -webkit-tap-highlight-color: transparent; cursor: pointer; }
 .page.active { display: block; }
 
 .app-version {
-  position: fixed;
-  right: max(12px, calc((100vw - 430px) / 2 + 12px));
-  bottom: 8px;
-  z-index: 20;
-  color: rgba(247, 243, 255, 0.42);
-  font-size: 11px;
+  max-width: 430px;
+  margin: 4px auto 0;
+  padding: 0 12px 4px;
+  text-align: right;
+  color: rgba(247, 243, 255, 0.32);
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.02em;
   pointer-events: none;
@@ -1277,7 +1277,7 @@ button:not(.icon-btn):not(.nav-item):not(.update):not(.plan):not(.result-card) {
   grid-template-columns: repeat(2, 1fr) !important;
   gap: 0 !important;
   margin-top: 12px !important;
-  padding: 10px 12px 12px !important;
+  padding: 8px 12px 10px !important;
   border: 1px solid rgba(255,255,255,.10) !important;
   border-radius: 18px !important;
   background: rgba(13,17,32,.82) !important;
@@ -1298,8 +1298,8 @@ button.nav-tab {
   display: grid !important;
   place-items: center !important;
   gap: 4px !important;
-  padding: 6px 4px !important;
-  min-height: 50px !important;
+  padding: 5px 4px !important;
+  min-height: 46px !important;
   width: auto !important;
   height: auto !important;
   margin: 0 !important;
@@ -1664,133 +1664,4 @@ button.nav-tab.active {
   .language-globe { font-size: 16px; }
 }
 
-
-/* v1.13: bundmenu finjusteret
-   - Fast lav højde, så iPhone ikke laver ekstra stor bund
-   - 3 kolonner er klar til ekstra knap senere
-   - Versionsnummer ligger absolut og optager ingen plads */
-:root {
-  --bottom-nav-height: 76px;
-  --bottom-nav-radius: 18px;
-  --bottom-nav-padding-x: 12px;
-  --bottom-nav-padding-y: 8px;
-  --bottom-nav-columns: 3;
-  --bottom-nav-icon-size: 21px;
-  --bottom-nav-label-size: 12px;
-  --bottom-nav-version-size: 10px;
-}
-
-.bottom-nav {
-  position: relative !important;
-  display: grid !important;
-  grid-template-columns: repeat(var(--bottom-nav-columns), minmax(0, 1fr)) !important;
-  align-items: center !important;
-  gap: 0 !important;
-  height: var(--bottom-nav-height) !important;
-  min-height: var(--bottom-nav-height) !important;
-  max-height: var(--bottom-nav-height) !important;
-  margin-top: 10px !important;
-  padding: var(--bottom-nav-padding-y) var(--bottom-nav-padding-x) !important;
-  border-radius: var(--bottom-nav-radius) !important;
-  overflow: hidden !important;
-}
-
-.nav-tab,
-button.nav-tab {
-  min-height: 0 !important;
-  height: calc(var(--bottom-nav-height) - (var(--bottom-nav-padding-y) * 2)) !important;
-  padding: 3px 2px !important;
-  gap: 3px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-.nav-tab span {
-  font-size: var(--bottom-nav-icon-size) !important;
-  line-height: 1 !important;
-}
-
-.nav-tab strong {
-  font-size: var(--bottom-nav-label-size) !important;
-  line-height: 1.1 !important;
-}
-
-.nav-slot {
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-.app-version {
-  position: absolute !important;
-  right: 8px !important;
-  bottom: 5px !important;
-  z-index: 2 !important;
-  color: rgba(247, 243, 255, 0.26) !important;
-  font-size: var(--bottom-nav-version-size) !important;
-  font-weight: 700 !important;
-  line-height: 1 !important;
-  letter-spacing: 0.01em !important;
-  pointer-events: none !important;
-}
-
-@media (max-width: 390px) {
-  :root {
-    --bottom-nav-height: 70px;
-    --bottom-nav-padding-y: 7px;
-    --bottom-nav-icon-size: 19px;
-    --bottom-nav-label-size: 11px;
-  }
-}
-
-
-/* v1.14: kompakt bundmenu og version uden for synligt område */
-.bottom-nav {
-  grid-template-columns: repeat(3, 1fr) !important;
-  gap: 0 !important;
-  margin-top: 8px !important;
-  padding: 6px 8px 7px !important;
-  border-radius: 16px !important;
-}
-
-.nav-tab,
-button.nav-tab {
-  min-height: 42px !important;
-  padding: 4px 3px !important;
-  gap: 3px !important;
-}
-
-.nav-tab span {
-  font-size: 20px !important;
-}
-
-.currency-nav-icon {
-  font-size: 22px !important;
-}
-
-.nav-tab strong {
-  font-size: 12px !important;
-}
-
-.nav-slot {
-  display: grid !important;
-}
-
-.app-version {
-  position: static !important;
-  display: block !important;
-  margin: 12px 4px 0 auto !important;
-  padding: 0 0 2px !important;
-  width: max-content !important;
-  color: rgba(247, 243, 255, 0.26) !important;
-  font-size: 10px !important;
-  font-weight: 600 !important;
-  line-height: 1 !important;
-  letter-spacing: 0.02em !important;
-  pointer-events: none !important;
-}
-
-#homePage .bottom-nav {
-  grid-column: 1 / -1;
-}
+/* v1.15: bygger videre på v1.11 layout. Versionsnummer ligger udenfor appen og påvirker ikke bundmenuen. */
