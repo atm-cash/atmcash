@@ -146,13 +146,13 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v1.2-revolut-direct-reset";
+const RATE_VERSION = "v1.3-wise-rate-reset";
 // Revolut must follow the same DKK/THB rate shown in Revolut's own converter.
 // Keep this at 0 unless Revolut changes their public converter logic.
 const REVOLUT_REFERENCE_MARGIN = 0;
 // Wise is calibrated from the same hourly base rate to match Wise mid-market reference.
-// Reference: Wise showed 1 DKK = 5.060 THB when base source was around 5.077947 THB/DKK.
-const WISE_REFERENCE_MARGIN = 0.353;
+// Reference: Wise showed 1 DKK = 5.083 THB while the hourly base source was around 5.0679 THB/DKK.
+const WISE_REFERENCE_MARGIN = -0.298;
 // Tavex calibrated from Tavex online calculator: 10.000 THB = 2.076 DKK (0,2076 DKK/THB).
 const TAVEX_REFERENCE_MARGIN = 5.14;
 const RATE_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
@@ -248,9 +248,9 @@ function applyMarketRates() {
   // Older saved browser settings may contain a referenceMargin, so reset it every time.
   data.revolut.referenceMargin = REVOLUT_REFERENCE_MARGIN;
   data.revolut.rate = revolutEffectiveRate(marketRate);
-  const wiseMargin = data.wise.referenceMargin == null ? WISE_REFERENCE_MARGIN : Number(data.wise.referenceMargin);
-  data.wise.referenceMargin = wiseMargin;
-  data.wise.rate = marketRate * (1 - wiseMargin / 100);
+  // Force Wise calibration too, so old saved browser settings do not keep an outdated Wise rate.
+  data.wise.referenceMargin = WISE_REFERENCE_MARGIN;
+  data.wise.rate = marketRate * (1 - WISE_REFERENCE_MARGIN / 100);
   const visaSpread = data.visa.spread == null ? 0 : data.visa.spread;
   data.visa.spread = visaSpread;
   data.visa.rate = marketRate * (1 - (visaSpread / 100));
