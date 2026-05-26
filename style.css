@@ -41,12 +41,12 @@ button { -webkit-tap-highlight-color: transparent; cursor: pointer; }
 .page.active { display: block; }
 
 .app-version {
-  max-width: 430px;
-  margin: 4px auto 0;
-  padding: 0 12px 4px;
-  text-align: right;
-  color: rgba(247, 243, 255, 0.32);
-  font-size: 10px;
+  position: fixed;
+  right: max(12px, calc((100vw - 430px) / 2 + 12px));
+  bottom: 8px;
+  z-index: 20;
+  color: rgba(247, 243, 255, 0.42);
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.02em;
   pointer-events: none;
@@ -1277,7 +1277,7 @@ button:not(.icon-btn):not(.nav-item):not(.update):not(.plan):not(.result-card) {
   grid-template-columns: repeat(2, 1fr) !important;
   gap: 0 !important;
   margin-top: 12px !important;
-  padding: 8px 12px 10px !important;
+  padding: 10px 12px 12px !important;
   border: 1px solid rgba(255,255,255,.10) !important;
   border-radius: 18px !important;
   background: rgba(13,17,32,.82) !important;
@@ -1298,8 +1298,8 @@ button.nav-tab {
   display: grid !important;
   place-items: center !important;
   gap: 4px !important;
-  padding: 5px 4px !important;
-  min-height: 46px !important;
+  padding: 6px 4px !important;
+  min-height: 50px !important;
   width: auto !important;
   height: auto !important;
   margin: 0 !important;
@@ -1663,5 +1663,3 @@ button.nav-tab.active {
   .language-flag-da { width: 17px; height: 12px; }
   .language-globe { font-size: 16px; }
 }
-
-/* v1.15: bygger videre på v1.11 layout. Versionsnummer ligger udenfor appen og påvirker ikke bundmenuen. */

@@ -3,7 +3,7 @@
     "rate": 5.057,
     "date": "",
     "source": "standard",
-    "rateVersion": "v1.15-compact-v11-layout",
+    "rateVersion": "v1.11-unified-mastercard-calculation",
     "rates": {
       "DKK": 1,
       "THB": 5.057,
