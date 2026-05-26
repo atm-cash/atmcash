@@ -1,4 +1,4 @@
-// ATM Cash v1.6 - conversions, defaults, config, language and currency helpers
+// ATM Cash v1.7 - conversions, defaults, config, language and currency helpers
 let defaults = {
   market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v73", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
@@ -7,7 +7,7 @@ let defaults = {
   wise: { limit: 1800, rate: 5.05441, atm: 220, over: 2.69 },
   visa: { bank: "Danske Bank", type: "Visa Debit", rate: 5.05441, spread: 0, percent: 1.75, fixedDkk: 0, atm: 220 },
   mastercard: { bank: "Danske Bank", type: "Mastercard Debit", rate: 5.05441, spread: 0, percent: 1.75, fixedDkk: 0, atm: 220 },
-  loomis: { place: "Loomis online", rate: 4.79, margin: 5.23, fixedDkk: 49.95 },
+  loomis: { place: "Loomis online", rate: 4.789071, margin: 5.51, fixedDkk: 49.95, delivery: 0, other: 0 },
   forex: { place: "FOREX afhentning", rate: 4.72, margin: 6.62, fixedDkk: 0, delivery: 0, other: 0 },
   tavex: { place: "Tavex webshop", rate: 4.840271055, margin: 4.299, fixedDkk: 0, delivery: 50, other: 0 }
 };

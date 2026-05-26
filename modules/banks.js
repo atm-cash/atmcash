@@ -146,7 +146,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v1.6-unified-calculation";
+const RATE_VERSION = "v1.7-unified-loomis-calculation";
 // Revolut must follow the same DKK/THB rate shown in Revolut's own converter.
 // Keep this at 0 unless Revolut changes their public converter logic.
 const REVOLUT_REFERENCE_MARGIN = 0;
@@ -157,6 +157,10 @@ const WISE_REFERENCE_MARGIN = -0.298;
 // Reference: 10.000 THB = 2.066 DKK before delivery, so 1 DKK = 4.840271055 THB.
 const TAVEX_DKK_PER_THB = 0.2066;
 const TAVEX_DIRECT_RATE = 1 / TAVEX_DKK_PER_THB;
+// Loomis is calculated from Loomis cash price, not from saved browser margin/cache.
+// Reference: 10.000 THB = 2.087,67 DKK before fee, so 1 DKK = 4.789071 THB.
+const LOOMIS_DKK_PER_THB = 0.208767;
+const LOOMIS_DIRECT_RATE = 1 / LOOMIS_DKK_PER_THB;
 const RATE_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 
 function todayKey() {
@@ -266,7 +270,13 @@ function applyMarketRates() {
     data.tavex.marginMigrated = true;
   }
 
-  data.loomis.rate = marketRate * (1 - (data.loomis.margin || 0) / 100);
+  // Force Loomis to one shared calculation on all devices.
+  data.loomis.place = "Loomis online";
+  data.loomis.rate = LOOMIS_DIRECT_RATE;
+  data.loomis.margin = Math.max(0, (1 - data.loomis.rate / marketRate) * 100);
+  data.loomis.fixedDkk = 49.95;
+  data.loomis.delivery = 0;
+  data.loomis.other = 0;
   data.forex.rate = marketRate * (1 - (data.forex.margin || 0) / 100);
   data.tavex.rate = TAVEX_DIRECT_RATE;
   data.tavex.margin = Math.max(0, (1 - data.tavex.rate / marketRate) * 100);
