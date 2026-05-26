@@ -146,7 +146,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v1.10-unified-visa-calculation";
+const RATE_VERSION = "v1.11-unified-visa-calculation";
 // Revolut must follow the same DKK/THB rate shown in Revolut's own converter.
 // Keep this at 0 unless Revolut changes their public converter logic.
 const REVOLUT_REFERENCE_MARGIN = 0;
@@ -169,6 +169,11 @@ const FOREX_DIRECT_RATE = 1 / FOREX_DKK_PER_THB;
 // Reference: 10.000 THB = 2.020,354068 DKK, so 1 DKK = 4.949627 THB.
 const VISA_DKK_PER_THB = 0.2020354068;
 const VISA_DIRECT_RATE = 1 / VISA_DKK_PER_THB;
+// Mastercard calculator screenshot included a 1% bank fee.
+// Remove that 1% here, then let ATM Cash add the user's bank fee afterwards.
+// Reference: Mastercard showed 1 THB = 0.2003816 DKK including 1% bank fee.
+const MASTERCARD_DKK_PER_THB_WITH_1_PERCENT_BANK_FEE = 0.2003816;
+const MASTERCARD_DIRECT_RATE = 1 / (MASTERCARD_DKK_PER_THB_WITH_1_PERCENT_BANK_FEE / 1.01);
 const RATE_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 
 function todayKey() {
@@ -273,9 +278,11 @@ function applyMarketRates() {
   data.visa.percent = 0;
   data.visa.fixedDkk = 0;
 
-  const mastercardSpread = data.mastercard.spread == null ? 0 : data.mastercard.spread;
-  data.mastercard.spread = mastercardSpread;
-  data.mastercard.rate = marketRate * (1 - (mastercardSpread / 100));
+  // Force Mastercard to one shared official calculation on all devices.
+  // Mastercard calculator value had 1% bank fee included; the app adds bank fee separately.
+  data.mastercard.rate = MASTERCARD_DIRECT_RATE;
+  data.mastercard.spread = Math.max(0, (1 - data.mastercard.rate / marketRate) * 100);
+  data.mastercard.fixedDkk = 0;
 
   if (!data.tavex.marginMigrated && marketRate && (data.tavex.margin || 0) === 0 && data.tavex.rate && Math.abs(data.tavex.rate - marketRate) > 0.01) {
     data.tavex.margin = Math.max(0, (1 - data.tavex.rate / marketRate) * 100);
