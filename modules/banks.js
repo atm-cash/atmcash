@@ -146,7 +146,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v1.9-unified-cash-supplier-calculation";
+const RATE_VERSION = "v1.10-unified-visa-calculation";
 // Revolut must follow the same DKK/THB rate shown in Revolut's own converter.
 // Keep this at 0 unless Revolut changes their public converter logic.
 const REVOLUT_REFERENCE_MARGIN = 0;
@@ -165,6 +165,10 @@ const LOOMIS_DIRECT_RATE = 1 / LOOMIS_DKK_PER_THB;
 // Reference: 10.000 THB = 2.116,71 DKK, so 1 DKK = 4.724312731 THB.
 const FOREX_DKK_PER_THB = 0.211671;
 const FOREX_DIRECT_RATE = 1 / FOREX_DKK_PER_THB;
+// Visa is calculated from Visa.dk converter including the bank fee entered there.
+// Reference: 10.000 THB = 2.020,354068 DKK, so 1 DKK = 4.949627 THB.
+const VISA_DKK_PER_THB = 0.2020354068;
+const VISA_DIRECT_RATE = 1 / VISA_DKK_PER_THB;
 const RATE_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 
 function todayKey() {
@@ -261,9 +265,13 @@ function applyMarketRates() {
   // Force Wise calibration too, so old saved browser settings do not keep an outdated Wise rate.
   data.wise.referenceMargin = WISE_REFERENCE_MARGIN;
   data.wise.rate = marketRate * (1 - WISE_REFERENCE_MARGIN / 100);
-  const visaSpread = data.visa.spread == null ? 0 : data.visa.spread;
-  data.visa.spread = visaSpread;
-  data.visa.rate = marketRate * (1 - (visaSpread / 100));
+  // Force Visa to one shared official calculation on all devices.
+  // The Visa.dk value already includes the bank fee from the Visa calculator,
+  // so no extra bank fee is added here.
+  data.visa.rate = VISA_DIRECT_RATE;
+  data.visa.spread = Math.max(0, (1 - data.visa.rate / marketRate) * 100);
+  data.visa.percent = 0;
+  data.visa.fixedDkk = 0;
 
   const mastercardSpread = data.mastercard.spread == null ? 0 : data.mastercard.spread;
   data.mastercard.spread = mastercardSpread;

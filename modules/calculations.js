@@ -1,6 +1,6 @@
-// ATM Cash v1.9 - price calculations and detail views
-// v1.9: Cash suppliers use fixed webshop prices in DKK per THB.
-// This avoids old localStorage/cache giving different rates on PC, tablet and iPhone.
+// ATM Cash v1.10 - price calculations and detail views
+// v1.10: Visa uses one shared Visa.dk based calculation on all devices.
+// Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
   forex: { dkkPerThb: 0.211671, fixedDkk: 0, delivery: 0, other: 0 },
   tavex: { dkkPerThb: 0.2066, fixedDkk: 0, delivery: 50, other: 0 },
