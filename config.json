@@ -3,7 +3,7 @@
     "rate": 5.0570,
     "date": "",
     "source": "standard",
-    "rateVersion": "v1.2-revolut-direct-reset",
+    "rateVersion": "v1.3-wise-rate-reset",
     "rates": {
       "DKK": 1,
       "THB": 5.0570,
@@ -23,7 +23,7 @@
   },
   "wise": {
     "limit": 1800,
-    "rate": 5.0570,
+    "rate": 5.0830,
     "atm": 220,
     "over": 2.69
   },
