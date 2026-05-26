@@ -146,10 +146,10 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v79-tavex-hourly";
-// Revolut is calibrated separately from the generic market rate. DO NOT change without explicit request.
-// Based on current Revolut reference check: 5.0312 THB/DKK when generic market was 5.077947.
-const REVOLUT_REFERENCE_MARGIN = 0.92;
+const RATE_VERSION = "v80-revolut-direct";
+// Revolut must follow the same DKK/THB rate shown in Revolut's own converter.
+// Keep this at 0 unless Revolut changes their public converter logic.
+const REVOLUT_REFERENCE_MARGIN = 0;
 // Wise is calibrated from the same hourly base rate to match Wise mid-market reference.
 // Reference: Wise showed 1 DKK = 5.060 THB when base source was around 5.077947 THB/DKK.
 const WISE_REFERENCE_MARGIN = 0.353;
@@ -195,9 +195,9 @@ function isWeekendToday() {
 }
 
 function revolutEffectiveRate(baseRate) {
-  const plan = data.revolut?.plan || "Premium";
-  const weekendMarkup = (plan === "Standard" || plan === "Plus") && isWeekendToday() ? 1 : 0;
-  return baseRate * (1 - weekendMarkup / 100);
+  // Revolut's own converter currently shows the direct exchange rate with no extra spread.
+  // ATM-limit fees are still calculated separately in calculateRevolutDetails().
+  return baseRate;
 }
 
 function applyMarketRates() {
