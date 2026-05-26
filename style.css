@@ -1663,3 +1663,74 @@ button.nav-tab.active {
   .language-flag-da { width: 17px; height: 12px; }
   .language-globe { font-size: 16px; }
 }
+
+
+/* v1.12: struktureret bundmenu
+   - Samme stil som resten af appen
+   - Lavere højde giver mere plads til resultater
+   - 3 kolonner er klargjort til en ekstra knap senere
+   - Versionsnummer ligger absolut i menuen og optager ikke plads */
+:root {
+  --bottom-nav-height: 58px;
+  --bottom-nav-radius: 18px;
+  --bottom-nav-padding-x: 10px;
+  --bottom-nav-padding-y: 7px;
+  --bottom-nav-columns: 3;
+  --bottom-nav-icon-size: 19px;
+  --bottom-nav-label-size: 12px;
+  --bottom-nav-version-size: 10px;
+}
+
+.bottom-nav {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: repeat(var(--bottom-nav-columns), minmax(0, 1fr)) !important;
+  gap: 0 !important;
+  min-height: var(--bottom-nav-height) !important;
+  margin-top: 8px !important;
+  padding: var(--bottom-nav-padding-y) var(--bottom-nav-padding-x) !important;
+  border-radius: var(--bottom-nav-radius) !important;
+  overflow: hidden !important;
+}
+
+.nav-tab,
+button.nav-tab {
+  min-height: calc(var(--bottom-nav-height) - (var(--bottom-nav-padding-y) * 2)) !important;
+  padding: 4px 2px !important;
+  gap: 3px !important;
+}
+
+.nav-tab span {
+  font-size: var(--bottom-nav-icon-size) !important;
+}
+
+.nav-tab strong {
+  font-size: var(--bottom-nav-label-size) !important;
+}
+
+.nav-slot {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.app-version {
+  position: absolute !important;
+  right: 8px !important;
+  bottom: 4px !important;
+  z-index: 2 !important;
+  color: rgba(247, 243, 255, 0.28) !important;
+  font-size: var(--bottom-nav-version-size) !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.01em !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 390px) {
+  :root {
+    --bottom-nav-height: 54px;
+    --bottom-nav-padding-y: 6px;
+    --bottom-nav-icon-size: 18px;
+    --bottom-nav-label-size: 11px;
+  }
+}
