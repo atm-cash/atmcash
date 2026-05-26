@@ -3,7 +3,7 @@
     "rate": 5.057,
     "date": "",
     "source": "standard",
-    "rateVersion": "v1.9-unified-cash-supplier-calculation",
+    "rateVersion": "v1.10-unified-visa-calculation",
     "rates": {
       "DKK": 1,
       "THB": 5.057,
@@ -30,18 +30,18 @@
   "visa": {
     "bank": "Danske Bank",
     "type": "Visa Debit",
-    "rate": 5.057,
-    "spread": 0,
-    "percent": 1.75,
+    "rate": 4.949627,
+    "spread": 2.124,
+    "percent": 0,
     "fixedDkk": 0,
     "atm": 220
   },
   "mastercard": {
     "bank": "Danske Bank",
     "type": "Mastercard Debit",
-    "rate": 5.057,
-    "spread": 0,
-    "percent": 1.75,
+    "rate": 4.949627,
+    "spread": 2.124,
+    "percent": 0,
     "fixedDkk": 0,
     "atm": 220
   },
