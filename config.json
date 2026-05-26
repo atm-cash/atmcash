@@ -1,12 +1,12 @@
 {
   "market": {
-    "rate": 5.0570,
+    "rate": 5.057,
     "date": "",
     "source": "standard",
-    "rateVersion": "v1.3-wise-rate-reset",
+    "rateVersion": "v1.5-tavex-webshop-rate",
     "rates": {
       "DKK": 1,
-      "THB": 5.0570,
+      "THB": 5.057,
       "EUR": 0.134,
       "USD": 0.146,
       "GBP": 0.114
@@ -17,20 +17,20 @@
   "revolut": {
     "plan": "Premium",
     "limit": 3000,
-    "rate": 5.0570,
+    "rate": 5.057,
     "atm": 220,
     "over": 2
   },
   "wise": {
     "limit": 1800,
-    "rate": 5.0830,
+    "rate": 5.083,
     "atm": 220,
     "over": 2.69
   },
   "visa": {
     "bank": "Danske Bank",
     "type": "Visa Debit",
-    "rate": 5.0570,
+    "rate": 5.057,
     "spread": 0,
     "percent": 1.75,
     "fixedDkk": 0,
@@ -39,7 +39,7 @@
   "mastercard": {
     "bank": "Danske Bank",
     "type": "Mastercard Debit",
-    "rate": 5.0570,
+    "rate": 5.057,
     "spread": 0,
     "percent": 1.75,
     "fixedDkk": 0,
@@ -61,8 +61,8 @@
   },
   "tavex": {
     "place": "Tavex webshop",
-    "rate": 4.81696,
-    "margin": 5.14,
+    "rate": 4.84027,
+    "margin": 4.492,
     "fixedDkk": 0,
     "delivery": 50,
     "other": 0
