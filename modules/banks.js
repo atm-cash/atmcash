@@ -146,7 +146,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v80-revolut-direct";
+const RATE_VERSION = "v1.2-revolut-direct-reset";
 // Revolut must follow the same DKK/THB rate shown in Revolut's own converter.
 // Keep this at 0 unless Revolut changes their public converter logic.
 const REVOLUT_REFERENCE_MARGIN = 0;
@@ -202,7 +202,7 @@ function revolutEffectiveRate(baseRate) {
 
 function applyMarketRates() {
   applyVisaBankPresetToData();
-  const marketRate = data.market?.rate || 5.05441;
+  const marketRate = data.market?.rate || 5.0570;
 
   // v73: cash suppliers restored to the calibrated values that matched real checks.
   // v70: old cached settings could keep the app around 4,85 even when the market is around 5,05.
@@ -244,9 +244,10 @@ function applyMarketRates() {
     data.v73CashRestoreDone = true;
   }
 
-  const revolutMargin = data.revolut.referenceMargin == null ? REVOLUT_REFERENCE_MARGIN : Number(data.revolut.referenceMargin);
-  data.revolut.referenceMargin = revolutMargin;
-  data.revolut.rate = revolutEffectiveRate(marketRate * (1 - revolutMargin / 100));
+  // Force Revolut to match Revolut's own converter.
+  // Older saved browser settings may contain a referenceMargin, so reset it every time.
+  data.revolut.referenceMargin = REVOLUT_REFERENCE_MARGIN;
+  data.revolut.rate = revolutEffectiveRate(marketRate);
   const wiseMargin = data.wise.referenceMargin == null ? WISE_REFERENCE_MARGIN : Number(data.wise.referenceMargin);
   data.wise.referenceMargin = wiseMargin;
   data.wise.rate = marketRate * (1 - wiseMargin / 100);
