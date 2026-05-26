@@ -3,7 +3,7 @@
     "rate": 5.057,
     "date": "",
     "source": "standard",
-    "rateVersion": "v1.5-tavex-webshop-rate",
+    "rateVersion": "v1.6-unified-calculation",
     "rates": {
       "DKK": 1,
       "THB": 5.057,
@@ -61,8 +61,8 @@
   },
   "tavex": {
     "place": "Tavex webshop",
-    "rate": 4.84027,
-    "margin": 4.492,
+    "rate": 4.840271055,
+    "margin": 4.299,
     "fixedDkk": 0,
     "delivery": 50,
     "other": 0
