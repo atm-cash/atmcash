@@ -1,12 +1,12 @@
 {
   "market": {
-    "rate": 5.05441,
+    "rate": 5.0570,
     "date": "",
     "source": "standard",
-    "rateVersion": "v73",
+    "rateVersion": "v1.2-revolut-direct-reset",
     "rates": {
       "DKK": 1,
-      "THB": 5.05441,
+      "THB": 5.0570,
       "EUR": 0.134,
       "USD": 0.146,
       "GBP": 0.114
@@ -17,20 +17,20 @@
   "revolut": {
     "plan": "Premium",
     "limit": 3000,
-    "rate": 5.05441,
+    "rate": 5.0570,
     "atm": 220,
     "over": 2
   },
   "wise": {
     "limit": 1800,
-    "rate": 5.05441,
+    "rate": 5.0570,
     "atm": 220,
     "over": 2.69
   },
   "visa": {
     "bank": "Danske Bank",
     "type": "Visa Debit",
-    "rate": 5.05441,
+    "rate": 5.0570,
     "spread": 0,
     "percent": 1.75,
     "fixedDkk": 0,
@@ -39,7 +39,7 @@
   "mastercard": {
     "bank": "Danske Bank",
     "type": "Mastercard Debit",
-    "rate": 5.05441,
+    "rate": 5.0570,
     "spread": 0,
     "percent": 1.75,
     "fixedDkk": 0,
