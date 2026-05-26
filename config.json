@@ -3,7 +3,7 @@
     "rate": 5.057,
     "date": "",
     "source": "standard",
-    "rateVersion": "v1.6-unified-calculation",
+    "rateVersion": "v1.7-unified-loomis-calculation",
     "rates": {
       "DKK": 1,
       "THB": 5.057,
@@ -47,9 +47,11 @@
   },
   "loomis": {
     "place": "Loomis online",
-    "rate": 4.79,
-    "margin": 5.23,
-    "fixedDkk": 49.95
+    "rate": 4.789071,
+    "margin": 5.51,
+    "fixedDkk": 49.95,
+    "delivery": 0,
+    "other": 0
   },
   "forex": {
     "place": "FOREX afhentning",
