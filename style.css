@@ -1665,18 +1665,17 @@ button.nav-tab.active {
 }
 
 
-/* v1.12: struktureret bundmenu
-   - Samme stil som resten af appen
-   - Lavere højde giver mere plads til resultater
-   - 3 kolonner er klargjort til en ekstra knap senere
-   - Versionsnummer ligger absolut i menuen og optager ikke plads */
+/* v1.13: bundmenu finjusteret
+   - Fast lav højde, så iPhone ikke laver ekstra stor bund
+   - 3 kolonner er klar til ekstra knap senere
+   - Versionsnummer ligger absolut og optager ingen plads */
 :root {
-  --bottom-nav-height: 58px;
+  --bottom-nav-height: 76px;
   --bottom-nav-radius: 18px;
-  --bottom-nav-padding-x: 10px;
-  --bottom-nav-padding-y: 7px;
+  --bottom-nav-padding-x: 12px;
+  --bottom-nav-padding-y: 8px;
   --bottom-nav-columns: 3;
-  --bottom-nav-icon-size: 19px;
+  --bottom-nav-icon-size: 21px;
   --bottom-nav-label-size: 12px;
   --bottom-nav-version-size: 10px;
 }
@@ -1685,9 +1684,12 @@ button.nav-tab.active {
   position: relative !important;
   display: grid !important;
   grid-template-columns: repeat(var(--bottom-nav-columns), minmax(0, 1fr)) !important;
+  align-items: center !important;
   gap: 0 !important;
+  height: var(--bottom-nav-height) !important;
   min-height: var(--bottom-nav-height) !important;
-  margin-top: 8px !important;
+  max-height: var(--bottom-nav-height) !important;
+  margin-top: 10px !important;
   padding: var(--bottom-nav-padding-y) var(--bottom-nav-padding-x) !important;
   border-radius: var(--bottom-nav-radius) !important;
   overflow: hidden !important;
@@ -1695,17 +1697,24 @@ button.nav-tab.active {
 
 .nav-tab,
 button.nav-tab {
-  min-height: calc(var(--bottom-nav-height) - (var(--bottom-nav-padding-y) * 2)) !important;
-  padding: 4px 2px !important;
+  min-height: 0 !important;
+  height: calc(var(--bottom-nav-height) - (var(--bottom-nav-padding-y) * 2)) !important;
+  padding: 3px 2px !important;
   gap: 3px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .nav-tab span {
   font-size: var(--bottom-nav-icon-size) !important;
+  line-height: 1 !important;
 }
 
 .nav-tab strong {
   font-size: var(--bottom-nav-label-size) !important;
+  line-height: 1.1 !important;
 }
 
 .nav-slot {
@@ -1716,9 +1725,9 @@ button.nav-tab {
 .app-version {
   position: absolute !important;
   right: 8px !important;
-  bottom: 4px !important;
+  bottom: 5px !important;
   z-index: 2 !important;
-  color: rgba(247, 243, 255, 0.28) !important;
+  color: rgba(247, 243, 255, 0.26) !important;
   font-size: var(--bottom-nav-version-size) !important;
   font-weight: 700 !important;
   line-height: 1 !important;
@@ -1728,9 +1737,9 @@ button.nav-tab {
 
 @media (max-width: 390px) {
   :root {
-    --bottom-nav-height: 54px;
-    --bottom-nav-padding-y: 6px;
-    --bottom-nav-icon-size: 18px;
+    --bottom-nav-height: 70px;
+    --bottom-nav-padding-y: 7px;
+    --bottom-nav-icon-size: 19px;
     --bottom-nav-label-size: 11px;
   }
 }
