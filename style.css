@@ -40,6 +40,19 @@ button { -webkit-tap-highlight-color: transparent; cursor: pointer; }
 .page { display: none; }
 .page.active { display: block; }
 
+.app-version {
+  position: fixed;
+  right: max(12px, calc((100vw - 430px) / 2 + 12px));
+  bottom: 8px;
+  z-index: 20;
+  color: rgba(247, 243, 255, 0.42);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+
 .header {
   display: grid;
   grid-template-columns: 76px 1fr 46px;
