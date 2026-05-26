@@ -3,7 +3,7 @@
     "rate": 5.057,
     "date": "",
     "source": "standard",
-    "rateVersion": "v1.10-unified-visa-calculation",
+    "rateVersion": "v1.11-unified-mastercard-calculation",
     "rates": {
       "DKK": 1,
       "THB": 5.057,
@@ -39,9 +39,9 @@
   "mastercard": {
     "bank": "Danske Bank",
     "type": "Mastercard Debit",
-    "rate": 4.949627,
-    "spread": 2.124,
-    "percent": 0,
+    "rate": 5.040382949333,
+    "spread": 0.329,
+    "percent": 1.75,
     "fixedDkk": 0,
     "atm": 220
   },
