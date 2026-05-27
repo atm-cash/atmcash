@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="style.css?v=1.1" />
 </head>
 <body>
-  <div id="version">v1.20</div>
+  <div id="version">v1.21</div>
   <main class="phone">
 
     <section id="homePage" class="page active">
@@ -79,6 +79,7 @@
         <button class="nav-tab" type="button" data-nav="tips"><span>ⓘ</span><strong>Tips</strong></button>
       </nav>
 
+      <div class="app-version" aria-label="Version">v1.11</div>
     </section>
 
 
@@ -151,6 +152,8 @@
         <article class="card tip-card">
           <div class="tip-icon">✕</div>
           <div>
+            <div class="tip-title">Sig nej til Conversion</div>
+            <p>Hvis automaten spørger om Conversion eller Dynamic Currency Conversion, så vælg nej. Lad altid dit eget kort/bank lave omregningen til THB.</p>
           </div>
         </article>
 
@@ -569,9 +572,6 @@
 
           <div class="calc-line">
             <div>Bankgebyr</div>
-          <div class="row total-fee">
-            <span class="yellow">110 DKK</span>
-          </div>
             <strong id="visaLinePercent">0 DKK</strong>
           </div>
 
@@ -594,9 +594,6 @@
       <div class="topbar">
         <button class="icon-btn back-btn" type="button">‹</button>
         <div class="title"><h1>Visa</h1><div>Bankgebyrer og hævning</div></div>
-          <div class="row total-fee">
-            <span class="yellow">110 DKK</span>
-          </div>
         <button class="icon-btn" type="button" data-save="visa">✓</button>
       </div>
 
@@ -625,9 +622,6 @@
           <div class="fee-box">
             <input id="visaPercent" inputmode="decimal" value="1,75" />
             <div class="unit">Bankgebyr · %</div>
-          <div class="row total-fee">
-            <span class="yellow">110 DKK</span>
-          </div>
           </div>
 
           <div class="fee-box">
@@ -708,9 +702,6 @@
           <div class="calc-line"><div>Pris før bankgebyr</div><strong id="mcLineBeforeFee">0 DKK</strong></div>
           <div class="calc-line"><div>Fast bankgebyr</div><strong id="mcLineFixed">0 DKK</strong></div>
           <div class="calc-line"><div>Bankgebyr</div><strong id="mcLinePercent">0 DKK</strong></div>
-          <div class="row total-fee">
-            <span class="yellow">110 DKK</span>
-          </div>
           <div class="calc-line total-line"><div>Total pris</div><strong id="mcLineFinalTotal">0 DKK</strong></div>
         </section>
 
@@ -727,9 +718,6 @@
       <div class="topbar">
         <button class="icon-btn back-btn" type="button">‹</button>
         <div class="title"><h1>Mastercard</h1><div>Bankgebyrer og hævning</div></div>
-          <div class="row total-fee">
-            <span class="yellow">110 DKK</span>
-          </div>
         <button class="icon-btn" type="button" data-save="mastercard">✓</button>
       </div>
 
@@ -758,9 +746,6 @@
           <div class="fee-box">
             <input id="mastercardPercent" inputmode="decimal" value="1,75" />
             <div class="unit">Bankgebyr · %</div>
-          <div class="row total-fee">
-            <span class="yellow">110 DKK</span>
-          </div>
           </div>
 
           <div class="fee-box">
@@ -1165,6 +1150,7 @@
 
   </main>
 
+  <script src="modules/conversions.js?v=1.11"></script>
   <script src="modules/banks.js?v=1.11"></script>
   <script src="modules/methods.js?v=1.11"></script>
   <script src="modules/calculations.js?v=1.11"></script>
