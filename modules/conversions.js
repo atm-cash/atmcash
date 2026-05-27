@@ -1,4 +1,4 @@
-// ATM Cash v2.0 - conversions, defaults, config, language and currency helpers
+// ATM Cash v2.8 - conversions, defaults, config, language and currency helpers
 let defaults = {
   market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v73", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
@@ -67,25 +67,6 @@ const translations = {
   "Beregning af kontant valuta": "Cash currency calculation",
   "Beregning ud fra forsiden": "Calculation based on the front page",
   "
-    // Beregn og vis Total gebyrer
-    try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
-    document.getElementById('totalGebyrer').textContent = totalGebyrer.toFixed(2) + ' DKK';
-                    
-
-    // Beregn og vis Total gebyrer
-    try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
-    const totalGebyrElem = document.getElementById('totalGebyrer');
-    if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
-                    
-
-    // Beregn og vis Total gebyrer sikkert
-    try {
-        try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
-        const totalGebyrElem = document.getElementById('totalGebyrer');
-        if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
-    } catch(e){}
-                    
-
 try {
     const totalGebyrer = (typeof atmFee !== 'undefined' ? atmFee : 0) + (typeof bankFee !== 'undefined' ? bankFee : 0);
     const totalGebyrElem = document.getElementById('totalGebyrer');
