@@ -1,5 +1,5 @@
-// ATM Cash v1-28 - price calculations and detail views
-// v1-28: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
+// ATM Cash v1.11 - price calculations and detail views
+// v1.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
   forex: { dkkPerThb: 0.211671, fixedDkk: 0, delivery: 0, other: 0 },
