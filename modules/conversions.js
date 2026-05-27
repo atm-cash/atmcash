@@ -1,4 +1,4 @@
-// ATM Cash v2.9 - conversions, defaults, config, language and currency helpers
+// ATM Cash v2.0 - conversions, defaults, config, language and currency helpers
 let defaults = {
   market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v73", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
@@ -348,34 +348,4 @@ function setupConverter() {
   updateConverterStatus();
   updateConverterFrom("DKK");
 }
-
-
-
-// Dynamisk Total gebyrer tilføjelse
-try {
-    const calcContainer = document.querySelector('.calc-container');
-    if(calcContainer && !document.getElementById('totalGebyrer')){
-        const totalDiv = document.createElement('div');
-        totalDiv.className = 'calc-line total-fees';
-        const label = document.createElement('div');
-        label.textContent = 'Total gebyrer (ATM + bank)';
-        const strong = document.createElement('strong');
-        strong.id = 'totalGebyrer';
-        strong.textContent = '0 DKK';
-        totalDiv.appendChild(label);
-        totalDiv.appendChild(strong);
-        // Indsæt lige før Total pris linjen
-        const totalLine = calcContainer.querySelector('.calc-line.total-line');
-        if(totalLine){ calcContainer.insertBefore(totalDiv, totalLine); }
-        // Opdater dynamisk når atmFee og bankFee findes
-        const observer = new MutationObserver(()=>{
-            try {
-                const atm = typeof atmFee !== 'undefined' ? atmFee : 0;
-                const bank = typeof bankFee !== 'undefined' ? bankFee : 0;
-                strong.textContent = (atm + bank).toFixed(2) + ' DKK';
-            } catch(e){}
-        });
-        observer.observe(calcContainer, {childList:true, subtree:true});
-    }
-} catch(e){ console.warn(e); }
 
