@@ -78,7 +78,7 @@
         <button class="nav-tab" type="button" data-nav="tips"><span>ⓘ</span><strong>Tips</strong></button>
       </nav>
 
-      <div class="app-version" aria-label="Version">v2.0</div>
+      <div class="app-version" aria-label="Version">v2.1</div>
     </section>
 
 
@@ -200,7 +200,8 @@
           <div class="main-title" id="revolutCalcPlan">Revolut Premium</div>
           <div class="main-sub" id="revolutCalcSubtitle">Beregning ud fra forsiden</div>
         </div>
-        <div class="main-value" id="revolutCalcTotal">0 DKK<span>Total pris</span></div>
+        <div class="main-value" id="revolutCalcTotal">0 DKK<span><div class="total-fees">Total gebyrer (ATM + bank): <span id="totalGebyrer">0 DKK</span></div>
+Total pris</span></div>
       </section>
 
       <div class="calc-scroll">
@@ -273,7 +274,8 @@
         </div>
 
         <div class="calc-line total-line">
-          <div>Total pris</div>
+          <div><div class="total-fees">Total gebyrer (ATM + bank): <span id="totalGebyrer">0 DKK</span></div>
+Total pris</div>
           <strong id="lineFinalTotal">0 DKK</strong>
         </div>
       </section>
@@ -359,7 +361,8 @@
           <div class="main-title">Wise kort</div>
           <div class="main-sub" id="wiseCalcSubtitle">Beregning ud fra forsiden</div>
         </div>
-        <div class="main-value" id="wiseCalcTotal">0 DKK<span>Total pris</span></div>
+        <div class="main-value" id="wiseCalcTotal">0 DKK<span><div class="total-fees">Total gebyrer (ATM + bank): <span id="totalGebyrer">0 DKK</span></div>
+Total pris</span></div>
       </section>
 
       <div class="calc-scroll">
@@ -432,7 +435,8 @@
         </div>
 
         <div class="calc-line total-line">
-          <div>Total pris</div>
+          <div><div class="total-fees">Total gebyrer (ATM + bank): <span id="totalGebyrer">0 DKK</span></div>
+Total pris</div>
           <strong id="wiseLineFinalTotal">0 DKK</strong>
         </div>
       </section>
@@ -502,7 +506,8 @@
           <div class="main-title" id="visaCalcCard">Visa Debit</div>
           <div class="main-sub" id="visaCalcSubtitle">Beregning ud fra forsiden</div>
         </div>
-        <div class="main-value" id="visaCalcTotal">0 DKK<span>Total pris</span></div>
+        <div class="main-value" id="visaCalcTotal">0 DKK<span><div class="total-fees">Total gebyrer (ATM + bank): <span id="totalGebyrer">0 DKK</span></div>
+Total pris</span></div>
       </section>
 
       <div class="calc-scroll">
@@ -575,7 +580,8 @@
           </div>
 
           <div class="calc-line total-line">
-            <div>Total pris</div>
+            <div><div class="total-fees">Total gebyrer (ATM + bank): <span id="totalGebyrer">0 DKK</span></div>
+Total pris</div>
             <strong id="visaLineFinalTotal">0 DKK</strong>
           </div>
         </section>
@@ -661,7 +667,8 @@
           <div class="main-title" id="mcCalcCard">Mastercard Debit</div>
           <div class="main-sub" id="mcCalcSubtitle">Beregning ud fra forsiden</div>
         </div>
-        <div class="main-value" id="mcCalcTotal">0 DKK<span>Total pris</span></div>
+        <div class="main-value" id="mcCalcTotal">0 DKK<span><div class="total-fees">Total gebyrer (ATM + bank): <span id="totalGebyrer">0 DKK</span></div>
+Total pris</span></div>
       </section>
 
       <div class="calc-scroll">
@@ -701,7 +708,8 @@
           <div class="calc-line"><div>Pris før bankgebyr</div><strong id="mcLineBeforeFee">0 DKK</strong></div>
           <div class="calc-line"><div>Fast bankgebyr</div><strong id="mcLineFixed">0 DKK</strong></div>
           <div class="calc-line"><div>Bankgebyr</div><strong id="mcLinePercent">0 DKK</strong></div>
-          <div class="calc-line total-line"><div>Total pris</div><strong id="mcLineFinalTotal">0 DKK</strong></div>
+          <div class="calc-line total-line"><div><div class="total-fees">Total gebyrer (ATM + bank): <span id="totalGebyrer">0 DKK</span></div>
+Total pris</div><strong id="mcLineFinalTotal">0 DKK</strong></div>
         </section>
 
         <section class="card">
@@ -785,7 +793,8 @@
           <div class="main-title">Loomis</div>
           <div class="main-sub" id="loomisCalcSubtitle">Beregning ud fra forsiden</div>
         </div>
-        <div class="main-value" id="loomisCalcTotal">0 DKK<span>Total pris</span></div>
+        <div class="main-value" id="loomisCalcTotal">0 DKK<span><div class="total-fees">Total gebyrer (ATM + bank): <span id="totalGebyrer">0 DKK</span></div>
+Total pris</span></div>
       </section>
 
       <div class="calc-scroll">
@@ -823,7 +832,8 @@
           <div class="calc-line"><div>Fast gebyr</div><strong id="loomisLineFixed">0 DKK</strong></div>
           <div class="calc-line"><div>Levering</div><strong id="loomisLineDelivery">0 DKK</strong></div>
           <div class="calc-line"><div>Øvrige gebyrer</div><strong id="loomisLineOther">0 DKK</strong></div>
-          <div class="calc-line total-line"><div>Total pris</div><strong id="loomisLineFinalTotal">0 DKK</strong></div>
+          <div class="calc-line total-line"><div><div class="total-fees">Total gebyrer (ATM + bank): <span id="totalGebyrer">0 DKK</span></div>
+Total pris</div><strong id="loomisLineFinalTotal">0 DKK</strong></div>
         </section>
 
         <section class="card">
@@ -895,7 +905,8 @@
           <div class="main-title">FOREX</div>
           <div class="main-sub" id="forexCalcSubtitle">Beregning ud fra forsiden</div>
         </div>
-        <div class="main-value" id="forexCalcTotal">0 DKK<span>Total pris</span></div>
+        <div class="main-value" id="forexCalcTotal">0 DKK<span><div class="total-fees">Total gebyrer (ATM + bank): <span id="totalGebyrer">0 DKK</span></div>
+Total pris</span></div>
       </section>
 
       <div class="calc-scroll">
@@ -933,7 +944,8 @@
           <div class="calc-line"><div>Fast gebyr</div><strong id="forexLineFixed">0 DKK</strong></div>
           <div class="calc-line"><div>Levering</div><strong id="forexLineDelivery">0 DKK</strong></div>
           <div class="calc-line"><div>Øvrige gebyrer</div><strong id="forexLineOther">0 DKK</strong></div>
-          <div class="calc-line total-line"><div>Total pris</div><strong id="forexLineFinalTotal">0 DKK</strong></div>
+          <div class="calc-line total-line"><div><div class="total-fees">Total gebyrer (ATM + bank): <span id="totalGebyrer">0 DKK</span></div>
+Total pris</div><strong id="forexLineFinalTotal">0 DKK</strong></div>
         </section>
 
         <section class="card">
@@ -1017,7 +1029,8 @@
           <div class="main-title">Tavex</div>
           <div class="main-sub" id="tavexCalcSubtitle">Beregning ud fra forsiden</div>
         </div>
-        <div class="main-value" id="tavexCalcTotal">0 DKK<span>Total pris</span></div>
+        <div class="main-value" id="tavexCalcTotal">0 DKK<span><div class="total-fees">Total gebyrer (ATM + bank): <span id="totalGebyrer">0 DKK</span></div>
+Total pris</span></div>
       </section>
 
       <div class="calc-scroll">
@@ -1056,7 +1069,8 @@
           <div class="calc-line"><div>Fast gebyr</div><strong id="tavexLineFixed">0 DKK</strong></div>
           <div class="calc-line"><div>Levering</div><strong id="tavexLineDelivery">0 DKK</strong></div>
           <div class="calc-line"><div>Øvrige gebyrer</div><strong id="tavexLineOther">0 DKK</strong></div>
-          <div class="calc-line total-line"><div>Total pris</div><strong id="tavexLineFinalTotal">0 DKK</strong></div>
+          <div class="calc-line total-line"><div><div class="total-fees">Total gebyrer (ATM + bank): <span id="totalGebyrer">0 DKK</span></div>
+Total pris</div><strong id="tavexLineFinalTotal">0 DKK</strong></div>
         </section>
 
         <section class="card">
