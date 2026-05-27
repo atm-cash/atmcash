@@ -341,7 +341,7 @@ function updateTotalGebyr() {
     // Find or create total-fee row in results section
     let totalRow = document.querySelector('.row.total-fee');
     if (!totalRow) {
-        const container = document.querySelector('#results'); // adjust if needed
+        const container = document.querySelector('#results'); // adjust if necessary
         totalRow = document.createElement('div');
         totalRow.className = 'row total-fee';
         const label = document.createElement('span');
