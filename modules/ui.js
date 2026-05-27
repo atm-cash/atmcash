@@ -333,7 +333,7 @@ document.addEventListener("DOMContentLoaded", init);
 
 
 function updateTotalGebyr() {
-    // Get ATM and Bank fee values from existing calculations
+    // Get ATM and Bank fee values
     const atmFee = parseFloat(window.atmFeeDKK) || 0;
     const bankFee = parseFloat(window.bankFeeDKK) || 0;
     const total = atmFee + bankFee;
@@ -341,7 +341,7 @@ function updateTotalGebyr() {
     // Find or create total-fee row in results section
     let totalRow = document.querySelector('.row.total-fee');
     if (!totalRow) {
-        const container = document.querySelector('#results'); // adjust if necessary
+        const container = document.querySelector('#results'); // adjust selector if needed
         totalRow = document.createElement('div');
         totalRow.className = 'row total-fee';
         const label = document.createElement('span');
