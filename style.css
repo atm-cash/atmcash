@@ -1665,7 +1665,3 @@ button.nav-tab.active {
 }
 
 .total-fees { color: yellow; font-weight: bold; margin-bottom: 5px; }
-
-@media screen and (max-width: 768px) {
-  .calc-line, .total-fees { display: flex !important; width: 100% !important; }
-}
