@@ -1,4 +1,4 @@
-// ATM Cash v2.13 - conversions, defaults, config, language and currency helpers
+// ATM Cash v1.11 - conversions, defaults, config, language and currency helpers
 let defaults = {
   market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v73", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
@@ -349,15 +349,3 @@ function setupConverter() {
   updateConverterFrom("DKK");
 }
 
-
-
-// Opdater Total gebyrer integreret i beregning
-try {
-    if(typeof atmFee !== 'undefined' && typeof bankFee !== 'undefined'){
-        const totalFeesElem = document.getElementById('totalFees');
-        if(totalFeesElem){
-            const totalFees = atmFee + bankFee;
-            totalFeesElem.innerText = `Total gebyrer (ATM + bank): ${totalFees.toFixed(2)} DKK`;
-        }
-    }
-} catch(e){ console.warn(e); }

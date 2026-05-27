@@ -146,7 +146,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v2.13-unified-visa-calculation";
+const RATE_VERSION = "v1.11-unified-visa-calculation";
 // Revolut must follow the same DKK/THB rate shown in Revolut's own converter.
 // Keep this at 0 unless Revolut changes their public converter logic.
 const REVOLUT_REFERENCE_MARGIN = 0;
@@ -357,15 +357,3 @@ async function updateMarketRateIfNeeded() {
   }
 }
 
-
-
-// Opdater Total gebyrer integreret i beregning
-try {
-    if(typeof atmFee !== 'undefined' && typeof bankFee !== 'undefined'){
-        const totalFeesElem = document.getElementById('totalFees');
-        if(totalFeesElem){
-            const totalFees = atmFee + bankFee;
-            totalFeesElem.innerText = `Total gebyrer (ATM + bank): ${totalFees.toFixed(2)} DKK`;
-        }
-    }
-} catch(e){ console.warn(e); }

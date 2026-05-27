@@ -330,15 +330,3 @@ async function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
-
-
-// Opdater Total gebyrer integreret i beregning
-try {
-    if(typeof atmFee !== 'undefined' && typeof bankFee !== 'undefined'){
-        const totalFeesElem = document.getElementById('totalFees');
-        if(totalFeesElem){
-            const totalFees = atmFee + bankFee;
-            totalFeesElem.innerText = `Total gebyrer (ATM + bank): ${totalFees.toFixed(2)} DKK`;
-        }
-    }
-} catch(e){ console.warn(e); }
