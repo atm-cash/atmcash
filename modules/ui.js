@@ -331,11 +331,14 @@ async function init() {
 
 document.addEventListener("DOMContentLoaded", init);
 
-// Opdater Total gebyrer dynamisk
+
+// Opdater Total gebyrer integreret i beregning
 try {
-    const totalFeesElem = document.getElementById('totalFees');
-    if(totalFeesElem){
-        const totalFees = (typeof atmFee !== 'undefined' ? atmFee : 0) + (typeof bankFee !== 'undefined' ? bankFee : 0);
-        totalFeesElem.innerText = `Total gebyrer (ATM + bank): ${totalFees.toFixed(2)} DKK`;
+    if(typeof atmFee !== 'undefined' && typeof bankFee !== 'undefined'){
+        const totalFeesElem = document.getElementById('totalFees');
+        if(totalFeesElem){
+            const totalFees = atmFee + bankFee;
+            totalFeesElem.innerText = `Total gebyrer (ATM + bank): ${totalFees.toFixed(2)} DKK`;
+        }
     }
 } catch(e){ console.warn(e); }
