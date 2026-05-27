@@ -1,4 +1,4 @@
-// ATM Cash v1.1 - bank presets, card rules and live rate handling
+// ATM Cash v1-28 - bank presets, card rules and live rate handling
 function goNav(page) {
   if (page === "home") showPage("home");
   if (page === "converter") {
@@ -146,7 +146,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v1.11-unified-visa-calculation";
+const RATE_VERSION = "v1-28-unified-visa-calculation";
 // Revolut must follow the same DKK/THB rate shown in Revolut's own converter.
 // Keep this at 0 unless Revolut changes their public converter logic.
 const REVOLUT_REFERENCE_MARGIN = 0;
