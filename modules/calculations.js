@@ -1,5 +1,5 @@
-// ATM Cash v2.11 - price calculations and detail views
-// v2.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
+// ATM Cash v2.12 - price calculations and detail views
+// v2.12: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
   forex: { dkkPerThb: 0.211671, fixedDkk: 0, delivery: 0, other: 0 },
@@ -719,45 +719,11 @@ function methodTitle(method) {
 }
 
 
-
-// Dynamisk Total gebyrer tilføjelse
+// Opdater Total gebyrer dynamisk
 try {
-    const calcContainer = document.querySelector('.calc-container');
-    if(calcContainer && !document.getElementById('totalGebyrer')){
-        const totalDiv = document.createElement('div');
-        totalDiv.className = 'calc-line total-fees';
-        const label = document.createElement('div');
-        label.textContent = 'Total gebyrer (ATM + bank)';
-        const strong = document.createElement('strong');
-        strong.id = 'totalGebyrer';
-        strong.textContent = '0 DKK';
-        totalDiv.appendChild(label);
-        totalDiv.appendChild(strong);
-        // Indsæt lige før Total pris linjen
-        const totalLine = calcContainer.querySelector('.calc-line.total-line');
-        if(totalLine){ calcContainer.insertBefore(totalDiv, totalLine); }
-        // Opdater dynamisk når atmFee og bankFee findes
-        const observer = new MutationObserver(()=>{
-            try {
-                const atm = typeof atmFee !== 'undefined' ? atmFee : 0;
-                const bank = typeof bankFee !== 'undefined' ? bankFee : 0;
-                strong.textContent = (atm + bank).toFixed(2) + ' DKK';
-            } catch(e){}
-        });
-        observer.observe(calcContainer, {childList:true, subtree:true});
+    const totalFeesElem = document.getElementById('totalFees');
+    if(totalFeesElem){
+        const totalFees = (typeof atmFee !== 'undefined' ? atmFee : 0) + (typeof bankFee !== 'undefined' ? bankFee : 0);
+        totalFeesElem.innerText = `Total gebyrer (ATM + bank): ${totalFees.toFixed(2)} DKK`;
     }
-} catch(e){ console.warn(e); }
-
-
-// Integrer Total gebyrer i udregning
-try {
-    const atm = typeof atmFee !== 'undefined' ? atmFee : 0;
-    const bank = typeof bankFee !== 'undefined' ? bankFee : 0;
-    const totalGebyrer = atm + bank;
-    const totalGebyrElem = document.getElementById('totalGebyrer');
-    if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
-
-    // Opdater Total pris inkl. gebyrer hvis ønsket
-    const totalFinalElem = document.getElementById('mcLineFinalTotal');
-    if(totalFinalElem){ totalFinalElem.textContent = (typeof baseTotal !== 'undefined' ? baseTotal : 0 + totalGebyrer).toFixed(2) + ' DKK'; }
 } catch(e){ console.warn(e); }
