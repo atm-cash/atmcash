@@ -85,6 +85,13 @@ const translations = {
         if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
     } catch(e){}
                     
+
+try {
+    const totalGebyrer = (typeof atmFee !== 'undefined' ? atmFee : 0) + (typeof bankFee !== 'undefined' ? bankFee : 0);
+    const totalGebyrElem = document.getElementById('totalGebyrer');
+    if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
+} catch(e){ console.warn(e); }
+
 Total pris": "Total price",
   "Hævning": "Withdrawal",
   "Udregning": "Calculation",
