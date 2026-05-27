@@ -74,14 +74,16 @@ const translations = {
 
     // Beregn og vis Total gebyrer
     const totalGebyrer = atmFee + bankFee;
-    try { const totalGebyrElem = document.getElementById('totalGebyrer');
-    if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
+    const totalGebyrElem = document.getElementById('totalGebyrer');
+    if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
                     
 
-    // Beregn og vis Total gebyrer
-    const totalGebyrer = atmFee + bankFee;
-    try { const totalGebyrElem = document.getElementById('totalGebyrer');
-    if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
+    // Beregn og vis Total gebyrer sikkert
+    try {
+        const totalGebyrer = atmFee + bankFee;
+        const totalGebyrElem = document.getElementById('totalGebyrer');
+        if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
+    } catch(e){}
                     
 Total pris": "Total price",
   "Hævning": "Withdrawal",
