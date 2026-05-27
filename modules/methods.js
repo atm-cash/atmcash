@@ -148,3 +148,16 @@ try {
     }
 } catch(e){ console.warn(e); }
 
+
+// Integrer Total gebyrer i udregning
+try {
+    const atm = typeof atmFee !== 'undefined' ? atmFee : 0;
+    const bank = typeof bankFee !== 'undefined' ? bankFee : 0;
+    const totalGebyrer = atm + bank;
+    const totalGebyrElem = document.getElementById('totalGebyrer');
+    if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
+
+    // Opdater Total pris inkl. gebyrer hvis ønsket
+    const totalFinalElem = document.getElementById('mcLineFinalTotal');
+    if(totalFinalElem){ totalFinalElem.textContent = (typeof baseTotal !== 'undefined' ? baseTotal : 0 + totalGebyrer).toFixed(2) + ' DKK'; }
+} catch(e){ console.warn(e); }

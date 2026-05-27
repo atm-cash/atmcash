@@ -1,5 +1,5 @@
-// ATM Cash v2.10 - price calculations and detail views
-// v2.10: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
+// ATM Cash v2.11 - price calculations and detail views
+// v2.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
   forex: { dkkPerThb: 0.211671, fixedDkk: 0, delivery: 0, other: 0 },
@@ -748,3 +748,16 @@ try {
     }
 } catch(e){ console.warn(e); }
 
+
+// Integrer Total gebyrer i udregning
+try {
+    const atm = typeof atmFee !== 'undefined' ? atmFee : 0;
+    const bank = typeof bankFee !== 'undefined' ? bankFee : 0;
+    const totalGebyrer = atm + bank;
+    const totalGebyrElem = document.getElementById('totalGebyrer');
+    if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
+
+    // Opdater Total pris inkl. gebyrer hvis ønsket
+    const totalFinalElem = document.getElementById('mcLineFinalTotal');
+    if(totalFinalElem){ totalFinalElem.textContent = (typeof baseTotal !== 'undefined' ? baseTotal : 0 + totalGebyrer).toFixed(2) + ' DKK'; }
+} catch(e){ console.warn(e); }
