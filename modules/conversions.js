@@ -66,7 +66,12 @@ const translations = {
   "Beregning af ATM-hævning": "ATM withdrawal calculation",
   "Beregning af kontant valuta": "Cash currency calculation",
   "Beregning ud fra forsiden": "Calculation based on the front page",
-  "Total pris": "Total price",
+  "
+    // Beregn og vis Total gebyrer
+    const totalGebyrer = atmFee + bankFee;
+    document.getElementById('totalGebyrer').textContent = totalGebyrer.toFixed(2) + ' DKK';
+                    
+Total pris": "Total price",
   "Hævning": "Withdrawal",
   "Udregning": "Calculation",
   "Sådan er det beregnet": "How it is calculated",

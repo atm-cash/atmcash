@@ -343,7 +343,12 @@ function calculateRevolutDetails() {
   setText("revolutCalcPlan", `Revolut ${r.plan}`);
   setText("revolutCalcSubtitle", `${formatNumber(wantedCashThb)} THB hævet i Thailand`);
   const totalEl = document.getElementById("revolutCalcTotal");
-  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>Total pris</span>`;
+  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>
+    // Beregn og vis Total gebyrer
+    const totalGebyrer = atmFee + bankFee;
+    document.getElementById('totalGebyrer').textContent = totalGebyrer.toFixed(2) + ' DKK';
+                    
+Total pris</span>`;
 
   setText("revolutCalcCash", formatNumber(wantedCashThb));
   setText("revolutCalcCount", formatNumber(withdrawalCount));
@@ -416,7 +421,12 @@ function calculateWiseDetails() {
 
   setText("wiseCalcSubtitle", `${formatNumber(wantedCashThb)} THB hævet i Thailand`);
   const totalEl = document.getElementById("wiseCalcTotal");
-  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>Total pris</span>`;
+  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>
+    // Beregn og vis Total gebyrer
+    const totalGebyrer = atmFee + bankFee;
+    document.getElementById('totalGebyrer').textContent = totalGebyrer.toFixed(2) + ' DKK';
+                    
+Total pris</span>`;
 
   setText("wiseCalcCash", formatNumber(wantedCashThb));
   setText("wiseCalcCount", formatNumber(withdrawalCount));
@@ -492,7 +502,12 @@ function calculateVisaDetails() {
   setText("visaCalcCard", getVisaTypeLabel(c));
   setText("visaCalcSubtitle", `${formatNumber(wantedCashThb)} THB hævet i Thailand`);
   const totalEl = document.getElementById("visaCalcTotal");
-  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>Total pris</span>`;
+  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>
+    // Beregn og vis Total gebyrer
+    const totalGebyrer = atmFee + bankFee;
+    document.getElementById('totalGebyrer').textContent = totalGebyrer.toFixed(2) + ' DKK';
+                    
+Total pris</span>`;
 
   setText("visaCalcCash", formatNumber(wantedCashThb));
   setText("visaCalcCount", formatNumber(withdrawalCount));
@@ -568,7 +583,12 @@ function calculateMastercardDetails() {
   setText("mcCalcCard", c.type);
   setText("mcCalcSubtitle", `${formatNumber(wantedCashThb)} THB hævet i Thailand`);
   const totalEl = document.getElementById("mcCalcTotal");
-  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>Total pris</span>`;
+  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>
+    // Beregn og vis Total gebyrer
+    const totalGebyrer = atmFee + bankFee;
+    document.getElementById('totalGebyrer').textContent = totalGebyrer.toFixed(2) + ' DKK';
+                    
+Total pris</span>`;
 
   setText("mcCalcCash", formatNumber(wantedCashThb));
   setText("mcCalcCount", formatNumber(withdrawalCount));
@@ -638,7 +658,12 @@ function calculateCashDetails(method, title) {
 
   setText(`${method}CalcSubtitle`, `${formatNumber(wantedCashThb)} THB kontant`);
   const totalEl = document.getElementById(`${method}CalcTotal`);
-  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>Total pris</span>`;
+  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>
+    // Beregn og vis Total gebyrer
+    const totalGebyrer = atmFee + bankFee;
+    document.getElementById('totalGebyrer').textContent = totalGebyrer.toFixed(2) + ' DKK';
+                    
+Total pris</span>`;
 
   setText(`${method}CalcCash`, formatNumber(wantedCashThb));
   setText(`${method}CalcRate`, formatDecimal(rate));
@@ -663,7 +688,12 @@ function calculateCashDetails(method, title) {
         <strong>2.</strong> Kurs: mid-market ${formatDecimal(marketRate)} minus ${formatDecimal(cfg.margin || 0)}% margin = ${formatDecimal(rate)} THB/DKK.<br>
         <strong>3.</strong> ${formatNumber(wantedCashThb)} / ${formatDecimal(rate)} = ${formatNumber(beforeFeesDkk)} DKK før gebyrer.<br>
         <strong>4.</strong> Gebyrer: ${formatNumber(fixed)} + ${formatNumber(delivery)} + ${formatNumber(other)} = ${formatNumber(fees)} DKK.<br>
-        <strong>6.</strong> Total pris: ${formatNumber(beforeFeesDkk)} + ${formatNumber(fees)} = ${formatNumber(finalTotalDkk)} DKK.
+        <strong>6.</strong> 
+    // Beregn og vis Total gebyrer
+    const totalGebyrer = atmFee + bankFee;
+    document.getElementById('totalGebyrer').textContent = totalGebyrer.toFixed(2) + ' DKK';
+                    
+Total pris: ${formatNumber(beforeFeesDkk)} + ${formatNumber(fees)} = ${formatNumber(finalTotalDkk)} DKK.
       `;
     } else {
       const dkk = amountToDkk(parseNumber(document.getElementById("dkkAmount").value));
@@ -673,7 +703,12 @@ function calculateCashDetails(method, title) {
         <strong>3.</strong> Kurs: mid-market ${formatDecimal(marketRate)} minus ${formatDecimal(cfg.margin || 0)}% margin = ${formatDecimal(rate)} THB/DKK.<br>
         <strong>4.</strong> Beløb til veksling: ${formatNumber(dkk)} - ${formatNumber(fees)} = ${formatNumber(dkk - fees)} DKK.<br>
         <strong>5.</strong> ${formatNumber(dkk - fees)} × ${formatDecimal(rate)} = ${formatNumber(wantedCashThb)} THB.<br>
-        <strong>6.</strong> Total pris: ${formatNumber(beforeFeesDkk)} + ${formatNumber(fees)} = ${formatNumber(finalTotalDkk)} DKK.
+        <strong>6.</strong> 
+    // Beregn og vis Total gebyrer
+    const totalGebyrer = atmFee + bankFee;
+    document.getElementById('totalGebyrer').textContent = totalGebyrer.toFixed(2) + ' DKK';
+                    
+Total pris: ${formatNumber(beforeFeesDkk)} + ${formatNumber(fees)} = ${formatNumber(finalTotalDkk)} DKK.
       `;
     }
   }
