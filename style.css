@@ -1663,3 +1663,5 @@ button.nav-tab.active {
   .language-flag-da { width: 17px; height: 12px; }
   .language-globe { font-size: 16px; }
 }
+
+.total-fee-dkk { color: #FFD700; font-weight: bold; }
