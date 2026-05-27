@@ -332,28 +332,25 @@ async function init() {
 document.addEventListener("DOMContentLoaded", init);
 
 
+// Dynamically update Total samlet gebyr
 function updateTotalGebyr() {
-    // Get ATM and Bank fee values
     const atmFee = parseFloat(window.atmFeeDKK) || 0;
     const bankFee = parseFloat(window.bankFeeDKK) || 0;
     const total = atmFee + bankFee;
-
-    // Find or create total-fee row in results section
-    let totalRow = document.querySelector('.row.total-fee');
-    if (!totalRow) {
-        const container = document.querySelector('#results'); // adjust selector if needed
-        totalRow = document.createElement('div');
-        totalRow.className = 'row total-fee';
-        const label = document.createElement('span');
-        label.textContent = 'Total samlet gebyr (ATM-gebyr + Bankgebyr)';
-        const value = document.createElement('span');
-        value.className = 'yellow';
-        value.textContent = total.toFixed(0) + ' DKK';
-        totalRow.appendChild(label);
-        totalRow.appendChild(value);
-        container.appendChild(totalRow);
-    } else {
-        totalRow.querySelector('.yellow').textContent = total.toFixed(0) + ' DKK';
+    const totalElem = document.getElementById('totalGebyr');
+    if(totalElem) {
+        totalElem.textContent = total.toFixed(0) + ' DKK';
     }
+}
+
+// Call this function after any calculation update
+if(typeof updateUI === 'function'){
+    const originalUpdateUI = updateUI;
+    updateUI = function() {
+        originalUpdateUI.apply(this, arguments);
+        updateTotalGebyr();
+    }
+} else {
+    document.addEventListener('DOMContentLoaded', updateTotalGebyr);
 }
 
