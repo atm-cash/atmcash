@@ -1,4 +1,4 @@
-// ATM Cash v1.1 - user interface, filters, accordions and startup
+// ATM Cash v1-28 - user interface, filters, accordions and startup
 function setupEmbeddedSettings() {
   const methods = ["revolut", "wise", "visa", "mastercard", "loomis", "forex", "tavex"];
 
@@ -330,27 +330,3 @@ async function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
-
-
-// Dynamically update Total samlet gebyr
-function updateTotalGebyr() {
-    const atmFee = parseFloat(window.atmFeeDKK) || 0;
-    const bankFee = parseFloat(window.bankFeeDKK) || 0;
-    const total = atmFee + bankFee;
-    const totalElem = document.getElementById('totalGebyr');
-    if(totalElem) {
-        totalElem.textContent = total.toFixed(0) + ' DKK';
-    }
-}
-
-// Call this function after any calculation update
-if(typeof updateUI === 'function'){
-    const originalUpdateUI = updateUI;
-    updateUI = function() {
-        originalUpdateUI.apply(this, arguments);
-        updateTotalGebyr();
-    }
-} else {
-    document.addEventListener('DOMContentLoaded', updateTotalGebyr);
-}
-
