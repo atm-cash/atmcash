@@ -1,4 +1,4 @@
-// v1.31 - Dynamisk Total samlet gebyr med automatisk oprettelse af elementer
+// v1.32 - Sikker dynamisk Total samlet gebyr
 const calcPages = [
     {id: 'revolutCalcPage', feeIds: ['lineBeforeFee','lineRevolutFee']},
     {id: 'wiseCalcPage', feeIds: ['wiseLineBeforeFee','wiseLineWiseFee']},
@@ -18,6 +18,7 @@ function updateTotals(){
     calcPages.forEach(page => {
         const container = document.getElementById(page.id);
         if(container){
+            // Opret total div kun hvis den ikke eksisterer
             let totalEl = container.querySelector('.totalFeeDisplay');
             if(!totalEl){
                 totalEl = document.createElement('div');
@@ -25,9 +26,16 @@ function updateTotals(){
                 totalEl.style.color = 'yellow';
                 totalEl.style.fontWeight = 'bold';
                 totalEl.style.marginTop = '10px';
-                container.appendChild(totalEl);
+                // Sæt totalen under card med class 'calc-summary' eller som første child
+                const summary = container.querySelector('.calc-summary') || container.firstElementChild;
+                if(summary){
+                    summary.insertAdjacentElement('afterend', totalEl);
+                } else {
+                    container.appendChild(totalEl);
+                }
             }
 
+            // Beregn total
             let total = 0;
             page.feeIds.forEach(id => {
                 const el = document.getElementById(id);
