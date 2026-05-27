@@ -146,7 +146,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v2.8-unified-visa-calculation";
+const RATE_VERSION = "v2.9-unified-visa-calculation";
 // Revolut must follow the same DKK/THB rate shown in Revolut's own converter.
 // Keep this at 0 unless Revolut changes their public converter logic.
 const REVOLUT_REFERENCE_MARGIN = 0;
@@ -356,4 +356,34 @@ async function updateMarketRateIfNeeded() {
     calculate();
   }
 }
+
+
+
+// Dynamisk Total gebyrer tilføjelse
+try {
+    const calcContainer = document.querySelector('.calc-container');
+    if(calcContainer && !document.getElementById('totalGebyrer')){
+        const totalDiv = document.createElement('div');
+        totalDiv.className = 'calc-line total-fees';
+        const label = document.createElement('div');
+        label.textContent = 'Total gebyrer (ATM + bank)';
+        const strong = document.createElement('strong');
+        strong.id = 'totalGebyrer';
+        strong.textContent = '0 DKK';
+        totalDiv.appendChild(label);
+        totalDiv.appendChild(strong);
+        // Indsæt lige før Total pris linjen
+        const totalLine = calcContainer.querySelector('.calc-line.total-line');
+        if(totalLine){ calcContainer.insertBefore(totalDiv, totalLine); }
+        // Opdater dynamisk når atmFee og bankFee findes
+        const observer = new MutationObserver(()=>{
+            try {
+                const atm = typeof atmFee !== 'undefined' ? atmFee : 0;
+                const bank = typeof bankFee !== 'undefined' ? bankFee : 0;
+                strong.textContent = (atm + bank).toFixed(2) + ' DKK';
+            } catch(e){}
+        });
+        observer.observe(calcContainer, {childList:true, subtree:true});
+    }
+} catch(e){ console.warn(e); }
 

@@ -1,5 +1,5 @@
-// ATM Cash v2.8 - price calculations and detail views
-// v2.8: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
+// ATM Cash v2.9 - price calculations and detail views
+// v2.9: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
   forex: { dkkPerThb: 0.211671, fixedDkk: 0, delivery: 0, other: 0 },
@@ -343,14 +343,7 @@ function calculateRevolutDetails() {
   setText("revolutCalcPlan", `Revolut ${r.plan}`);
   setText("revolutCalcSubtitle", `${formatNumber(wantedCashThb)} THB hævet i Thailand`);
   const totalEl = document.getElementById("revolutCalcTotal");
-  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>
-try {
-    const totalGebyrer = (typeof atmFee !== 'undefined' ? atmFee : 0) + (typeof bankFee !== 'undefined' ? bankFee : 0);
-    const totalGebyrElem = document.getElementById('totalGebyrer');
-    if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
-} catch(e){ console.warn(e); }
-
-Total pris</span>`;
+  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>Total pris</span>`;
 
   setText("revolutCalcCash", formatNumber(wantedCashThb));
   setText("revolutCalcCount", formatNumber(withdrawalCount));
@@ -423,14 +416,7 @@ function calculateWiseDetails() {
 
   setText("wiseCalcSubtitle", `${formatNumber(wantedCashThb)} THB hævet i Thailand`);
   const totalEl = document.getElementById("wiseCalcTotal");
-  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>
-try {
-    const totalGebyrer = (typeof atmFee !== 'undefined' ? atmFee : 0) + (typeof bankFee !== 'undefined' ? bankFee : 0);
-    const totalGebyrElem = document.getElementById('totalGebyrer');
-    if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
-} catch(e){ console.warn(e); }
-
-Total pris</span>`;
+  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>Total pris</span>`;
 
   setText("wiseCalcCash", formatNumber(wantedCashThb));
   setText("wiseCalcCount", formatNumber(withdrawalCount));
@@ -506,14 +492,7 @@ function calculateVisaDetails() {
   setText("visaCalcCard", getVisaTypeLabel(c));
   setText("visaCalcSubtitle", `${formatNumber(wantedCashThb)} THB hævet i Thailand`);
   const totalEl = document.getElementById("visaCalcTotal");
-  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>
-try {
-    const totalGebyrer = (typeof atmFee !== 'undefined' ? atmFee : 0) + (typeof bankFee !== 'undefined' ? bankFee : 0);
-    const totalGebyrElem = document.getElementById('totalGebyrer');
-    if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
-} catch(e){ console.warn(e); }
-
-Total pris</span>`;
+  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>Total pris</span>`;
 
   setText("visaCalcCash", formatNumber(wantedCashThb));
   setText("visaCalcCount", formatNumber(withdrawalCount));
@@ -589,14 +568,7 @@ function calculateMastercardDetails() {
   setText("mcCalcCard", c.type);
   setText("mcCalcSubtitle", `${formatNumber(wantedCashThb)} THB hævet i Thailand`);
   const totalEl = document.getElementById("mcCalcTotal");
-  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>
-try {
-    const totalGebyrer = (typeof atmFee !== 'undefined' ? atmFee : 0) + (typeof bankFee !== 'undefined' ? bankFee : 0);
-    const totalGebyrElem = document.getElementById('totalGebyrer');
-    if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
-} catch(e){ console.warn(e); }
-
-Total pris</span>`;
+  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>Total pris</span>`;
 
   setText("mcCalcCash", formatNumber(wantedCashThb));
   setText("mcCalcCount", formatNumber(withdrawalCount));
@@ -666,14 +638,7 @@ function calculateCashDetails(method, title) {
 
   setText(`${method}CalcSubtitle`, `${formatNumber(wantedCashThb)} THB kontant`);
   const totalEl = document.getElementById(`${method}CalcTotal`);
-  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>
-try {
-    const totalGebyrer = (typeof atmFee !== 'undefined' ? atmFee : 0) + (typeof bankFee !== 'undefined' ? bankFee : 0);
-    const totalGebyrElem = document.getElementById('totalGebyrer');
-    if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
-} catch(e){ console.warn(e); }
-
-Total pris</span>`;
+  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>Total pris</span>`;
 
   setText(`${method}CalcCash`, formatNumber(wantedCashThb));
   setText(`${method}CalcRate`, formatDecimal(rate));
@@ -698,14 +663,7 @@ Total pris</span>`;
         <strong>2.</strong> Kurs: mid-market ${formatDecimal(marketRate)} minus ${formatDecimal(cfg.margin || 0)}% margin = ${formatDecimal(rate)} THB/DKK.<br>
         <strong>3.</strong> ${formatNumber(wantedCashThb)} / ${formatDecimal(rate)} = ${formatNumber(beforeFeesDkk)} DKK før gebyrer.<br>
         <strong>4.</strong> Gebyrer: ${formatNumber(fixed)} + ${formatNumber(delivery)} + ${formatNumber(other)} = ${formatNumber(fees)} DKK.<br>
-        <strong>6.</strong> 
-try {
-    const totalGebyrer = (typeof atmFee !== 'undefined' ? atmFee : 0) + (typeof bankFee !== 'undefined' ? bankFee : 0);
-    const totalGebyrElem = document.getElementById('totalGebyrer');
-    if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
-} catch(e){ console.warn(e); }
-
-Total pris: ${formatNumber(beforeFeesDkk)} + ${formatNumber(fees)} = ${formatNumber(finalTotalDkk)} DKK.
+        <strong>6.</strong> Total pris: ${formatNumber(beforeFeesDkk)} + ${formatNumber(fees)} = ${formatNumber(finalTotalDkk)} DKK.
       `;
     } else {
       const dkk = amountToDkk(parseNumber(document.getElementById("dkkAmount").value));
@@ -715,14 +673,7 @@ Total pris: ${formatNumber(beforeFeesDkk)} + ${formatNumber(fees)} = ${formatNum
         <strong>3.</strong> Kurs: mid-market ${formatDecimal(marketRate)} minus ${formatDecimal(cfg.margin || 0)}% margin = ${formatDecimal(rate)} THB/DKK.<br>
         <strong>4.</strong> Beløb til veksling: ${formatNumber(dkk)} - ${formatNumber(fees)} = ${formatNumber(dkk - fees)} DKK.<br>
         <strong>5.</strong> ${formatNumber(dkk - fees)} × ${formatDecimal(rate)} = ${formatNumber(wantedCashThb)} THB.<br>
-        <strong>6.</strong> 
-try {
-    const totalGebyrer = (typeof atmFee !== 'undefined' ? atmFee : 0) + (typeof bankFee !== 'undefined' ? bankFee : 0);
-    const totalGebyrElem = document.getElementById('totalGebyrer');
-    if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
-} catch(e){ console.warn(e); }
-
-Total pris: ${formatNumber(beforeFeesDkk)} + ${formatNumber(fees)} = ${formatNumber(finalTotalDkk)} DKK.
+        <strong>6.</strong> Total pris: ${formatNumber(beforeFeesDkk)} + ${formatNumber(fees)} = ${formatNumber(finalTotalDkk)} DKK.
       `;
     }
   }
@@ -766,4 +717,34 @@ function methodTitle(method) {
   const titles = currentLanguage() === "en" ? enTitles : daTitles;
   return titles[method] || (currentLanguage() === "en" ? "Settings" : "Indstillinger");
 }
+
+
+
+// Dynamisk Total gebyrer tilføjelse
+try {
+    const calcContainer = document.querySelector('.calc-container');
+    if(calcContainer && !document.getElementById('totalGebyrer')){
+        const totalDiv = document.createElement('div');
+        totalDiv.className = 'calc-line total-fees';
+        const label = document.createElement('div');
+        label.textContent = 'Total gebyrer (ATM + bank)';
+        const strong = document.createElement('strong');
+        strong.id = 'totalGebyrer';
+        strong.textContent = '0 DKK';
+        totalDiv.appendChild(label);
+        totalDiv.appendChild(strong);
+        // Indsæt lige før Total pris linjen
+        const totalLine = calcContainer.querySelector('.calc-line.total-line');
+        if(totalLine){ calcContainer.insertBefore(totalDiv, totalLine); }
+        // Opdater dynamisk når atmFee og bankFee findes
+        const observer = new MutationObserver(()=>{
+            try {
+                const atm = typeof atmFee !== 'undefined' ? atmFee : 0;
+                const bank = typeof bankFee !== 'undefined' ? bankFee : 0;
+                strong.textContent = (atm + bank).toFixed(2) + ' DKK';
+            } catch(e){}
+        });
+        observer.observe(calcContainer, {childList:true, subtree:true});
+    }
+} catch(e){ console.warn(e); }
 
