@@ -345,19 +345,19 @@ function calculateRevolutDetails() {
   const totalEl = document.getElementById("revolutCalcTotal");
   if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>
     // Beregn og vis Total gebyrer
-    const totalGebyrer = atmFee + bankFee;
+    try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
     document.getElementById('totalGebyrer').textContent = totalGebyrer.toFixed(2) + ' DKK';
                     
 
     // Beregn og vis Total gebyrer
-    const totalGebyrer = atmFee + bankFee;
+    try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
     const totalGebyrElem = document.getElementById('totalGebyrer');
     if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
                     
 
     // Beregn og vis Total gebyrer sikkert
     try {
-        const totalGebyrer = atmFee + bankFee;
+        try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
         const totalGebyrElem = document.getElementById('totalGebyrer');
         if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
     } catch(e){}
@@ -437,19 +437,19 @@ function calculateWiseDetails() {
   const totalEl = document.getElementById("wiseCalcTotal");
   if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>
     // Beregn og vis Total gebyrer
-    const totalGebyrer = atmFee + bankFee;
+    try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
     document.getElementById('totalGebyrer').textContent = totalGebyrer.toFixed(2) + ' DKK';
                     
 
     // Beregn og vis Total gebyrer
-    const totalGebyrer = atmFee + bankFee;
+    try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
     const totalGebyrElem = document.getElementById('totalGebyrer');
     if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
                     
 
     // Beregn og vis Total gebyrer sikkert
     try {
-        const totalGebyrer = atmFee + bankFee;
+        try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
         const totalGebyrElem = document.getElementById('totalGebyrer');
         if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
     } catch(e){}
@@ -532,19 +532,19 @@ function calculateVisaDetails() {
   const totalEl = document.getElementById("visaCalcTotal");
   if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>
     // Beregn og vis Total gebyrer
-    const totalGebyrer = atmFee + bankFee;
+    try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
     document.getElementById('totalGebyrer').textContent = totalGebyrer.toFixed(2) + ' DKK';
                     
 
     // Beregn og vis Total gebyrer
-    const totalGebyrer = atmFee + bankFee;
+    try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
     const totalGebyrElem = document.getElementById('totalGebyrer');
     if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
                     
 
     // Beregn og vis Total gebyrer sikkert
     try {
-        const totalGebyrer = atmFee + bankFee;
+        try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
         const totalGebyrElem = document.getElementById('totalGebyrer');
         if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
     } catch(e){}
@@ -627,19 +627,19 @@ function calculateMastercardDetails() {
   const totalEl = document.getElementById("mcCalcTotal");
   if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>
     // Beregn og vis Total gebyrer
-    const totalGebyrer = atmFee + bankFee;
+    try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
     document.getElementById('totalGebyrer').textContent = totalGebyrer.toFixed(2) + ' DKK';
                     
 
     // Beregn og vis Total gebyrer
-    const totalGebyrer = atmFee + bankFee;
+    try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
     const totalGebyrElem = document.getElementById('totalGebyrer');
     if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
                     
 
     // Beregn og vis Total gebyrer sikkert
     try {
-        const totalGebyrer = atmFee + bankFee;
+        try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
         const totalGebyrElem = document.getElementById('totalGebyrer');
         if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
     } catch(e){}
@@ -716,19 +716,19 @@ function calculateCashDetails(method, title) {
   const totalEl = document.getElementById(`${method}CalcTotal`);
   if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>
     // Beregn og vis Total gebyrer
-    const totalGebyrer = atmFee + bankFee;
+    try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
     document.getElementById('totalGebyrer').textContent = totalGebyrer.toFixed(2) + ' DKK';
                     
 
     // Beregn og vis Total gebyrer
-    const totalGebyrer = atmFee + bankFee;
+    try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
     const totalGebyrElem = document.getElementById('totalGebyrer');
     if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
                     
 
     // Beregn og vis Total gebyrer sikkert
     try {
-        const totalGebyrer = atmFee + bankFee;
+        try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
         const totalGebyrElem = document.getElementById('totalGebyrer');
         if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
     } catch(e){}
@@ -760,19 +760,19 @@ Total pris</span>`;
         <strong>4.</strong> Gebyrer: ${formatNumber(fixed)} + ${formatNumber(delivery)} + ${formatNumber(other)} = ${formatNumber(fees)} DKK.<br>
         <strong>6.</strong> 
     // Beregn og vis Total gebyrer
-    const totalGebyrer = atmFee + bankFee;
+    try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
     document.getElementById('totalGebyrer').textContent = totalGebyrer.toFixed(2) + ' DKK';
                     
 
     // Beregn og vis Total gebyrer
-    const totalGebyrer = atmFee + bankFee;
+    try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
     const totalGebyrElem = document.getElementById('totalGebyrer');
     if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
                     
 
     // Beregn og vis Total gebyrer sikkert
     try {
-        const totalGebyrer = atmFee + bankFee;
+        try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
         const totalGebyrElem = document.getElementById('totalGebyrer');
         if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
     } catch(e){}
@@ -789,19 +789,19 @@ Total pris: ${formatNumber(beforeFeesDkk)} + ${formatNumber(fees)} = ${formatNum
         <strong>5.</strong> ${formatNumber(dkk - fees)} × ${formatDecimal(rate)} = ${formatNumber(wantedCashThb)} THB.<br>
         <strong>6.</strong> 
     // Beregn og vis Total gebyrer
-    const totalGebyrer = atmFee + bankFee;
+    try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
     document.getElementById('totalGebyrer').textContent = totalGebyrer.toFixed(2) + ' DKK';
                     
 
     // Beregn og vis Total gebyrer
-    const totalGebyrer = atmFee + bankFee;
+    try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
     const totalGebyrElem = document.getElementById('totalGebyrer');
     if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
                     
 
     // Beregn og vis Total gebyrer sikkert
     try {
-        const totalGebyrer = atmFee + bankFee;
+        try { const totalGebyrer = atmFee + bankFee; const totalGebyrElem = document.getElementById('totalGebyrer'); if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; } } catch(e){}
         const totalGebyrElem = document.getElementById('totalGebyrer');
         if(totalGebyrElem){ totalGebyrElem.textContent = totalGebyrer.toFixed(2) + ' DKK'; }
     } catch(e){}
