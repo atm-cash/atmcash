@@ -330,3 +330,30 @@ async function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
+
+function updateTotalGebyr() {
+    // Ensure ATM fee and bank fee are numbers
+    const atmFee = parseFloat(window.atmFeeDKK) || 0;
+    const bankFee = parseFloat(window.bankFeeDKK) || 0;
+    const total = atmFee + bankFee;
+    
+    // Find or create the row element
+    let totalRow = document.querySelector('.row.total-fee');
+    if (!totalRow) {
+        const container = document.querySelector('#results'); // assuming results container
+        totalRow = document.createElement('div');
+        totalRow.className = 'row total-fee';
+        const label = document.createElement('span');
+        label.textContent = 'Total samlet gebyr (ATM-gebyr + Bankgebyr)';
+        const value = document.createElement('span');
+        value.className = 'yellow';
+        value.textContent = total.toFixed(0) + ' DKK';
+        totalRow.appendChild(label);
+        totalRow.appendChild(value);
+        container.appendChild(totalRow);
+    } else {
+        totalRow.querySelector('.yellow').textContent = total.toFixed(0) + ' DKK';
+    }
+}
+
