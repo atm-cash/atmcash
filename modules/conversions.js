@@ -1,5 +1,7 @@
 // ATM Cash v1.11 - conversions, defaults, config, language and currency helpers
 let defaults = {
+  visibleMethods: ["revolut", "wise", "mastercard", "loomis", "forex", "tavex"],
+  visaDefaultHiddenApplied: true,
   market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v73", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
   language: "da",
@@ -216,6 +218,7 @@ function translatePage() {
 
 
 const allMethods = ["revolut", "wise", "visa", "mastercard", "loomis", "forex", "tavex"];
+const defaultVisibleMethods = allMethods.filter((method) => method !== "visa");
 let lastEditedCurrency = "dkk";
 
 function clone(obj) {
@@ -248,7 +251,14 @@ function loadData() {
 
 function ensureVisibleMethods() {
   if (!Array.isArray(data.visibleMethods) || data.visibleMethods.length === 0) {
-    data.visibleMethods = [...allMethods];
+    data.visibleMethods = [...defaultVisibleMethods];
+  }
+
+  // v1.19 migration: older saved settings had Visa enabled by default.
+  // Remove it once, but allow the user to enable it manually afterwards.
+  if (data.visaDefaultHiddenApplied !== true) {
+    data.visibleMethods = data.visibleMethods.filter((method) => method !== "visa");
+    data.visaDefaultHiddenApplied = true;
   }
 }
 

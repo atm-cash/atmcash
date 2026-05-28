@@ -109,7 +109,7 @@ function saveFilters() {
     if (box.checked) selected.push(box.value);
   });
 
-  data.visibleMethods = selected.length ? selected : [...allMethods];
+  data.visibleMethods = selected.length ? selected : [...defaultVisibleMethods];
   persist();
   calculate();
   syncInputs();
