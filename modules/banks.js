@@ -144,7 +144,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v1.16";
+const RATE_VERSION = "v1.17";
 const RATE_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.

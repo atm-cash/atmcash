@@ -520,7 +520,7 @@ function calculateVisaDetails() {
       <strong>2.</strong> Det kræver ${withdrawalCount} hævning${withdrawalCount === 1 ? "" : "er"} ved maks ${formatNumber(maxPerWithdrawal)} DKK pr. gang.<br>
       <strong>3.</strong> ATM-gebyr: ${withdrawalCount} × ${formatNumber(c.atm)} THB = ${formatNumber(atmFeeThb)} THB.<br>
       <strong>4.</strong> Total inkl. ATM-gebyr: ${formatNumber(wantedCashThb)} + ${formatNumber(atmFeeThb)} = ${formatNumber(totalThbWithFees)} THB.<br>
-      <strong>5.</strong> Visa kurs fra Visa Exchange Rate Calculator inkl. 1% bankgebyr.<br>
+      <strong>5.</strong> Visa kurs: ${formatDecimal(c.rate)} THB/DKK inkl. 1% gebyr.<br>
       <strong>6.</strong> ${formatNumber(totalThbWithFees)} / ${formatDecimal(c.rate)} = ${formatNumber(beforeBankFeeDkk)} DKK før bankgebyr.<br>
       <strong>7.</strong> Bankgebyr: ${visaMinimumFeeDkk ? c.percent ? `${formatDecimal(c.percent)}% / min. ${withdrawalCount} × ${formatNumber(visaMinimumFeeDkk)} DKK` : `${withdrawalCount} × ${formatNumber(visaMinimumFeeDkk)} DKK` : `${formatDecimal(c.percent)}%`} = ${formatNumber(percentFeeDkk)} DKK.<br>
       <strong>8.</strong> Total: ${formatNumber(beforeBankFeeDkk)} + ${formatNumber(percentFeeDkk)}${getVisaFixedExtraDkk(c) ? ` + ${formatNumber(getVisaFixedExtraDkk(c))}` : ""} = ${formatNumber(finalTotalDkk)} DKK.
