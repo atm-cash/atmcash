@@ -5,7 +5,7 @@ let defaults = {
   language: "da",
   revolut: { plan: "Premium", limit: 3000, rate: 5.05441, atm: 220, over: 2 },
   wise: { limit: 1800, rate: 5.05441, atm: 220, over: 2.69 },
-  visa: { bank: "Danske Bank", type: "Visa Debit", rate: 4.949627, spread: 2.124, percent: 0, fixedDkk: 0, atm: 220 },
+  visa: { bank: "Danske Bank", type: "Visa Debit", rate: 5.162380, spread: 0, percent: 0, fixedDkk: 0, atm: 220 },
   mastercard: { bank: "Danske Bank", type: "Mastercard Debit", rate: 5.040382949333, spread: 0.329, percent: 1.75, fixedDkk: 0, atm: 220 },
   loomis: { place: "Loomis online", rate: 4.789071, margin: 5.51, fixedDkk: 49.95, delivery: 0, other: 0 },
   forex: { place: "FOREX afhentning", rate: 4.724312730606, margin: 6.579, fixedDkk: 0, delivery: 0, other: 0 },

@@ -502,8 +502,6 @@ function calculateVisaDetails() {
   setText("visaLineAtm", `${withdrawalCount} × ${formatNumber(c.atm)} = ${formatNumber(atmFeeThb)} THB`);
   setText("visaLineTotalThb", `${formatNumber(totalThbWithFees)} THB`);
   setText("visaLineRate", `${formatDecimal(c.rate)} THB/DKK`);
-  const marketRate = data.market?.rate || c.rate;
-  setText("visaLineSpread", `${formatDecimal(c.spread || 0)}% (mid-market ${formatDecimal(marketRate)} → Visa ${formatDecimal(c.rate)})`);
   setText("visaLineBeforeFee", `${formatNumber(beforeBankFeeDkk)} DKK`);
   const visaMinimumFeeDkk = getVisaMinimumFeeDkk(c);
   const visaMinimumTotalDkk = visaMinimumFeeDkk * Math.max(1, withdrawalCount || 1);
@@ -522,7 +520,7 @@ function calculateVisaDetails() {
       <strong>2.</strong> Det kræver ${withdrawalCount} hævning${withdrawalCount === 1 ? "" : "er"} ved maks ${formatNumber(maxPerWithdrawal)} DKK pr. gang.<br>
       <strong>3.</strong> ATM-gebyr: ${withdrawalCount} × ${formatNumber(c.atm)} THB = ${formatNumber(atmFeeThb)} THB.<br>
       <strong>4.</strong> Total inkl. ATM-gebyr: ${formatNumber(wantedCashThb)} + ${formatNumber(atmFeeThb)} = ${formatNumber(totalThbWithFees)} THB.<br>
-      <strong>5.</strong> Visa kurs: mid-market ${formatDecimal(marketRate)} minus ${formatDecimal(c.spread || 0)}% spread = ${formatDecimal(c.rate)} THB/DKK.<br>
+      <strong>5.</strong> Visa kurs fra Visa Exchange Rate Calculator inkl. 1% bankgebyr.<br>
       <strong>6.</strong> ${formatNumber(totalThbWithFees)} / ${formatDecimal(c.rate)} = ${formatNumber(beforeBankFeeDkk)} DKK før bankgebyr.<br>
       <strong>7.</strong> Bankgebyr: ${visaMinimumFeeDkk ? c.percent ? `${formatDecimal(c.percent)}% / min. ${withdrawalCount} × ${formatNumber(visaMinimumFeeDkk)} DKK` : `${withdrawalCount} × ${formatNumber(visaMinimumFeeDkk)} DKK` : `${formatDecimal(c.percent)}%`} = ${formatNumber(percentFeeDkk)} DKK.<br>
       <strong>8.</strong> Total: ${formatNumber(beforeBankFeeDkk)} + ${formatNumber(percentFeeDkk)}${getVisaFixedExtraDkk(c) ? ` + ${formatNumber(getVisaFixedExtraDkk(c))}` : ""} = ${formatNumber(finalTotalDkk)} DKK.
