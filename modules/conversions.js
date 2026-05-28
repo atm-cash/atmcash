@@ -1,7 +1,5 @@
-// ATM Cash v1.11 - conversions, defaults, config, language and currency helpers
+// ATM Cash v1.20 - conversions, defaults, config, language and currency helpers
 let defaults = {
-  visibleMethods: ["revolut", "wise", "mastercard", "loomis", "forex", "tavex"],
-  visaDefaultHiddenApplied: true,
   market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v73", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
   language: "da",
@@ -217,8 +215,7 @@ function translatePage() {
 }
 
 
-const allMethods = ["revolut", "wise", "visa", "mastercard", "loomis", "forex", "tavex"];
-const defaultVisibleMethods = allMethods.filter((method) => method !== "visa");
+const allMethods = ["revolut", "wise", "mastercard", "loomis", "forex", "tavex"];
 let lastEditedCurrency = "dkk";
 
 function clone(obj) {
@@ -243,7 +240,15 @@ function mergeDefaults(defaultObj, savedObj) {
 function loadData() {
   try {
     const saved = localStorage.getItem("atmCashData");
-    return saved ? mergeDefaults(defaults, JSON.parse(saved)) : clone(defaults);
+    const loaded = saved ? mergeDefaults(defaults, JSON.parse(saved)) : clone(defaults);
+    const migrationKey = "atmCashVisaHiddenDefaultV120";
+    if (localStorage.getItem(migrationKey) !== "1") {
+      if (Array.isArray(loaded.visibleMethods)) {
+        loaded.visibleMethods = loaded.visibleMethods.filter((method) => method !== "visa");
+      }
+      localStorage.setItem(migrationKey, "1");
+    }
+    return loaded;
   } catch {
     return clone(defaults);
   }
@@ -251,14 +256,7 @@ function loadData() {
 
 function ensureVisibleMethods() {
   if (!Array.isArray(data.visibleMethods) || data.visibleMethods.length === 0) {
-    data.visibleMethods = [...defaultVisibleMethods];
-  }
-
-  // v1.19 migration: older saved settings had Visa enabled by default.
-  // Remove it once, but allow the user to enable it manually afterwards.
-  if (data.visaDefaultHiddenApplied !== true) {
-    data.visibleMethods = data.visibleMethods.filter((method) => method !== "visa");
-    data.visaDefaultHiddenApplied = true;
+    data.visibleMethods = [...allMethods];
   }
 }
 
