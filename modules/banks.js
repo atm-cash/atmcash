@@ -15,25 +15,25 @@ function getVisaBankRule(card) {
   const type = String(card.type || "").toLowerCase();
 
   if (bank === "nordea" || bank === "danske bank") {
-    return { percent: 1, minDkk: 30, spread: 1.5, label: "Gebyr 1% - Min 30 DKK" };
+    return { percent: 1, minDkk: 30, label: "Gebyr 1% - Min 30 DKK" };
   }
 
   if (bank === "jyske bank") {
     if (type === "visa credit") {
-      return { percent: 2, minDkk: 50, spread: 1.5, label: "Gebyr 2% - Min 50 DKK" };
+      return { percent: 2, minDkk: 50, label: "Gebyr 2% - Min 50 DKK" };
     }
-    return { percent: 0, minDkk: 15, spread: 1.5, label: "Gebyr 15 DKK pr. hævning" };
+    return { percent: 0, minDkk: 15, label: "Gebyr 15 DKK pr. hævning" };
   }
 
   if (bank === "lunar") {
-    return { percent: 0, minDkk: 19, spread: 1, label: "Gebyr 19 DKK pr. hævning" };
+    return { percent: 0, minDkk: 19, label: "Gebyr 19 DKK pr. hævning" };
   }
 
   if (bank === "sydbank") {
     if (type === "visa credit") {
-      return { percent: 2, minDkk: 50, spread: 2, label: "Gebyr 2% - Min 50 DKK" };
+      return { percent: 2, minDkk: 50, label: "Gebyr 2% - Min 50 DKK" };
     }
-    return { percent: 1.5, minDkk: 40, spread: 1.5, label: "Gebyr 1,5% - Min 40 DKK" };
+    return { percent: 1.5, minDkk: 40, label: "Gebyr 1,5% - Min 40 DKK" };
   }
 
   return null;
@@ -81,7 +81,7 @@ function applyVisaBankPresetToData(forceMinimum = false) {
   const key = getVisaBankRuleKey(data.visa);
   const ruleChanged = data.visa.ruleKey !== key;
   data.visa.percent = rule.percent;
-  data.visa.spread = rule.spread;
+  data.visa.spread = 0;
   if (forceMinimum || ruleChanged || !data.visa.fixedDkk || data.visa.fixedDkk === defaults.visa.fixedDkk) {
     data.visa.fixedDkk = rule.minDkk;
   }
@@ -96,7 +96,6 @@ function applyVisaNordeaPresetToInputs() {
   const bank = document.getElementById("visaBank");
   const type = document.getElementById("visaType");
   const percent = document.getElementById("visaPercent");
-  const spread = document.getElementById("visaSpread");
   const fixed = document.getElementById("visaFixed");
   const fixedLabel = document.getElementById("visaFixedLabel");
   if (!bank || !type || !percent || !fixed) return;
@@ -112,7 +111,6 @@ function applyVisaNordeaPresetToInputs() {
 
   if (rule) {
     percent.value = formatDecimal(rule.percent);
-    if (spread) spread.value = formatDecimal(rule.spread);
     if (fixed.dataset.ruleKey !== key || !parseNumber(fixed.value)) fixed.value = formatDecimal(rule.minDkk);
     fixed.dataset.ruleKey = key;
     if (fixedLabel) fixedLabel.textContent = rule.label.replace(formatNumber(rule.minDkk), formatNumber(parseNumber(fixed.value) || rule.minDkk));
@@ -146,14 +144,14 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v1.13-provider-specific-rates-fix";
+const RATE_VERSION = "v1.14";
 const RATE_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.
 const FALLBACK_RATES = {
   revolut: 5.04747,
   wise: 5.07720,
-  visa: 4.949627,
+  visa: 5.162380,
   mastercard: 5.040382949333,
   loomis: 4.789071,
   forex: 4.72589,
@@ -324,7 +322,7 @@ function applyMarketRates() {
   data.wise.rate = providerRate("wise");
 
   data.visa.rate = FALLBACK_RATES.visa;
-  data.visa.spread = Math.max(0, (1 - data.visa.rate / marketRate) * 100);
+  data.visa.spread = 0;
   data.visa.percent = 0;
   data.visa.fixedDkk = 0;
 
