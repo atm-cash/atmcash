@@ -3,7 +3,7 @@
     "rate": 5.057,
     "date": "",
     "source": "standard",
-    "rateVersion": "v1.17",
+    "rateVersion": "v1.18",
     "rates": {
       "DKK": 1,
       "THB": 5.057,
@@ -100,5 +100,13 @@
       "updatedAtHour": "",
       "ok": false
     }
-  }
+  },
+  "visibleMethods": [
+    "revolut",
+    "wise",
+    "mastercard",
+    "loomis",
+    "forex",
+    "tavex"
+  ]
 }
