@@ -146,7 +146,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v1.13-provider-specific-rates";
+const RATE_VERSION = "v1.13-provider-specific-rates-fix";
 const RATE_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.
@@ -210,10 +210,11 @@ async function fetchProviderText(url) {
 function parseDkkToThbRate(html) {
   const text = String(html).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
   const patterns = [
-    /1\s*DKK\s*[=|:]?\s*([\d.,]+)\s*THB/i,
-    /1\s*Dansk(?:e)?\s*krone\s*[=|:]?\s*([\d.,]+)\s*THB/i,
-    /100\s*DKK\s*[=|:]?\s*([\d.,]+)\s*THB/i,
-    /1000\s*DKK\s*[=|:]?\s*([\d.,]+)\s*THB/i
+    /(?:kr\s*)?1\s*DKK\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i,
+    /1\s*(?:kr\.|DKK)\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i,
+    /1\s*Dansk(?:e)?\s*krone\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i,
+    /100\s*DKK\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i,
+    /1000\s*DKK\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i
   ];
   for (const pattern of patterns) {
     const match = text.match(pattern);
@@ -357,6 +358,11 @@ function applyMarketRates() {
 
 async function updateMarketRateIfNeeded() {
   ensureVisibleMethods();
+
+  if (data.market?.rateVersion !== RATE_VERSION) {
+    data.providerRates = {};
+    if (data.market) data.market.updatedAtHour = "";
+  }
 
   if (data.market?.updatedAtHour === hourlyKey() && data.market?.rateVersion === RATE_VERSION && (data.market?.rate || 0) > 5) {
     const providerCacheIsFresh = ["revolut", "wise", "forex", "tavex", "loomis"]
