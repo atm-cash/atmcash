@@ -146,35 +146,27 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v1.11-unified-visa-calculation";
-// Revolut must follow the same DKK/THB rate shown in Revolut's own converter.
-// Keep this at 0 unless Revolut changes their public converter logic.
-const REVOLUT_REFERENCE_MARGIN = 0;
-// Wise is calibrated from the same hourly base rate to match Wise mid-market reference.
-// Reference: Wise showed 1 DKK = 5.083 THB while the hourly base source was around 5.0679 THB/DKK.
-const WISE_REFERENCE_MARGIN = -0.298;
-// Tavex is calculated from Tavex webshop cash price, not from each browser's saved mid-market rate.
-// Reference: 10.000 THB = 2.066 DKK before delivery, so 1 DKK = 4.840271055 THB.
-const TAVEX_DKK_PER_THB = 0.2066;
-const TAVEX_DIRECT_RATE = 1 / TAVEX_DKK_PER_THB;
-// Loomis is calculated from Loomis cash price, not from saved browser margin/cache.
-// Reference: 10.000 THB = 2.087,67 DKK before fee, so 1 DKK = 4.789071 THB.
-const LOOMIS_DKK_PER_THB = 0.208767;
-const LOOMIS_DIRECT_RATE = 1 / LOOMIS_DKK_PER_THB;
-// FOREX is calculated from FOREX webshop pickup price, not from saved browser margin/cache.
-// Reference: 10.000 THB = 2.116,71 DKK, so 1 DKK = 4.724312731 THB.
-const FOREX_DKK_PER_THB = 0.211671;
-const FOREX_DIRECT_RATE = 1 / FOREX_DKK_PER_THB;
-// Visa is calculated from Visa.dk converter including the bank fee entered there.
-// Reference: 10.000 THB = 2.020,354068 DKK, so 1 DKK = 4.949627 THB.
-const VISA_DKK_PER_THB = 0.2020354068;
-const VISA_DIRECT_RATE = 1 / VISA_DKK_PER_THB;
-// Mastercard calculator screenshot included a 1% bank fee.
-// Remove that 1% here, then let ATM Cash add the user's bank fee afterwards.
-// Reference: Mastercard showed 1 THB = 0.2003816 DKK including 1% bank fee.
-const MASTERCARD_DKK_PER_THB_WITH_1_PERCENT_BANK_FEE = 0.2003816;
-const MASTERCARD_DIRECT_RATE = 1 / (MASTERCARD_DKK_PER_THB_WITH_1_PERCENT_BANK_FEE / 1.01);
+const RATE_VERSION = "v1.13-provider-specific-rates";
 const RATE_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
+
+// Fallback values are only used if the provider page cannot be read.
+const FALLBACK_RATES = {
+  revolut: 5.04747,
+  wise: 5.07720,
+  visa: 4.949627,
+  mastercard: 5.040382949333,
+  loomis: 4.789071,
+  forex: 4.72589,
+  tavex: 1 / 0.207
+};
+
+const PROVIDER_RATE_SOURCES = {
+  revolut: "https://www.revolut.com/da-DK/currency-converter/convert-dkk-to-thb-exchange-rate/?amount=1",
+  wise: "https://wise.com/dk/currency-converter/dkk-to-thb-rate?amount=1",
+  forex: "https://www.forexvaluta.dk/valuta/thb/",
+  tavex: "https://tavex.dk/valuta-prisliste/",
+  loomis: "https://nemvaluta.loomis.dk/"
+};
 
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
@@ -189,6 +181,110 @@ function hourlyKey() {
 function formatRateUpdateTime(value) {
   if (!value) return "";
   return value.length === 13 ? value.replace("T", " ") + ":00" : value;
+}
+
+function parseRateNumber(value) {
+  if (!value) return 0;
+  const cleaned = String(value).replace(/\s/g, "");
+  if (cleaned.includes(",") && cleaned.includes(".")) {
+    return Number(cleaned.replace(/\./g, "").replace(",", ".")) || 0;
+  }
+  return Number(cleaned.replace(",", ".")) || 0;
+}
+
+function rateFromDkkPerThb(dkkPerThb) {
+  return dkkPerThb > 0 ? 1 / dkkPerThb : 0;
+}
+
+async function fetchProviderText(url) {
+  const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+  try {
+    const direct = await fetch(url, { cache: "no-store" });
+    if (direct.ok) return await direct.text();
+  } catch {}
+  const response = await fetch(proxied, { cache: "no-store" });
+  if (!response.ok) throw new Error("Provider page could not be read");
+  return await response.text();
+}
+
+function parseDkkToThbRate(html) {
+  const text = String(html).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+  const patterns = [
+    /1\s*DKK\s*[=|:]?\s*([\d.,]+)\s*THB/i,
+    /1\s*Dansk(?:e)?\s*krone\s*[=|:]?\s*([\d.,]+)\s*THB/i,
+    /100\s*DKK\s*[=|:]?\s*([\d.,]+)\s*THB/i,
+    /1000\s*DKK\s*[=|:]?\s*([\d.,]+)\s*THB/i
+  ];
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (!match) continue;
+    const raw = parseRateNumber(match[1]);
+    if (raw > 50 && pattern.source.startsWith("1000")) return raw / 1000;
+    if (raw > 10 && pattern.source.startsWith("100")) return raw / 100;
+    if (raw > 3 && raw < 7) return raw;
+  }
+  return 0;
+}
+
+function parseForexRate(html) {
+  const text = String(html).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+  const dkkToThb = parseDkkToThbRate(text);
+  if (dkkToThb) return dkkToThb;
+  const thbToDkk = text.match(/1\s*THB\s*[=|:]?\s*([\d.,]+)\s*DKK/i);
+  return thbToDkk ? rateFromDkkPerThb(parseRateNumber(thbToDkk[1])) : 0;
+}
+
+function parseTavexRate(html) {
+  const text = String(html).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+  const row = text.match(/THB\s+Thailandske\s+baht\s+([\d.,]+)\s+([\d.,]+)/i);
+  if (row) return rateFromDkkPerThb(parseRateNumber(row[2]));
+  const dkkPerThb = text.match(/Thailandske\s+baht[\s\S]{0,250}?([\d.,]+)\s*DKK/i);
+  return dkkPerThb ? rateFromDkkPerThb(parseRateNumber(dkkPerThb[1])) : 0;
+}
+
+async function fetchOneProviderRate(provider) {
+  const html = await fetchProviderText(PROVIDER_RATE_SOURCES[provider]);
+  let rate = 0;
+  if (provider === "forex") rate = parseForexRate(html);
+  else if (provider === "tavex") rate = parseTavexRate(html);
+  else rate = parseDkkToThbRate(html);
+  if (!rate || rate < 3 || rate > 7) throw new Error(`Invalid ${provider} rate`);
+  return rate;
+}
+
+async function fetchProviderRates() {
+  const providers = ["revolut", "wise", "forex", "tavex", "loomis"];
+  data.providerRates = data.providerRates || {};
+  const results = await Promise.allSettled(providers.map(async (provider) => {
+    const rate = await fetchOneProviderRate(provider);
+    return { provider, rate };
+  }));
+
+  for (const result of results) {
+    if (result.status !== "fulfilled") continue;
+    const { provider, rate } = result.value;
+    data.providerRates[provider] = {
+      rate,
+      source: PROVIDER_RATE_SOURCES[provider],
+      updatedAtHour: hourlyKey(),
+      ok: true
+    };
+  }
+
+  for (const provider of providers) {
+    if (!data.providerRates[provider]?.rate) {
+      data.providerRates[provider] = {
+        rate: FALLBACK_RATES[provider],
+        source: "fallback",
+        updatedAtHour: hourlyKey(),
+        ok: false
+      };
+    }
+  }
+}
+
+function providerRate(provider) {
+  return data.providerRates?.[provider]?.rate || FALLBACK_RATES[provider];
 }
 
 function updateRateStatus() {
@@ -207,15 +303,12 @@ function updateRateStatus() {
   updateConverterStatus();
 }
 
-
 function isWeekendToday() {
   const day = new Date().getDay();
   return day === 0 || day === 6;
 }
 
 function revolutEffectiveRate(baseRate) {
-  // Revolut's own converter currently shows the direct exchange rate with no extra spread.
-  // ATM-limit fees are still calculated separately in calculateRevolutDetails().
   return baseRate;
 }
 
@@ -223,92 +316,42 @@ function applyMarketRates() {
   applyVisaBankPresetToData();
   const marketRate = data.market?.rate || 5.0570;
 
-  // v73: cash suppliers restored to the calibrated values that matched real checks.
-  // v70: old cached settings could keep the app around 4,85 even when the market is around 5,05.
-  // Migrate only the old defaults so user-edited values are not overwritten.
-  if (!data.v70RateMigrationDone) {
-    if (Math.abs((data.market?.rate || 0) - 4.85) < 0.03 || !data.market?.rateVersion) {
-      data.market = {
-        ...(data.market || {}),
-        rate: marketRate,
-        rateVersion: RATE_VERSION
-      };
-    }
-    if (Math.abs((data.visa.spread || 0) - 1.5) < 0.01) data.visa.spread = 0;
-    if (Math.abs((data.mastercard.spread || 0) - 1.5) < 0.01) data.mastercard.spread = 0;
-    if (Math.abs((data.loomis.margin || 0) - 1.2) < 0.05) data.loomis.margin = 5.23;
-    if (Math.abs((data.forex.margin || 0) - 2.65) < 0.05) data.forex.margin = 6.62;
-    if (Math.abs((data.tavex.margin || 0) - 2.5) < 0.05 || Math.abs((data.tavex.margin || 0) - 4.79) < 0.05) data.tavex.margin = Math.max(0, (1 - TAVEX_DIRECT_RATE / marketRate) * 100);
-    if (!data.tavex.delivery || Math.abs(data.tavex.delivery - 99) < 0.5 || Math.abs(data.tavex.delivery - 50) < 0.5) data.tavex.delivery = 50;
-    data.v70RateMigrationDone = true;
-  }
+  data.revolut.referenceMargin = 0;
+  data.revolut.rate = providerRate("revolut");
 
-  if (!data.v73CashRestoreDone) {
-    data.loomis.place = "Loomis online";
-    data.loomis.margin = 5.23;
-    data.loomis.fixedDkk = 49.95;
+  data.wise.referenceMargin = 0;
+  data.wise.rate = providerRate("wise");
 
-    data.forex.place = "FOREX afhentning";
-    data.forex.margin = 6.62;
-    data.forex.fixedDkk = 0;
-    data.forex.delivery = 0;
-    data.forex.other = 0;
-
-    data.tavex.place = "Tavex webshop";
-    data.tavex.margin = Math.max(0, (1 - TAVEX_DIRECT_RATE / marketRate) * 100);
-    data.tavex.fixedDkk = 0;
-    data.tavex.delivery = 50;
-    data.tavex.other = 0;
-
-    data.v73CashRestoreDone = true;
-  }
-
-  // Force Revolut to match Revolut's own converter.
-  // Older saved browser settings may contain a referenceMargin, so reset it every time.
-  data.revolut.referenceMargin = REVOLUT_REFERENCE_MARGIN;
-  data.revolut.rate = revolutEffectiveRate(marketRate);
-  // Force Wise calibration too, so old saved browser settings do not keep an outdated Wise rate.
-  data.wise.referenceMargin = WISE_REFERENCE_MARGIN;
-  data.wise.rate = marketRate * (1 - WISE_REFERENCE_MARGIN / 100);
-  // Force Visa to one shared official calculation on all devices.
-  // The Visa.dk value already includes the bank fee from the Visa calculator,
-  // so no extra bank fee is added here.
-  data.visa.rate = VISA_DIRECT_RATE;
+  data.visa.rate = FALLBACK_RATES.visa;
   data.visa.spread = Math.max(0, (1 - data.visa.rate / marketRate) * 100);
   data.visa.percent = 0;
   data.visa.fixedDkk = 0;
 
-  // Force Mastercard to one shared official calculation on all devices.
-  // Mastercard calculator value had 1% bank fee included; the app adds bank fee separately.
-  data.mastercard.rate = MASTERCARD_DIRECT_RATE;
+  data.mastercard.rate = FALLBACK_RATES.mastercard;
   data.mastercard.spread = Math.max(0, (1 - data.mastercard.rate / marketRate) * 100);
   data.mastercard.fixedDkk = 0;
 
-  if (!data.tavex.marginMigrated && marketRate && (data.tavex.margin || 0) === 0 && data.tavex.rate && Math.abs(data.tavex.rate - marketRate) > 0.01) {
-    data.tavex.margin = Math.max(0, (1 - data.tavex.rate / marketRate) * 100);
-    data.tavex.marginMigrated = true;
-  }
-
-  // Force Loomis to one shared calculation on all devices.
   data.loomis.place = "Loomis online";
-  data.loomis.rate = LOOMIS_DIRECT_RATE;
+  data.loomis.rate = providerRate("loomis");
   data.loomis.margin = Math.max(0, (1 - data.loomis.rate / marketRate) * 100);
   data.loomis.fixedDkk = 49.95;
   data.loomis.delivery = 0;
   data.loomis.other = 0;
-  // Force FOREX to one shared calculation on all devices.
+
   data.forex.place = "FOREX afhentning";
-  data.forex.rate = FOREX_DIRECT_RATE;
+  data.forex.rate = providerRate("forex");
   data.forex.margin = Math.max(0, (1 - data.forex.rate / marketRate) * 100);
   data.forex.fixedDkk = 0;
   data.forex.delivery = 0;
   data.forex.other = 0;
-  data.tavex.rate = TAVEX_DIRECT_RATE;
+
+  data.tavex.place = "Tavex webshop";
+  data.tavex.rate = providerRate("tavex");
   data.tavex.margin = Math.max(0, (1 - data.tavex.rate / marketRate) * 100);
   data.tavex.delivery = 50;
   data.tavex.fixedDkk = 0;
   data.tavex.other = 0;
-  data.tavex.place = "Tavex webshop";
+
   data.market.rateVersion = RATE_VERSION;
 }
 
@@ -316,6 +359,9 @@ async function updateMarketRateIfNeeded() {
   ensureVisibleMethods();
 
   if (data.market?.updatedAtHour === hourlyKey() && data.market?.rateVersion === RATE_VERSION && (data.market?.rate || 0) > 5) {
+    const providerCacheIsFresh = ["revolut", "wise", "forex", "tavex", "loomis"]
+      .every((provider) => data.providerRates?.[provider]?.updatedAtHour === hourlyKey());
+    if (!providerCacheIsFresh) await fetchProviderRates();
     applyMarketRates();
     syncInputs();
     syncHomeCurrencyUi();
@@ -343,6 +389,7 @@ async function updateMarketRateIfNeeded() {
           GBP: Number(json.rates.GBP || getCurrencyRates().GBP)
         }
       };
+      await fetchProviderRates();
       applyMarketRates();
       persist();
       syncInputs();
@@ -351,6 +398,7 @@ async function updateMarketRateIfNeeded() {
       calculate();
     }
   } catch {
+    await fetchProviderRates().catch(() => {});
     applyMarketRates();
     updateRateStatus();
     calculate();

@@ -85,18 +85,16 @@ function saveMethod(method) {
 
   if (method === "loomis") {
     data.loomis.place = document.getElementById("loomisPlace").value;
-    data.loomis.margin = parseNumber(document.getElementById("loomisMargin").value);
     data.loomis.fixedDkk = parseNumber(document.getElementById("loomisFixed").value);
-    data.loomis.rate = (data.market?.rate || 5.05441) * (1 - data.loomis.margin / 100);
+    applyMarketRates();
   }
 
   if (method === "forex") {
     data.forex.place = document.getElementById("forexPlace").value;
-    data.forex.margin = parseNumber(document.getElementById("forexMargin").value);
     data.forex.fixedDkk = parseNumber(document.getElementById("forexFixed").value);
     data.forex.delivery = 0;
     data.forex.other = parseNumber(document.getElementById("forexOther").value);
-    data.forex.rate = (data.market?.rate || 5.05441) * (1 - data.forex.margin / 100);
+    applyMarketRates();
   }
 
   if (method === "tavex") {
