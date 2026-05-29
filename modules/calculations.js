@@ -1,4 +1,4 @@
-// ATM Cash v1.25 - price calculations and detail views
+// ATM Cash v1.27 - price calculations and detail views
 // v1.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
@@ -357,6 +357,7 @@ function calculateRevolutDetails() {
   setText("lineLimit", `${formatNumber(r.limit)} DKK`);
   setText("lineOverLimit", `${formatNumber(overLimitDkk)} DKK`);
   setText("lineRevolutFee", `${formatDecimal(r.over)}% = ${formatNumber(revolutFeeDkk)} DKK`);
+  setTotalFeeLine("lineTotalFee", (atmFeeThb / r.rate) + revolutFeeDkk);
   setText("lineFinalTotal", `${formatNumber(finalTotalDkk)} DKK`);
 
   const formula = document.getElementById("revolutFormula");
@@ -376,6 +377,15 @@ function calculateRevolutDetails() {
 function setText(id, value) {
   const el = document.getElementById(id);
   if (el) el.textContent = value;
+}
+
+function setTotalFeeLine(id, valueDkk) {
+  setText(id, `${formatNumber(Math.max(0, valueDkk || 0))} DKK`);
+}
+
+function spreadCostDkk(totalThb, rawRate, effectiveRate) {
+  if (!totalThb || !rawRate || !effectiveRate || rawRate <= 0 || effectiveRate <= 0) return 0;
+  return Math.max(0, (totalThb / effectiveRate) - (totalThb / rawRate));
 }
 
 
@@ -430,6 +440,7 @@ function calculateWiseDetails() {
   setText("wiseLineLimit", `${formatNumber(w.limit)} DKK`);
   setText("wiseLineOverLimit", `${formatNumber(overLimitDkk)} DKK`);
   setText("wiseLineWiseFee", `${formatDecimal(w.over)}% = ${formatNumber(wiseFeeDkk)} DKK`);
+  setTotalFeeLine("wiseLineTotalFee", (atmFeeThb / w.rate) + wiseFeeDkk);
   setText("wiseLineFinalTotal", `${formatNumber(finalTotalDkk)} DKK`);
 
   const formula = document.getElementById("wiseFormula");
@@ -512,7 +523,7 @@ function calculateVisaDetails() {
   setText("visaLinePercent", visaMinimumFeeDkk
     ? c.percent ? `${formatDecimal(c.percent)}% / min. ${withdrawalCount} × ${formatNumber(visaMinimumFeeDkk)} = ${formatNumber(percentFeeDkk)} DKK` : `${withdrawalCount} × ${formatNumber(visaMinimumFeeDkk)} = ${formatNumber(percentFeeDkk)} DKK`
     : `${formatDecimal(c.percent)}% = ${formatNumber(percentFeeDkk)} DKK`);
-  setText("visaLineTotalFees", `${formatNumber((atmFeeDkk||0)+(markupFeeDkk||0)+(percentFeeDkk||0))} DKK`);
+  setTotalFeeLine("visaLineTotalFee", (atmFeeThb / c.rate) + spreadCostDkk(totalThbWithFees, c.rawRate || c.rate, c.rate) + percentFeeDkk + getVisaFixedExtraDkk(c));
   setText("visaLineFinalTotal", `${formatNumber(finalTotalDkk)} DKK`);
 
   const formula = document.getElementById("visaFormula");
@@ -583,6 +594,7 @@ function calculateMastercardDetails() {
   setText("mcLineBeforeFee", `${formatNumber(beforeBankFeeDkk)} DKK`);
   setText("mcLineFixed", `${formatNumber(c.fixedDkk)} DKK`);
   setText("mcLinePercent", `${formatDecimal(c.percent)}% = ${formatNumber(percentFeeDkk)} DKK`);
+  setTotalFeeLine("mcLineTotalFee", (atmFeeThb / c.rate) + spreadCostDkk(totalThbWithFees, mcMarketRate, c.rate) + percentFeeDkk + (c.fixedDkk || 0));
   setText("mcLineFinalTotal", `${formatNumber(finalTotalDkk)} DKK`);
 
   const formula = document.getElementById("mcFormula");
@@ -653,6 +665,7 @@ function calculateCashDetails(method, title) {
   setText(`${method}LineFixed`, `${formatNumber(fixed)} DKK`);
   setText(`${method}LineDelivery`, `${formatNumber(delivery)} DKK`);
   setText(`${method}LineOther`, `${formatNumber(other)} DKK`);
+  setTotalFeeLine(`${method}LineTotalFee`, fees);
   setText(`${method}LineFinalTotal`, `${formatNumber(finalTotalDkk)} DKK`);
 
   const formula = document.getElementById(`${method}Formula`);
