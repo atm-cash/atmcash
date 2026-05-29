@@ -1,4 +1,4 @@
-// ATM Cash v1.29 - conversions, defaults, config, language and currency helpers
+// ATM Cash v1.30 - conversions, defaults, config, language and currency helpers
 let defaults = {
   market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v73", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
@@ -35,7 +35,7 @@ const translations = {
   "↗ Resultat": "↗ Result",
   "☰ Vælg metoder": "☰ Choose methods",
   "Vælg metoder": "Choose methods",
-  "Kurser opdateres hver time.": "Rates update hourly.",
+  "Kurser opdateres hvert 10. minut.": "Rates update hourly.",
   "Kurser og gebyrer er vejledende og kan ændres.": "Rates and fees are indicative and may change.",
   "Valuta": "Currency",
   "Tips": "Tips",
@@ -178,8 +178,8 @@ function setLanguage(lang) {
 function translateNodeText(text) {
   if (currentLanguage() !== "en") return text;
   if (translations[text]) return translations[text];
-  if (text.startsWith("Kurser opdateres hver time. Sidst opdateret ")) {
-    return text.replace("Kurser opdateres hver time. Sidst opdateret ", "Rates update hourly. Last updated ");
+  if (text.startsWith("Kurser opdateres hvert 10. minut. Sidst opdateret ")) {
+    return text.replace("Kurser opdateres hvert 10. minut. Sidst opdateret ", "Rates update hourly. Last updated ");
   }
   if (text.includes("Over grænse")) return text.replaceAll("Over grænse", "Over limit");
   if (text.includes("over grænse")) return text.replaceAll("over grænse", "over limit");
@@ -334,8 +334,8 @@ function updateConverterStatus() {
   const en = currentLanguage() === "en";
   const updated = formatRateUpdateTime(data.market?.updatedAtHour || data.market?.date);
   el.textContent = updated
-    ? (en ? `Rates update hourly. Last updated ${updated}.` : `Kurser opdateres hver time. Sidst opdateret ${updated}.`)
-    : (en ? "Rates update hourly." : "Kurser opdateres hver time.");
+    ? (en ? `Rates update hourly. Last updated ${updated}.` : `Kurser opdateres hvert 10. minut. Sidst opdateret ${updated}.`)
+    : (en ? "Rates update hourly." : "Kurser opdateres hvert 10. minut.");
 }
 
 function updateConverterFrom(currency) {

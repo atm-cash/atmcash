@@ -159,8 +159,8 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v1.29";
-const RATE_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
+const RATE_VERSION = "v1.30";
+const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.
 const FALLBACK_RATES = {
@@ -306,7 +306,7 @@ function updateRateStatus() {
   if (!el) return;
 
   const en = currentLanguage() === "en";
-  const prefix = en ? "Rates update hourly." : "Kurser opdateres hver time.";
+  const prefix = en ? "Rates update hourly." : "Kurser opdateres hvert 10. minut.";
   el.textContent = "";
   el.appendChild(document.createTextNode(prefix));
   if (data.market?.date) {
