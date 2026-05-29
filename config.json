@@ -1,0 +1,113 @@
+{
+  "market": {
+    "rate": 5.057,
+    "date": "",
+    "source": "standard",
+    "rateVersion": "v1.28",
+    "rates": {
+      "DKK": 1,
+      "THB": 5.057,
+      "EUR": 0.134,
+      "USD": 0.146,
+      "GBP": 0.114
+    }
+  },
+  "homeCurrency": "DKK",
+  "language": "da",
+  "revolut": {
+    "plan": "Premium",
+    "limit": 3000,
+    "rate": 5.04747,
+    "atm": 220,
+    "over": 2
+  },
+  "wise": {
+    "limit": 1800,
+    "rate": 5.0772,
+    "atm": 220,
+    "over": 2.69
+  },
+  "visa": {
+    "bank": "Danske Bank",
+    "type": "Visa Debit",
+    "rate": 5.16238,
+    "spread": 1.5,
+    "percent": 1,
+    "fixedDkk": 30,
+    "atm": 220
+  },
+  "mastercard": {
+    "bank": "Danske Bank",
+    "type": "Mastercard Debit",
+    "rate": 5.040382949333,
+    "spread": 0.329,
+    "percent": 1.75,
+    "fixedDkk": 0,
+    "atm": 220
+  },
+  "loomis": {
+    "place": "Loomis online",
+    "rate": 4.789071,
+    "margin": 5.51,
+    "fixedDkk": 49.95,
+    "delivery": 0,
+    "other": 0
+  },
+  "forex": {
+    "place": "FOREX afhentning",
+    "rate": 4.72589,
+    "margin": 6.579,
+    "fixedDkk": 0,
+    "delivery": 0,
+    "other": 0
+  },
+  "tavex": {
+    "place": "Tavex webshop",
+    "rate": 4.830917874396135,
+    "margin": 4.299,
+    "fixedDkk": 0,
+    "delivery": 50,
+    "other": 0
+  },
+  "providerRates": {
+    "revolut": {
+      "rate": 5.04747,
+      "source": "fallback",
+      "updatedAtHour": "",
+      "ok": false
+    },
+    "wise": {
+      "rate": 5.0772,
+      "source": "fallback",
+      "updatedAtHour": "",
+      "ok": false
+    },
+    "forex": {
+      "rate": 4.72589,
+      "source": "fallback",
+      "updatedAtHour": "",
+      "ok": false
+    },
+    "tavex": {
+      "rate": 4.830917874396135,
+      "source": "fallback",
+      "updatedAtHour": "",
+      "ok": false
+    },
+    "loomis": {
+      "rate": 4.789071,
+      "source": "fallback",
+      "updatedAtHour": "",
+      "ok": false
+    }
+  },
+  "visibleMethods": [
+    "revolut",
+    "wise",
+    "visa",
+    "mastercard",
+    "loomis",
+    "forex",
+    "tavex"
+  ]
+}
