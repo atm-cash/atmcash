@@ -15,25 +15,25 @@ function getVisaBankRule(card) {
   const type = String(card.type || "").toLowerCase();
 
   if (bank === "nordea" || bank === "danske bank") {
-    return { percent: 1, minDkk: 30, label: "Gebyr 1% - Min 30 DKK" };
+    return { percent: 1, minDkk: 30, fxMarkup: 1.5, label: "Gebyr 1% - Min 30 DKK" };
   }
 
   if (bank === "jyske bank") {
     if (type === "visa credit") {
-      return { percent: 2, minDkk: 50, label: "Gebyr 2% - Min 50 DKK" };
+      return { percent: 2, minDkk: 50, fxMarkup: 1.5, label: "Gebyr 2% - Min 50 DKK" };
     }
-    return { percent: 0, minDkk: 15, label: "Gebyr 15 DKK pr. hævning" };
+    return { percent: 0, minDkk: 15, fxMarkup: 1.5, label: "Gebyr 15 DKK pr. hævning" };
   }
 
   if (bank === "lunar") {
-    return { percent: 0, minDkk: 19, label: "Gebyr 19 DKK pr. hævning" };
+    return { percent: 0, minDkk: 19, fxMarkup: 1.5, label: "Gebyr 19 DKK pr. hævning" };
   }
 
   if (bank === "sydbank") {
     if (type === "visa credit") {
-      return { percent: 2, minDkk: 50, label: "Gebyr 2% - Min 50 DKK" };
+      return { percent: 2, minDkk: 50, fxMarkup: 1.5, label: "Gebyr 2% - Min 50 DKK" };
     }
-    return { percent: 1.5, minDkk: 40, label: "Gebyr 1,5% - Min 40 DKK" };
+    return { percent: 1.5, minDkk: 40, fxMarkup: 1.5, label: "Gebyr 1,5% - Min 40 DKK" };
   }
 
   return null;
@@ -45,6 +45,11 @@ function getVisaBankRuleKey(card) {
 
 function hasVisaBankRule(card) {
   return Boolean(getVisaBankRule(card));
+}
+
+function getVisaFxMarkupPercent(card) {
+  const rule = getVisaBankRule(card);
+  return rule ? (rule.fxMarkup || 0) : (card.spread || 0);
 }
 
 function getVisaMinimumFeeDkk(card) {
@@ -81,7 +86,7 @@ function applyVisaBankPresetToData(forceMinimum = false) {
   const key = getVisaBankRuleKey(data.visa);
   const ruleChanged = data.visa.ruleKey !== key;
   data.visa.percent = rule.percent;
-  data.visa.spread = 0;
+  data.visa.spread = rule.fxMarkup || 0;
   if (forceMinimum || ruleChanged || !data.visa.fixedDkk || data.visa.fixedDkk === defaults.visa.fixedDkk) {
     data.visa.fixedDkk = rule.minDkk;
   }
@@ -144,14 +149,14 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v1.20";
+const RATE_VERSION = "v1.21";
 const RATE_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.
 const FALLBACK_RATES = {
   revolut: 5.04747,
   wise: 5.07720,
-  visa: 5.162380,
+  visa: 5.214525,
   mastercard: 5.040382949333,
   loomis: 4.789071,
   forex: 4.72589,
@@ -321,10 +326,11 @@ function applyMarketRates() {
   data.wise.referenceMargin = 0;
   data.wise.rate = providerRate("wise");
 
-  data.visa.rate = FALLBACK_RATES.visa;
-  data.visa.spread = 0;
-  data.visa.percent = 0;
-  data.visa.fixedDkk = 0;
+  const visaFxMarkup = getVisaFxMarkupPercent(data.visa);
+  data.visa.rawRate = FALLBACK_RATES.visa;
+  data.visa.rate = FALLBACK_RATES.visa * (1 - visaFxMarkup / 100);
+  data.visa.spread = visaFxMarkup;
+  applyVisaBankPresetToData();
 
   data.mastercard.rate = FALLBACK_RATES.mastercard;
   data.mastercard.spread = Math.max(0, (1 - data.mastercard.rate / marketRate) * 100);
