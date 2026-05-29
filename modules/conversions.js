@@ -1,4 +1,4 @@
-// ATM Cash v1.22 - conversions, defaults, config, language and currency helpers
+// ATM Cash v1.23 - conversions, defaults, config, language and currency helpers
 let defaults = {
   market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v73", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
@@ -101,13 +101,13 @@ const translations = {
   "Gebyrer · DKK": "Fees · DKK",
   "Valutakurs-spread": "Exchange rate spread",
   "Valutakurs-spread · %": "Exchange rate spread · %",
-  "Visa valutaspread": "Bankens valutakurstillæg",
-  "Visa valutaspread · %": "Bankens valutakurstillæg · %",
+  "Bankens valutakurstillæg": "Bankens valutakurstillæg",
+  "Bankens valutakurstillæg · %": "Bankens valutakurstillæg · %",
   "Kurs": "Rate",
   "Kurs · THB pr. DKK": "Rate · THB per DKK",
   "Kurs · THB pr. DKK (markedskurs)": "Rate · THB per DKK (market rate)",
   "Auto-kurs · THB pr. DKK": "Auto rate · THB per DKK",
-  "Kurs efter Visa-spread": "Kurs efter valutakurstillæg",
+  "Kurs efter bankens valutakurstillæg": "Kurs efter valutakurstillæg",
   "Kurs og gebyr": "Rate and fee",
   "Margin fra markedskurs": "Margin from market rate",
   "Margin fra markedskurs · %": "Margin from market rate · %",
@@ -241,7 +241,7 @@ function loadData() {
   try {
     const saved = localStorage.getItem("atmCashData");
     const loaded = saved ? mergeDefaults(defaults, JSON.parse(saved)) : clone(defaults);
-    const migrationKey = "atmCashVisaHiddenDefaultV122";
+    const migrationKey = "atmCashVisaHiddenDefaultV123";
     if (localStorage.getItem(migrationKey) !== "1") {
       if (Array.isArray(loaded.visibleMethods)) {
         loaded.visibleMethods = loaded.visibleMethods.filter((method) => method !== "visa");
