@@ -1,4 +1,4 @@
-// ATM Cash v1.28 - price calculations and detail views
+// ATM Cash v1.29 - price calculations and detail views
 // v1.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
@@ -17,6 +17,10 @@ function cashSupplierRate(method, fallbackRate) {
 }
 
 function cashSupplierFees(method, wantedThb = 0) {
+  if (method === "forex") {
+    const cfg = data.forex || {};
+    return { fixed: cfg.fixedDkk || 0, delivery: 0, other: 0 };
+  }
   const official = cashSupplierPrice(method);
   if (official) {
     return {
@@ -663,26 +667,31 @@ function calculateCashDetails(method, title) {
   setText(`${method}LineMargin`, `${formatDecimal(cfg.margin || 0)}% (mid-market ${formatDecimal(marketRate)} → ${formatDecimal(rate)})`);
   setText(`${method}LineBeforeFees`, `${formatNumber(beforeFeesDkk)} DKK`);
   setText(`${method}LineFixed`, `${formatNumber(fixed)} DKK`);
-  setText(`${method}LineDelivery`, `${formatNumber(delivery)} DKK`);
-  setText(`${method}LineOther`, `${formatNumber(other)} DKK`);
+  if (method !== "forex") {
+    setText(`${method}LineDelivery`, `${formatNumber(delivery)} DKK`);
+    setText(`${method}LineOther`, `${formatNumber(other)} DKK`);
+  }
   setTotalFeeLine(`${method}LineTotalFee`, fees);
   setText(`${method}LineFinalTotal`, `${formatNumber(finalTotalDkk)} DKK`);
 
   const formula = document.getElementById(`${method}Formula`);
   if (formula) {
+    const feeText = method === "forex"
+      ? `${formatNumber(fees)} DKK`
+      : `${formatNumber(fixed)} + ${formatNumber(delivery)} + ${formatNumber(other)} = ${formatNumber(fees)} DKK`;
     if (lastEditedCurrency === "thb") {
       formula.innerHTML = `
         <strong>1.</strong> Du har valgt ${formatNumber(wantedCashThb)} THB på forsiden.<br>
         <strong>2.</strong> Kurs: mid-market ${formatDecimal(marketRate)} minus ${formatDecimal(cfg.margin || 0)}% margin = ${formatDecimal(rate)} THB/DKK.<br>
         <strong>3.</strong> ${formatNumber(wantedCashThb)} / ${formatDecimal(rate)} = ${formatNumber(beforeFeesDkk)} DKK før gebyrer.<br>
-        <strong>4.</strong> Gebyrer: ${formatNumber(fixed)} + ${formatNumber(delivery)} + ${formatNumber(other)} = ${formatNumber(fees)} DKK.<br>
-        <strong>6.</strong> Total pris: ${formatNumber(beforeFeesDkk)} + ${formatNumber(fees)} = ${formatNumber(finalTotalDkk)} DKK.
+        <strong>4.</strong> Gebyr: ${feeText}.<br>
+        <strong>5.</strong> Total pris: ${formatNumber(beforeFeesDkk)} + ${formatNumber(fees)} = ${formatNumber(finalTotalDkk)} DKK.
       `;
     } else {
       const dkk = amountToDkk(parseNumber(document.getElementById("dkkAmount").value));
       formula.innerHTML = `
         <strong>1.</strong> Der bruges ${formatNumber(dkk)} DKK som udgangspunkt.<br>
-        <strong>2.</strong> Gebyrer trækkes fra: ${formatNumber(fixed)} + ${formatNumber(delivery)} + ${formatNumber(other)} = ${formatNumber(fees)} DKK.<br>
+        <strong>2.</strong> Gebyr trækkes fra: ${feeText}.<br>
         <strong>3.</strong> Kurs: mid-market ${formatDecimal(marketRate)} minus ${formatDecimal(cfg.margin || 0)}% margin = ${formatDecimal(rate)} THB/DKK.<br>
         <strong>4.</strong> Beløb til veksling: ${formatNumber(dkk)} - ${formatNumber(fees)} = ${formatNumber(dkk - fees)} DKK.<br>
         <strong>5.</strong> ${formatNumber(dkk - fees)} × ${formatDecimal(rate)} = ${formatNumber(wantedCashThb)} THB.<br>

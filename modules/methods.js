@@ -1,4 +1,4 @@
-// ATM Cash v1.1 - method settings and saved method data
+// ATM Cash v1.29 - method settings and saved method data
 function syncInputs() {
   applyVisaBankPresetToData();
   setInputValue("revolutAtm", data.revolut.atm);
@@ -35,7 +35,7 @@ function syncInputs() {
   setInputValue("forexMargin", data.forex.margin || 0);
   setInputValue("forexFixed", data.forex.fixedDkk);
   data.forex.delivery = 0;
-  setInputValue("forexOther", data.forex.other);
+  data.forex.other = 0;
 
   
   if (!data.tavex.place || ![...document.getElementById("tavexPlace").options].some(o => o.value === data.tavex.place)) data.tavex.place = "Tavex webshop";
@@ -94,7 +94,7 @@ function saveMethod(method) {
     data.forex.place = document.getElementById("forexPlace").value;
     data.forex.fixedDkk = parseNumber(document.getElementById("forexFixed").value);
     data.forex.delivery = 0;
-    data.forex.other = parseNumber(document.getElementById("forexOther").value);
+    data.forex.other = 0;
     applyMarketRates();
   }
 

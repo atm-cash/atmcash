@@ -1,4 +1,4 @@
-// ATM Cash v1.28 - conversions, defaults, config, language and currency helpers
+// ATM Cash v1.29 - conversions, defaults, config, language and currency helpers
 let defaults = {
   market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v73", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
@@ -97,6 +97,8 @@ const translations = {
   "Fast bankgebyr · DKK": "Fixed bank fee · DKK",
   "Fast gebyr": "Fixed fee",
   "Fast gebyr · DKK": "Fixed fee · DKK",
+  "Gebyr": "Fee",
+  "Gebyr · DKK": "Fee · DKK",
   "Gebyrer": "Fees",
   "Gebyrer · DKK": "Fees · DKK",
   "Valutakurs-spread": "Exchange rate spread",
@@ -247,6 +249,10 @@ function loadData() {
         loaded.visibleMethods = [...loaded.visibleMethods, "visa"];
       }
       localStorage.setItem(visaDefaultOnKey, "1");
+    }
+    if (loaded.forex) {
+      loaded.forex.delivery = 0;
+      loaded.forex.other = 0;
     }
     return loaded;
   } catch {
