@@ -100,7 +100,8 @@ function getVisaTypeLabel(card) {
   return card.type;
 }
 
-function applyVisaNordeaPresetToInputs() {
+function applyVisaNordeaPresetToInputs(eventOrForce = false) {
+  const forcePreset = eventOrForce === true || (eventOrForce && eventOrForce.type === "change");
   const bank = document.getElementById("visaBank");
   const type = document.getElementById("visaType");
   const percent = document.getElementById("visaPercent");
@@ -119,16 +120,20 @@ function applyVisaNordeaPresetToInputs() {
   const key = getVisaBankRuleKey(currentCard);
 
   if (rule) {
-    percent.value = formatDecimal(rule.percent);
-    if (spread) spread.value = formatDecimal(rule.fxMarkup || 0);
-    if (fixed.dataset.ruleKey !== key || !parseNumber(fixed.value)) fixed.value = formatDecimal(rule.minDkk);
+    if (forcePreset) {
+      percent.value = formatDecimal(rule.percent);
+      if (spread) spread.value = formatDecimal(rule.fxMarkup || 0);
+      fixed.value = formatDecimal(rule.minDkk);
+    }
     fixed.dataset.ruleKey = key;
-    if (fixedLabel) fixedLabel.textContent = rule.label.replace(formatNumber(rule.minDkk), formatNumber(parseNumber(fixed.value) || rule.minDkk));
+    if (fixedLabel) fixedLabel.textContent = "Min. hævegebyr · DKK";
   } else if (fixedLabel) {
-    fixedLabel.textContent = "Fast bankgebyr · DKK";
+    if (forcePreset) fixed.value = fixed.value || "0";
+    fixed.dataset.ruleKey = key;
+    if (spread && !spread.value) spread.value = "0";
+    fixedLabel.textContent = "Min. hævegebyr · DKK";
   }
 }
-
 function showPage(pageName) {
   document.querySelectorAll(".page").forEach((page) => page.classList.remove("active"));
   const target = document.getElementById(`${pageName}Page`);
@@ -154,7 +159,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v1.23";
+const RATE_VERSION = "v1.24";
 const RATE_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.

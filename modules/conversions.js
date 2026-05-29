@@ -1,4 +1,4 @@
-// ATM Cash v1.23 - conversions, defaults, config, language and currency helpers
+// ATM Cash v1.24 - conversions, defaults, config, language and currency helpers
 let defaults = {
   market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v73", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
@@ -215,7 +215,7 @@ function translatePage() {
 }
 
 
-const allMethods = ["revolut", "wise", "mastercard", "loomis", "forex", "tavex"];
+const allMethods = ["revolut", "wise", "visa", "mastercard", "loomis", "forex", "tavex"];
 let lastEditedCurrency = "dkk";
 
 function clone(obj) {
@@ -241,12 +241,12 @@ function loadData() {
   try {
     const saved = localStorage.getItem("atmCashData");
     const loaded = saved ? mergeDefaults(defaults, JSON.parse(saved)) : clone(defaults);
-    const migrationKey = "atmCashVisaHiddenDefaultV123";
-    if (localStorage.getItem(migrationKey) !== "1") {
-      if (Array.isArray(loaded.visibleMethods)) {
-        loaded.visibleMethods = loaded.visibleMethods.filter((method) => method !== "visa");
+    const visaDefaultOnKey = "atmCashVisaDefaultOnV124";
+    if (localStorage.getItem(visaDefaultOnKey) !== "1") {
+      if (Array.isArray(loaded.visibleMethods) && !loaded.visibleMethods.includes("visa")) {
+        loaded.visibleMethods = [...loaded.visibleMethods, "visa"];
       }
-      localStorage.setItem(migrationKey, "1");
+      localStorage.setItem(visaDefaultOnKey, "1");
     }
     return loaded;
   } catch {

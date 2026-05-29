@@ -1,4 +1,4 @@
-// ATM Cash v1.11 - price calculations and detail views
+// ATM Cash v1.24 - price calculations and detail views
 // v1.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
@@ -502,11 +502,12 @@ function calculateVisaDetails() {
   setText("visaLineAtm", `${withdrawalCount} × ${formatNumber(c.atm)} = ${formatNumber(atmFeeThb)} THB`);
   setText("visaLineTotalThb", `${formatNumber(totalThbWithFees)} THB`);
   setText("visaLineRate", `${formatDecimal(c.rate)} THB/DKK`);
+  setText("visaLineMarkup", `${formatDecimal(c.spread || 0)}%`);
   setText("visaLineBeforeFee", `${formatNumber(beforeBankFeeDkk)} DKK`);
   const visaMinimumFeeDkk = getVisaMinimumFeeDkk(c);
   const visaMinimumTotalDkk = visaMinimumFeeDkk * Math.max(1, withdrawalCount || 1);
   const fixedRow = document.getElementById("visaLineFixedRow");
-  if (fixedRow) fixedRow.style.display = hasVisaBankRule(c) ? "none" : "flex";
+  if (fixedRow) fixedRow.style.display = "none";
   setText("visaLineFixed", `${formatNumber(c.fixedDkk)} DKK`);
   setText("visaLinePercent", visaMinimumFeeDkk
     ? c.percent ? `${formatDecimal(c.percent)}% / min. ${withdrawalCount} × ${formatNumber(visaMinimumFeeDkk)} = ${formatNumber(percentFeeDkk)} DKK` : `${withdrawalCount} × ${formatNumber(visaMinimumFeeDkk)} = ${formatNumber(percentFeeDkk)} DKK`
@@ -521,8 +522,8 @@ function calculateVisaDetails() {
       <strong>3.</strong> ATM-gebyr: ${withdrawalCount} × ${formatNumber(c.atm)} THB = ${formatNumber(atmFeeThb)} THB.<br>
       <strong>4.</strong> Total inkl. ATM-gebyr: ${formatNumber(wantedCashThb)} + ${formatNumber(atmFeeThb)} = ${formatNumber(totalThbWithFees)} THB.<br>
       <strong>5.</strong> Visa kurs: ${formatDecimal(c.rawRate || c.rate)} - bankens valutakurstillæg ${formatDecimal(c.spread || 0)}% = ${formatDecimal(c.rate)} THB/DKK.<br>
-      <strong>6.</strong> ${formatNumber(totalThbWithFees)} / ${formatDecimal(c.rate)} = ${formatNumber(beforeBankFeeDkk)} DKK før bankgebyr.<br>
-      <strong>7.</strong> Bankgebyr: ${visaMinimumFeeDkk ? c.percent ? `${formatDecimal(c.percent)}% / min. ${withdrawalCount} × ${formatNumber(visaMinimumFeeDkk)} DKK` : `${withdrawalCount} × ${formatNumber(visaMinimumFeeDkk)} DKK` : `${formatDecimal(c.percent)}%`} = ${formatNumber(percentFeeDkk)} DKK.<br>
+      <strong>6.</strong> ${formatNumber(totalThbWithFees)} / ${formatDecimal(c.rate)} = ${formatNumber(beforeBankFeeDkk)} DKK før hævegebyr.<br>
+      <strong>7.</strong> Hævegebyr: ${visaMinimumFeeDkk ? c.percent ? `${formatDecimal(c.percent)}% / min. ${withdrawalCount} × ${formatNumber(visaMinimumFeeDkk)} DKK` : `${withdrawalCount} × ${formatNumber(visaMinimumFeeDkk)} DKK` : `${formatDecimal(c.percent)}%`} = ${formatNumber(percentFeeDkk)} DKK.<br>
       <strong>8.</strong> Total: ${formatNumber(beforeBankFeeDkk)} + ${formatNumber(percentFeeDkk)}${getVisaFixedExtraDkk(c) ? ` + ${formatNumber(getVisaFixedExtraDkk(c))}` : ""} = ${formatNumber(finalTotalDkk)} DKK.
     `;
   }
@@ -591,8 +592,8 @@ function calculateMastercardDetails() {
       <strong>3.</strong> ATM-gebyr: ${withdrawalCount} × ${formatNumber(c.atm)} THB = ${formatNumber(atmFeeThb)} THB.<br>
       <strong>4.</strong> Total inkl. ATM-gebyr: ${formatNumber(wantedCashThb)} + ${formatNumber(atmFeeThb)} = ${formatNumber(totalThbWithFees)} THB.<br>
       <strong>5.</strong> Mastercard kurs: mid-market ${formatDecimal(mcMarketRate)} minus ${formatDecimal(c.spread || 0)}% spread = ${formatDecimal(c.rate)} THB/DKK.<br>
-      <strong>6.</strong> ${formatNumber(totalThbWithFees)} / ${formatDecimal(c.rate)} = ${formatNumber(beforeBankFeeDkk)} DKK før bankgebyr.<br>
-      <strong>7.</strong> Bankgebyr: ${formatDecimal(c.percent)}% = ${formatNumber(percentFeeDkk)} DKK.<br>
+      <strong>6.</strong> ${formatNumber(totalThbWithFees)} / ${formatDecimal(c.rate)} = ${formatNumber(beforeBankFeeDkk)} DKK før hævegebyr.<br>
+      <strong>7.</strong> Hævegebyr: ${formatDecimal(c.percent)}% = ${formatNumber(percentFeeDkk)} DKK.<br>
       <strong>8.</strong> Total: ${formatNumber(beforeBankFeeDkk)} + ${formatNumber(percentFeeDkk)} + ${formatNumber(c.fixedDkk)} = ${formatNumber(finalTotalDkk)} DKK.
     `;
   }

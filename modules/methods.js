@@ -69,6 +69,7 @@ function saveMethod(method) {
     data.visa.spread = parseNumber(document.getElementById("visaSpread")?.value || "0");
     data.visa.fixedDkk = parseNumber(document.getElementById("visaFixed").value);
     data.visa.atm = parseNumber(document.getElementById("visaAtm").value);
+    data.visa.ruleKey = getVisaBankRuleKey(data.visa);
     applyVisaBankPresetToData();
     applyMarketRates();
   }
