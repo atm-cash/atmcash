@@ -159,7 +159,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v1.30";
+const RATE_VERSION = "v1.31";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.
@@ -188,12 +188,13 @@ function todayKey() {
 function hourlyKey() {
   const d = new Date();
   const pad = (n) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}`;
+  const minute = Math.floor(d.getMinutes() / 10) * 10;
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(minute)}`;
 }
 
 function formatRateUpdateTime(value) {
   if (!value) return "";
-  return value.length === 13 ? value.replace("T", " ") + ":00" : value;
+  return value.includes("T") ? value.replace("T", " ") : value;
 }
 
 function parseRateNumber(value) {
@@ -306,7 +307,7 @@ function updateRateStatus() {
   if (!el) return;
 
   const en = currentLanguage() === "en";
-  const prefix = en ? "Rates update hourly." : "Kurser opdateres hvert 10. minut.";
+  const prefix = en ? "Rates update every 10 minutes." : "Kurser opdateres hvert 10. minut.";
   el.textContent = "";
   el.appendChild(document.createTextNode(prefix));
   if (data.market?.date) {
