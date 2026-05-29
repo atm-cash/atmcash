@@ -512,6 +512,7 @@ function calculateVisaDetails() {
   setText("visaLinePercent", visaMinimumFeeDkk
     ? c.percent ? `${formatDecimal(c.percent)}% / min. ${withdrawalCount} × ${formatNumber(visaMinimumFeeDkk)} = ${formatNumber(percentFeeDkk)} DKK` : `${withdrawalCount} × ${formatNumber(visaMinimumFeeDkk)} = ${formatNumber(percentFeeDkk)} DKK`
     : `${formatDecimal(c.percent)}% = ${formatNumber(percentFeeDkk)} DKK`);
+  setText("visaLineTotalFees", `${formatNumber((atmFeeDkk||0)+(markupFeeDkk||0)+(percentFeeDkk||0))} DKK`);
   setText("visaLineFinalTotal", `${formatNumber(finalTotalDkk)} DKK`);
 
   const formula = document.getElementById("visaFormula");
