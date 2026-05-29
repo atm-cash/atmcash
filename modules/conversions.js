@@ -1,11 +1,11 @@
-// ATM Cash v1.21 - conversions, defaults, config, language and currency helpers
+// ATM Cash v1.22 - conversions, defaults, config, language and currency helpers
 let defaults = {
   market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v73", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
   language: "da",
   revolut: { plan: "Premium", limit: 3000, rate: 5.05441, atm: 220, over: 2 },
   wise: { limit: 1800, rate: 5.05441, atm: 220, over: 2.69 },
-  visa: { bank: "Danske Bank", type: "Visa Debit", rawRate: 5.214525, rate: 5.136307, spread: 1.5, percent: 1, fixedDkk: 30, atm: 220 },
+  visa: { bank: "Danske Bank", type: "Visa Debit", rawRate: 5.040756, rate: 4.965145, spread: 1.5, percent: 1, fixedDkk: 30, atm: 220 },
   mastercard: { bank: "Danske Bank", type: "Mastercard Debit", rate: 5.040382949333, spread: 0.329, percent: 1.75, fixedDkk: 0, atm: 220 },
   loomis: { place: "Loomis online", rate: 4.789071, margin: 5.51, fixedDkk: 49.95, delivery: 0, other: 0 },
   forex: { place: "FOREX afhentning", rate: 4.724312730606, margin: 6.579, fixedDkk: 0, delivery: 0, other: 0 },
@@ -101,13 +101,13 @@ const translations = {
   "Gebyrer · DKK": "Fees · DKK",
   "Valutakurs-spread": "Exchange rate spread",
   "Valutakurs-spread · %": "Exchange rate spread · %",
-  "Visa valutaspread": "Visa exchange spread",
-  "Visa valutaspread · %": "Visa exchange spread · %",
+  "Visa valutaspread": "Bankens valutakurstillæg",
+  "Visa valutaspread · %": "Bankens valutakurstillæg · %",
   "Kurs": "Rate",
   "Kurs · THB pr. DKK": "Rate · THB per DKK",
   "Kurs · THB pr. DKK (markedskurs)": "Rate · THB per DKK (market rate)",
   "Auto-kurs · THB pr. DKK": "Auto rate · THB per DKK",
-  "Kurs efter Visa-spread": "Rate after Visa spread",
+  "Kurs efter Visa-spread": "Kurs efter valutakurstillæg",
   "Kurs og gebyr": "Rate and fee",
   "Margin fra markedskurs": "Margin from market rate",
   "Margin fra markedskurs · %": "Margin from market rate · %",
@@ -241,7 +241,7 @@ function loadData() {
   try {
     const saved = localStorage.getItem("atmCashData");
     const loaded = saved ? mergeDefaults(defaults, JSON.parse(saved)) : clone(defaults);
-    const migrationKey = "atmCashVisaHiddenDefaultV121";
+    const migrationKey = "atmCashVisaHiddenDefaultV122";
     if (localStorage.getItem(migrationKey) !== "1") {
       if (Array.isArray(loaded.visibleMethods)) {
         loaded.visibleMethods = loaded.visibleMethods.filter((method) => method !== "visa");

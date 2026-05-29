@@ -10,6 +10,7 @@ function syncInputs() {
   document.getElementById("visaBank").value = data.visa.bank;
   document.getElementById("visaType").value = data.visa.type;
   setInputValue("visaPercent", data.visa.percent);
+  setInputValue("visaSpread", data.visa.spread || 0);
   setInputValue("visaFixed", data.visa.fixedDkk);
   applyVisaNordeaPresetToInputs();
   setInputValue("visaAtm", data.visa.atm);
@@ -65,7 +66,7 @@ function saveMethod(method) {
     data.visa.bank = document.getElementById("visaBank").value;
     data.visa.type = document.getElementById("visaType").value;
     data.visa.percent = parseNumber(document.getElementById("visaPercent").value);
-    data.visa.spread = 0;
+    data.visa.spread = parseNumber(document.getElementById("visaSpread")?.value || "0");
     data.visa.fixedDkk = parseNumber(document.getElementById("visaFixed").value);
     data.visa.atm = parseNumber(document.getElementById("visaAtm").value);
     applyVisaBankPresetToData();
