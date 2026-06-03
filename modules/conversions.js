@@ -1,6 +1,6 @@
-// ATM Cash v1.32 - conversions, defaults, config, language and currency helpers
+// ATM Cash v2.0 - conversions, defaults, config, language and currency helpers
 let defaults = {
-  market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v73", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
+  market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v2.0", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
   language: "da",
   revolut: { plan: "Premium", limit: 3000, rate: 5.05441, atm: 220, over: 2 },
@@ -9,8 +9,8 @@ let defaults = {
   mastercard: { bank: "Danske Bank", type: "Mastercard Debit", rate: 5.040382949333, spread: 0.329, percent: 1.75, fixedDkk: 0, atm: 220 },
   loomis: { place: "Loomis online", rate: 4.789071, margin: 5.51, fixedDkk: 49.95, delivery: 0, other: 0 },
   forex: { place: "FOREX afhentning", rate: 4.724312730606, margin: 6.579, fixedDkk: 0, delivery: 0, other: 0 },
-  superrich: { place: "SuperRich Thailand", rate: 37.80, fixedDkk: 0 },
-  tavex: { place: "Tavex webshop", rate: 4.840271055, margin: 4.299, fixedDkk: 0, delivery: 50, other: 0 }
+  tavex: { place: "Tavex webshop", rate: 4.840271055, margin: 4.299, fixedDkk: 0, delivery: 50, other: 0 },
+  eurcash: { bank: "Nordea", exchangePlace: "SuperRich", dkkPerEur: 7.46, eurToThb: 37.95, maxDkkPerWithdrawal: 15000 }
 };
 
 let data;
@@ -79,14 +79,13 @@ const translations = {
   "Loomis-indstillinger": "Loomis settings",
   "FOREX-indstillinger": "FOREX settings",
   "Tavex-indstillinger": "Tavex settings",
-  "SuperRich-indstillinger": "SuperRich settings",
-  "EUR + SuperRich": "EUR + SuperRich",
-  "EUR kontanter": "EUR cash",
-  "EUR kontanter til Thailand": "EUR cash for Thailand",
-  "SuperRich kurs": "SuperRich rate",
-  "SuperRich · THB pr. EUR": "SuperRich · THB per EUR",
-  "Kurs · THB pr. EUR": "Rate · THB per EUR",
+  "THB modtaget": "THB received",
+  "EUR→THB kurs": "EUR→THB rate",
   "DKK/EUR kurs": "DKK/EUR rate",
+  "Vekselsted": "Exchange office",
+  "EUR kontanter-indstillinger": "EUR cash settings",
+  "Gem EUR kontanter-indstillinger": "Save EUR cash settings",
+  "EUR kontanter": "EUR cash",
   "Gem Revolut-indstillinger": "Save Revolut settings",
   "Gem Wise-indstillinger": "Save Wise settings",
   "Gem Visa-indstillinger": "Save Visa settings",
@@ -226,7 +225,7 @@ function translatePage() {
 }
 
 
-const allMethods = ["revolut", "wise", "visa", "mastercard", "loomis", "forex", "superrich", "tavex"];
+const allMethods = ["revolut", "wise", "visa", "mastercard", "loomis", "forex", "tavex", "eurcash"];
 let lastEditedCurrency = "dkk";
 
 function clone(obj) {
@@ -259,13 +258,19 @@ function loadData() {
       }
       localStorage.setItem(visaDefaultOnKey, "1");
     }
+    if (!loaded.eurcash) {
+      loaded.eurcash = clone(defaults.eurcash);
+    }
+    const eurcashDefaultOnKey = "atmCashEurcashDefaultOnV20";
+    if (localStorage.getItem(eurcashDefaultOnKey) !== "1") {
+      if (Array.isArray(loaded.visibleMethods) && !loaded.visibleMethods.includes("eurcash")) {
+        loaded.visibleMethods = [...loaded.visibleMethods, "eurcash"];
+      }
+      localStorage.setItem(eurcashDefaultOnKey, "1");
+    }
     if (loaded.forex) {
       loaded.forex.delivery = 0;
       loaded.forex.other = 0;
-    }
-    if (!loaded.superrich) loaded.superrich = clone(defaults.superrich);
-    if (Array.isArray(loaded.visibleMethods) && !loaded.visibleMethods.includes("superrich")) {
-      loaded.visibleMethods = [...loaded.visibleMethods, "superrich"];
     }
     return loaded;
   } catch {

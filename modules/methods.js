@@ -1,4 +1,4 @@
-// ATM Cash v1.32 - method settings and saved method data
+// ATM Cash v2.0 - method settings and saved method data
 function syncInputs() {
   applyVisaBankPresetToData();
   setInputValue("revolutAtm", data.revolut.atm);
@@ -37,12 +37,6 @@ function syncInputs() {
   data.forex.delivery = 0;
   data.forex.other = 0;
 
-  data.superrich = data.superrich || { place: "SuperRich Thailand", rate: 37.80, fixedDkk: 0 };
-  if (![...document.getElementById("superrichPlace").options].some(o => o.value === data.superrich.place)) data.superrich.place = "SuperRich Thailand";
-  document.getElementById("superrichPlace").value = data.superrich.place;
-  setInputValue("superrichRate", data.superrich.rate);
-  setInputValue("superrichFixed", data.superrich.fixedDkk);
-
   
   if (!data.tavex.place || ![...document.getElementById("tavexPlace").options].some(o => o.value === data.tavex.place)) data.tavex.place = "Tavex webshop";
   document.getElementById("tavexPlace").value = data.tavex.place;
@@ -51,6 +45,14 @@ function syncInputs() {
   setInputValue("tavexFixed", data.tavex.fixedDkk);
   setInputValue("tavexDelivery", data.tavex.delivery);
   setInputValue("tavexOther", data.tavex.other);
+
+  if (data.eurcash) {
+    document.getElementById("eurcashBank").value = data.eurcash.bank || "Nordea";
+    document.getElementById("eurcashPlace").value = data.eurcash.exchangePlace || "SuperRich";
+    setInputValue("eurcashDkkPerEur", data.eurcash.dkkPerEur || dkkPerEurRate());
+    setInputValue("eurcashEurToThb", data.eurcash.eurToThb || 37.95);
+    setInputValue("eurcashMaxDkk", data.eurcash.maxDkkPerWithdrawal || 15000);
+  }
 
   document.querySelectorAll(".plan[data-plan]").forEach((plan) => {
     plan.classList.toggle("active", plan.dataset.plan === data.revolut.plan);
@@ -104,20 +106,21 @@ function saveMethod(method) {
     applyMarketRates();
   }
 
-  if (method === "superrich") {
-    data.superrich = data.superrich || {};
-    data.superrich.place = document.getElementById("superrichPlace").value;
-    data.superrich.rate = parseNumber(document.getElementById("superrichRate").value);
-    data.superrich.fixedDkk = parseNumber(document.getElementById("superrichFixed").value);
-    applyMarketRates();
-  }
-
   if (method === "tavex") {
     data.tavex.place = document.getElementById("tavexPlace").value;
     data.tavex.fixedDkk = 0;
     data.tavex.delivery = 50;
     data.tavex.other = 0;
     applyMarketRates();
+  }
+
+  if (method === "eurcash") {
+    data.eurcash = data.eurcash || {};
+    data.eurcash.bank = document.getElementById("eurcashBank").value;
+    data.eurcash.exchangePlace = document.getElementById("eurcashPlace").value;
+    data.eurcash.dkkPerEur = parseNumber(document.getElementById("eurcashDkkPerEur").value);
+    data.eurcash.eurToThb = parseNumber(document.getElementById("eurcashEurToThb").value);
+    data.eurcash.maxDkkPerWithdrawal = parseNumber(document.getElementById("eurcashMaxDkk").value) || 15000;
   }
 
   persist();

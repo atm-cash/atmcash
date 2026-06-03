@@ -145,6 +145,7 @@ function showPage(pageName) {
   if (pageName === "loomisCalc") calculateLoomisDetails();
   if (pageName === "forexCalc") calculateForexDetails();
   if (pageName === "tavexCalc") calculateTavexDetails();
+  if (pageName === "eurcashCalc") calculateEurcashDetails();
   if (pageName === "converter") {
     updateConverterStatus();
     setTimeout(() => updateConverterFrom("DKK"), 0);
@@ -159,7 +160,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v1.32";
+const RATE_VERSION = "v2.0";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.
@@ -170,8 +171,7 @@ const FALLBACK_RATES = {
   mastercard: 5.040382949333,
   loomis: 4.789071,
   forex: 4.72589,
-  tavex: 1 / 0.207,
-  superrich: 37.80
+  tavex: 1 / 0.207
 };
 
 const PROVIDER_RATE_SOURCES = {
@@ -179,8 +179,7 @@ const PROVIDER_RATE_SOURCES = {
   wise: "https://wise.com/dk/currency-converter/dkk-to-thb-rate?amount=1",
   forex: "https://www.forexvaluta.dk/valuta/thb/",
   tavex: "https://tavex.dk/valuta-prisliste/",
-  loomis: "https://nemvaluta.loomis.dk/",
-  superrich: "https://www.superrich.co.th/home.php?language=en"
+  loomis: "https://nemvaluta.loomis.dk/"
 };
 
 function todayKey() {
@@ -259,35 +258,18 @@ function parseTavexRate(html) {
   return dkkPerThb ? rateFromDkkPerThb(parseRateNumber(dkkPerThb[1])) : 0;
 }
 
-function parseSuperrichEurRate(html) {
-  const text = String(html).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
-  const candidates = [];
-  const eurRows = text.match(/EUR[\s\S]{0,180}?(?:[\d]{1,3}(?:[.,]\d{1,4})?)[\s\S]{0,80}?(?:[\d]{1,3}(?:[.,]\d{1,4})?)/gi) || [];
-  for (const row of eurRows) {
-    const nums = row.match(/\d{1,3}(?:[.,]\d{1,4})?/g) || [];
-    for (const num of nums) {
-      const value = parseRateNumber(num);
-      if (value > 25 && value < 50) candidates.push(value);
-    }
-  }
-  // Use the best buying rate for EUR cash to THB.
-  return candidates.length ? Math.max(...candidates) : 0;
-}
-
 async function fetchOneProviderRate(provider) {
   const html = await fetchProviderText(PROVIDER_RATE_SOURCES[provider]);
   let rate = 0;
   if (provider === "forex") rate = parseForexRate(html);
   else if (provider === "tavex") rate = parseTavexRate(html);
-  else if (provider === "superrich") rate = parseSuperrichEurRate(html);
   else rate = parseDkkToThbRate(html);
-  const isValid = provider === "superrich" ? (rate > 25 && rate < 50) : (rate > 3 && rate < 7);
-  if (!isValid) throw new Error(`Invalid ${provider} rate`);
+  if (!rate || rate < 3 || rate > 7) throw new Error(`Invalid ${provider} rate`);
   return rate;
 }
 
 async function fetchProviderRates() {
-  const providers = ["revolut", "wise", "forex", "tavex", "loomis", "superrich"];
+  const providers = ["revolut", "wise", "forex", "tavex", "loomis"];
   data.providerRates = data.providerRates || {};
   const results = await Promise.allSettled(providers.map(async (provider) => {
     const rate = await fetchOneProviderRate(provider);
@@ -349,6 +331,11 @@ function revolutEffectiveRate(baseRate) {
 function applyMarketRates() {
   applyVisaBankPresetToData();
   const marketRate = data.market?.rate || 5.0570;
+  if (data.eurcash) {
+    data.eurcash.dkkPerEur = data.eurcash.dkkPerEur || dkkPerEurRate();
+    data.eurcash.eurToThb = data.eurcash.eurToThb || 37.95;
+    data.eurcash.maxDkkPerWithdrawal = data.eurcash.maxDkkPerWithdrawal || 15000;
+  }
 
   data.revolut.referenceMargin = 0;
   data.revolut.rate = providerRate("revolut");
@@ -379,10 +366,6 @@ function applyMarketRates() {
   data.forex.delivery = 0;
   data.forex.other = 0;
 
-  data.superrich = data.superrich || { place: "SuperRich Thailand", rate: FALLBACK_RATES.superrich, fixedDkk: 0 };
-  data.superrich.rate = providerRate("superrich");
-  data.superrich.fixedDkk = data.superrich.fixedDkk || 0;
-
   data.tavex.place = "Tavex webshop";
   data.tavex.rate = providerRate("tavex");
   data.tavex.margin = Math.max(0, (1 - data.tavex.rate / marketRate) * 100);
@@ -402,7 +385,7 @@ async function updateMarketRateIfNeeded() {
   }
 
   if (data.market?.updatedAtHour === hourlyKey() && data.market?.rateVersion === RATE_VERSION && (data.market?.rate || 0) > 5) {
-    const providerCacheIsFresh = ["revolut", "wise", "forex", "tavex", "loomis", "superrich"]
+    const providerCacheIsFresh = ["revolut", "wise", "forex", "tavex", "loomis"]
       .every((provider) => data.providerRates?.[provider]?.updatedAtHour === hourlyKey());
     if (!providerCacheIsFresh) await fetchProviderRates();
     applyMarketRates();
