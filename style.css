@@ -420,6 +420,12 @@ button:not(.icon-btn):not(.nav-item):not(.update):not(.plan):not(.result-card) {
   font-size: 12px;
   letter-spacing: .2px;
 }
+.superrich-logo {
+  background: rgba(245,200,76,.16);
+  color: #f5c84c;
+  font-size: 22px;
+}
+
 
 .result-card.best .method-logo {
   border-color: rgba(39,232,132,.55);

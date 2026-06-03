@@ -3,7 +3,7 @@
     "rate": 5.057,
     "date": "",
     "source": "standard",
-    "rateVersion": "v1.31",
+    "rateVersion": "v1.32",
     "rates": {
       "DKK": 1,
       "THB": 5.057,
@@ -99,6 +99,12 @@
       "source": "fallback",
       "updatedAtHour": "",
       "ok": false
+    },
+    "superrich": {
+      "rate": 37.8,
+      "source": "fallback",
+      "updatedAtHour": "",
+      "ok": false
     }
   },
   "visibleMethods": [
@@ -108,6 +114,12 @@
     "mastercard",
     "loomis",
     "forex",
+    "superrich",
     "tavex"
-  ]
+  ],
+  "superrich": {
+    "place": "SuperRich Thailand",
+    "rate": 37.8,
+    "fixedDkk": 0
+  }
 }

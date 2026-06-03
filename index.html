@@ -68,7 +68,7 @@
           <h2>↗ Resultat</h2>
           <button class="update" type="button" id="calculateBtn">☰ Vælg metoder</button>
         </div>
-        <div class="rate"><span id="rateStatus">Kurser opdateres hvert 10. minut.</span><br>Kurser og gebyrer er vejledende og kan ændres.</div>
+        <div class="rate"><span id="rateStatus">Kurser opdateres hvert 10 minut</span><br>Kurser og gebyrer er vejledende og kan ændres.</div>
 
         <section id="results"></section>
       </div>
@@ -78,7 +78,7 @@
         <button class="nav-tab" type="button" data-nav="tips"><span>ⓘ</span><strong>Tips</strong></button>
       </nav>
 
-      <div class="app-version" aria-label="Version">v1.31</div>
+      <div class="app-version" aria-label="Version">v1.32</div>
     </section>
 
 
@@ -114,7 +114,7 @@
       </section>
 
       <section class="card small-note">
-        <div id="converterRateStatus">Kurser opdateres hvert 10. minut.</div>
+        <div id="converterRateStatus">Kurser opdateres hvert 10 minut</div>
         <div>Kurserne er vejledende.</div>
       </section>
 
@@ -1015,6 +1015,121 @@
     </section>
 
 
+    <section id="superrichCalcPage" class="page">
+      <div class="topbar">
+        <button class="icon-btn back-btn" type="button">‹</button>
+        <div class="title"><h1>EUR + SuperRich</h1><div>Beregning af EUR kontanter</div></div>
+        <button class="icon-btn" type="button" id="openSuperrichSettings">⚙︎</button>
+      </div>
+
+      <section class="card calc-summary">
+        <div class="method-logo superrich-logo">€</div>
+        <div>
+          <div class="main-title">EUR + SuperRich</div>
+          <div class="main-sub" id="superrichCalcSubtitle">Beregning ud fra forsiden</div>
+        </div>
+        <div class="main-value" id="superrichCalcTotal">0 DKK<span>Total pris</span></div>
+      </section>
+
+      <div class="calc-scroll">
+        <section class="card">
+          <div class="section-label">Kontanter</div>
+          <div class="fee-grid">
+            <div class="fee-box">
+              <div class="calc-value" id="superrichCalcCash">0</div>
+              <div class="unit">Kontanter · THB</div>
+            </div>
+
+            <div class="fee-box">
+              <div class="calc-value" id="superrichCalcEur">0</div>
+              <div class="unit">EUR kontanter</div>
+            </div>
+
+            <div class="fee-box">
+              <div class="calc-value" id="superrichCalcRate">0</div>
+              <div class="unit">SuperRich · THB pr. EUR</div>
+            </div>
+
+            <div class="fee-box">
+              <div class="calc-value" id="superrichCalcFees">0</div>
+              <div class="unit">Gebyrer · DKK</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="section-label">Udregning</div>
+
+          <div class="calc-line"><div>Kontanter ønsket</div><strong id="superrichLineWanted">0 THB</strong></div>
+          <div class="calc-line"><div>SuperRich kurs</div><strong id="superrichLineRate">0 THB/EUR</strong></div>
+          <div class="calc-line"><div>EUR kontanter</div><strong id="superrichLineEur">0 EUR</strong></div>
+          <div class="calc-line"><div>DKK/EUR kurs</div><strong id="superrichLineDkkEur">0 DKK/EUR</strong></div>
+          <div class="calc-line"><div>Pris før gebyrer</div><strong id="superrichLineBeforeFees">0 DKK</strong></div>
+          <div class="calc-line"><div>Gebyr</div><strong id="superrichLineFixed">0 DKK</strong></div>
+          <div class="calc-line fee-total-line"><div>Total gebyr</div><strong id="superrichLineTotalFee">0 DKK</strong></div>
+          <div class="calc-line total-line"><div>Total pris</div><strong id="superrichLineFinalTotal">0 DKK</strong></div>
+        </section>
+
+        <section class="card">
+          <div class="section-label">Sådan er det beregnet</div>
+          <div class="formula" id="superrichFormula"></div>
+        </section>
+
+        <button type="button" id="editSuperrichSettingsBtn">Rediger SuperRich-indstillinger</button>
+      </div>
+    </section>
+
+    <section id="superrichPage" class="page">
+      <div class="topbar">
+        <button class="icon-btn back-btn" type="button">‹</button>
+        <div class="title"><h1>EUR + SuperRich</h1><div>EUR kontanter til Thailand</div></div>
+        <button class="icon-btn" type="button" data-save="superrich">✓</button>
+      </div>
+
+      <section class="card">
+        <div class="section-label">Vekslingssted</div>
+        <select id="superrichPlace">
+          <option>SuperRich Thailand</option>
+          <option>SuperRich 1965</option>
+          <option>OH! RiCH Superrich</option>
+        </select>
+      </section>
+
+      <section class="card">
+        <div class="section-label">Kurs og gebyr</div>
+        <div class="fee-grid">
+          <div class="fee-box">
+            <input id="superrichRate" inputmode="decimal" value="37,80" />
+            <div class="unit">Kurs · THB pr. EUR</div>
+          </div>
+
+          <div class="fee-box">
+            <input id="superrichFixed" inputmode="decimal" value="0" />
+            <div class="unit">Gebyr · DKK</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card info-card">
+        <div class="info-icon">€</div>
+        <div>
+          <div class="info-title">EUR kontanter</div>
+          <div class="info-sub">Regner med EUR hævet i Danmark og vekslet til THB hos SuperRich.</div>
+        </div>
+      </section>
+
+      <section class="card info-card">
+        <div class="info-icon">🏦</div>
+        <div>
+          <div class="info-title">Ingen Thai ATM-gebyr</div>
+          <div class="info-sub">Der regnes ikke med ATM-gebyr i Thailand, fordi pengene veksles kontant.</div>
+        </div>
+      </section>
+
+      <button type="button" data-save="superrich">Gem SuperRich-indstillinger</button>
+    </section>
+
+
     <section id="tavexCalcPage" class="page">
       <div class="topbar">
         <button class="icon-btn back-btn" type="button">‹</button>
@@ -1153,6 +1268,7 @@
         <label class="filter-row"><span class="method-logo mastercard-logo"></span><span>Mastercard</span><input type="checkbox" id="filterMastercard" value="mastercard" /></label>
         <label class="filter-row"><span class="method-logo loomis-logo">L</span><span>Loomis</span><input type="checkbox" id="filterLoomis" value="loomis" /></label>
         <label class="filter-row"><span class="method-logo forex-logo">FOREX</span><span>FOREX</span><input type="checkbox" id="filterForex" value="forex" /></label>
+        <label class="filter-row"><span class="method-logo superrich-logo">€</span><span>EUR + SuperRich</span><input type="checkbox" id="filterSuperrich" value="superrich" /></label>
         <label class="filter-row"><span class="method-logo tavex-logo">TAVEX</span><span>Tavex</span><input type="checkbox" id="filterTavex" value="tavex" /></label>
       </section>
 
