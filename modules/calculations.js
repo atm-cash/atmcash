@@ -1,4 +1,4 @@
-// ATM Cash v2.0 - price calculations and detail views
+// ATM Cash v2.1 - price calculations and detail views
 // v1.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
@@ -754,12 +754,12 @@ function calculateEurcashDetails() {
 
   setText("eurcashCalcCash", formatNumber(wantedCashThb));
   setText("eurcashCalcCount", formatNumber(withdrawalCount));
-  setText("eurcashCalcEur", `${formatDecimal(eurCash)} EUR`);
+  setText("eurcashCalcEur", `${formatCurrencyInput(eurCash)} EUR`);
   setText("eurcashCalcRate", `${formatDecimal(effectiveRate)} THB/DKK`);
 
   setText("eurcashLineWanted", `${formatNumber(wantedCashThb)} THB`);
   setText("eurcashLineDkkEur", `${formatDecimal(dkkPerEur)} DKK/EUR`);
-  setText("eurcashLineEur", `${formatDecimal(eurCash)} EUR`);
+  setText("eurcashLineEur", `${formatCurrencyInput(eurCash)} EUR`);
   setText("eurcashLineEurThb", `${formatDecimal(eurToThb)} THB/EUR`);
   setText("eurcashLineReceived", `${formatNumber(wantedCashThb)} THB`);
   setText("eurcashLineWithdrawals", `${withdrawalCount} × maks ${formatNumber(maxDkk)} DKK`);
@@ -770,17 +770,17 @@ function calculateEurcashDetails() {
     if (lastEditedCurrency === "thb") {
       formula.innerHTML = `
         <strong>1.</strong> Du har valgt ${formatNumber(wantedCashThb)} THB på forsiden.<br>
-        <strong>2.</strong> EUR kontanter: ${formatNumber(wantedCashThb)} / ${formatDecimal(eurToThb)} = ${formatDecimal(eurCash)} EUR.<br>
+        <strong>2.</strong> EUR kontanter: ${formatNumber(wantedCashThb)} / ${formatDecimal(eurToThb)} = ${formatCurrencyInput(eurCash)} EUR.<br>
         <strong>3.</strong> DKK/EUR kurs: ${formatDecimal(dkkPerEur)} DKK/EUR.<br>
-        <strong>4.</strong> Total pris: ${formatDecimal(eurCash)} × ${formatDecimal(dkkPerEur)} = ${formatNumber(finalTotalDkk)} DKK.<br>
+        <strong>4.</strong> Total pris: ${formatCurrencyInput(eurCash)} × ${formatDecimal(dkkPerEur)} = ${formatNumber(finalTotalDkk)} DKK.<br>
         <strong>5.</strong> Antal hævninger: ${formatNumber(finalTotalDkk)} / ${formatNumber(maxDkk)} = ${withdrawalCount}.
       `;
     } else {
       formula.innerHTML = `
         <strong>1.</strong> Der bruges ${formatNumber(finalTotalDkk)} DKK som udgangspunkt.<br>
-        <strong>2.</strong> EUR kontanter: ${formatNumber(finalTotalDkk)} / ${formatDecimal(dkkPerEur)} = ${formatDecimal(eurCash)} EUR.<br>
+        <strong>2.</strong> EUR kontanter: ${formatNumber(finalTotalDkk)} / ${formatDecimal(dkkPerEur)} = ${formatCurrencyInput(eurCash)} EUR.<br>
         <strong>3.</strong> EUR→THB kurs: ${formatDecimal(eurToThb)} THB/EUR.<br>
-        <strong>4.</strong> THB modtaget: ${formatDecimal(eurCash)} × ${formatDecimal(eurToThb)} = ${formatNumber(wantedCashThb)} THB.<br>
+        <strong>4.</strong> THB modtaget: ${formatCurrencyInput(eurCash)} × ${formatDecimal(eurToThb)} = ${formatNumber(wantedCashThb)} THB.<br>
         <strong>5.</strong> Antal hævninger: ${formatNumber(finalTotalDkk)} / ${formatNumber(maxDkk)} = ${withdrawalCount}.
       `;
     }
