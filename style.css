@@ -8,6 +8,7 @@
   --purple-dark: #5b21b6;
   --green: #27e884;
   --visa: #1a4fbf;
+  --eurcash: #b88700;
   --mc-red: #eb001b;
   --mc-orange: #f79e1b;
 }
@@ -368,6 +369,13 @@ button:not(.icon-btn):not(.nav-item):not(.update):not(.plan):not(.result-card) {
   letter-spacing: -0.5px;
 }
 
+.eurcash-logo {
+  background: rgba(245, 185, 35, 0.18);
+  color: var(--eurcash);
+  font-size: 19px;
+  font-weight: 950;
+}
+
 .mastercard-logo {
   background: rgba(255,255,255,.08);
   position: relative;
@@ -420,12 +428,6 @@ button:not(.icon-btn):not(.nav-item):not(.update):not(.plan):not(.result-card) {
   font-size: 12px;
   letter-spacing: .2px;
 }
-.superrich-logo {
-  background: rgba(245,200,76,.16);
-  color: #f5c84c;
-  font-size: 22px;
-}
-
 
 .result-card.best .method-logo {
   border-color: rgba(39,232,132,.55);
@@ -831,7 +833,8 @@ button:not(.icon-btn):not(.nav-item):not(.update):not(.plan):not(.result-card) {
 #mastercardCalcPage.active,
 #loomisCalcPage.active,
 #forexCalcPage.active,
-#tavexCalcPage.active {
+#tavexCalcPage.active,
+#eurcashCalcPage.active {
   height: calc(100dvh - 36px);
   overflow: hidden;
   display: flex;
@@ -845,13 +848,15 @@ button:not(.icon-btn):not(.nav-item):not(.update):not(.plan):not(.result-card) {
 #loomisCalcPage .topbar,
 #forexCalcPage .topbar,
 #tavexCalcPage .topbar,
+#eurcashCalcPage .topbar,
 #revolutCalcPage .calc-summary,
 #wiseCalcPage .calc-summary,
 #visaCalcPage .calc-summary,
 #mastercardCalcPage .calc-summary,
 #loomisCalcPage .calc-summary,
 #forexCalcPage .calc-summary,
-#tavexCalcPage .calc-summary {
+#tavexCalcPage .calc-summary,
+#eurcashCalcPage .calc-summary {
   flex: 0 0 auto;
 }
 
@@ -875,7 +880,8 @@ button:not(.icon-btn):not(.nav-item):not(.update):not(.plan):not(.result-card) {
   #mastercardCalcPage.active,
   #loomisCalcPage.active,
   #forexCalcPage.active,
-  #tavexCalcPage.active {
+  #tavexCalcPage.active,
+  #eurcashCalcPage.active {
     height: calc(100dvh - 28px);
   }
 }

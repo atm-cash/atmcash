@@ -3,7 +3,7 @@
     "rate": 5.057,
     "date": "",
     "source": "standard",
-    "rateVersion": "v1.32",
+    "rateVersion": "v2.0",
     "rates": {
       "DKK": 1,
       "THB": 5.057,
@@ -99,12 +99,6 @@
       "source": "fallback",
       "updatedAtHour": "",
       "ok": false
-    },
-    "superrich": {
-      "rate": 37.8,
-      "source": "fallback",
-      "updatedAtHour": "",
-      "ok": false
     }
   },
   "visibleMethods": [
@@ -114,12 +108,14 @@
     "mastercard",
     "loomis",
     "forex",
-    "superrich",
-    "tavex"
+    "tavex",
+    "eurcash"
   ],
-  "superrich": {
-    "place": "SuperRich Thailand",
-    "rate": 37.8,
-    "fixedDkk": 0
+  "eurcash": {
+    "bank": "Nordea",
+    "exchangePlace": "SuperRich",
+    "dkkPerEur": 7.46,
+    "eurToThb": 37.95,
+    "maxDkkPerWithdrawal": 15000
   }
 }
