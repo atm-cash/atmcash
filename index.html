@@ -78,7 +78,7 @@
         <button class="nav-tab" type="button" data-nav="tips"><span>ⓘ</span><strong>Tips</strong></button>
       </nav>
 
-      <div class="app-version" aria-label="Version">v2.0</div>
+      <div class="app-version" aria-label="Version">v2.1</div>
     </section>
 
 
@@ -1139,31 +1139,36 @@
 
 
     <section id="eurcashCalcPage" class="page">
-      <div class="topbar calc-topbar">
+      <div class="topbar">
         <button class="icon-btn back-btn" type="button">‹</button>
+        <div class="title"><h1>EUR kontanter</h1><div>Beregning af EUR kontanter</div></div>
+        <button class="icon-btn" type="button" id="openEurcashSettings">⚙︎</button>
+      </div>
+
+      <section class="card calc-summary">
         <div class="method-logo eurcash-logo">€</div>
-        <div class="title">
+        <div>
           <div class="main-title" id="eurcashCalcCard">EUR kontanter</div>
           <div class="main-sub" id="eurcashCalcSubtitle">Beregning ud fra forsiden</div>
         </div>
         <div class="main-value" id="eurcashCalcTotal">0 DKK<span>Total pris</span></div>
-      </div>
+      </section>
 
       <div class="calc-scroll">
-        <section class="card calc-summary">
+        <section class="card">
           <div class="section-label">Hævning</div>
-          <div class="calc-grid">
-            <div class="calc-box">
-              <span>Kontanter · THB</span>
+          <div class="fee-grid eurcash-withdrawal-grid">
+            <div class="fee-box">
               <div class="calc-value" id="eurcashCalcCash">0</div>
+              <div class="unit">Kontanter · THB</div>
             </div>
-            <div class="calc-box">
-              <span>Maks pr. hævning · DKK</span>
+            <div class="fee-box">
               <input id="eurcashMaxDkk" inputmode="decimal" value="15.000" />
+              <div class="unit">Maks pr. hævning · DKK</div>
             </div>
-            <div class="calc-box">
-              <span>Antal hævninger</span>
+            <div class="fee-box">
               <div class="calc-value" id="eurcashCalcCount">0</div>
+              <div class="unit">Antal hævninger</div>
             </div>
           </div>
         </section>
