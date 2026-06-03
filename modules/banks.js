@@ -159,7 +159,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v1.31";
+const RATE_VERSION = "v1.32";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.
@@ -170,7 +170,8 @@ const FALLBACK_RATES = {
   mastercard: 5.040382949333,
   loomis: 4.789071,
   forex: 4.72589,
-  tavex: 1 / 0.207
+  tavex: 1 / 0.207,
+  superrich: 37.80
 };
 
 const PROVIDER_RATE_SOURCES = {
@@ -178,7 +179,8 @@ const PROVIDER_RATE_SOURCES = {
   wise: "https://wise.com/dk/currency-converter/dkk-to-thb-rate?amount=1",
   forex: "https://www.forexvaluta.dk/valuta/thb/",
   tavex: "https://tavex.dk/valuta-prisliste/",
-  loomis: "https://nemvaluta.loomis.dk/"
+  loomis: "https://nemvaluta.loomis.dk/",
+  superrich: "https://www.superrich.co.th/home.php?language=en"
 };
 
 function todayKey() {
@@ -257,18 +259,35 @@ function parseTavexRate(html) {
   return dkkPerThb ? rateFromDkkPerThb(parseRateNumber(dkkPerThb[1])) : 0;
 }
 
+function parseSuperrichEurRate(html) {
+  const text = String(html).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+  const candidates = [];
+  const eurRows = text.match(/EUR[\s\S]{0,180}?(?:[\d]{1,3}(?:[.,]\d{1,4})?)[\s\S]{0,80}?(?:[\d]{1,3}(?:[.,]\d{1,4})?)/gi) || [];
+  for (const row of eurRows) {
+    const nums = row.match(/\d{1,3}(?:[.,]\d{1,4})?/g) || [];
+    for (const num of nums) {
+      const value = parseRateNumber(num);
+      if (value > 25 && value < 50) candidates.push(value);
+    }
+  }
+  // Use the best buying rate for EUR cash to THB.
+  return candidates.length ? Math.max(...candidates) : 0;
+}
+
 async function fetchOneProviderRate(provider) {
   const html = await fetchProviderText(PROVIDER_RATE_SOURCES[provider]);
   let rate = 0;
   if (provider === "forex") rate = parseForexRate(html);
   else if (provider === "tavex") rate = parseTavexRate(html);
+  else if (provider === "superrich") rate = parseSuperrichEurRate(html);
   else rate = parseDkkToThbRate(html);
-  if (!rate || rate < 3 || rate > 7) throw new Error(`Invalid ${provider} rate`);
+  const isValid = provider === "superrich" ? (rate > 25 && rate < 50) : (rate > 3 && rate < 7);
+  if (!isValid) throw new Error(`Invalid ${provider} rate`);
   return rate;
 }
 
 async function fetchProviderRates() {
-  const providers = ["revolut", "wise", "forex", "tavex", "loomis"];
+  const providers = ["revolut", "wise", "forex", "tavex", "loomis", "superrich"];
   data.providerRates = data.providerRates || {};
   const results = await Promise.allSettled(providers.map(async (provider) => {
     const rate = await fetchOneProviderRate(provider);
@@ -307,13 +326,13 @@ function updateRateStatus() {
   if (!el) return;
 
   const en = currentLanguage() === "en";
-  const prefix = en ? "Rates update every 10 minutes." : "Kurser opdateres hvert 10. minut.";
+  const prefix = en ? "Rates update every 10 minutes" : "Kurser opdateres hvert 10 minut";
   el.textContent = "";
   el.appendChild(document.createTextNode(prefix));
   if (data.market?.date) {
     const updated = formatRateUpdateTime(data.market.updatedAtHour || data.market.date);
     el.appendChild(document.createElement("br"));
-    el.appendChild(document.createTextNode(en ? `Last updated ${updated}.` : `Sidst opdateret ${updated}.`));
+    el.appendChild(document.createTextNode(en ? `Last updated ${updated}` : `Sidst opdateret ${updated}`));
   }
   updateConverterStatus();
 }
@@ -360,6 +379,10 @@ function applyMarketRates() {
   data.forex.delivery = 0;
   data.forex.other = 0;
 
+  data.superrich = data.superrich || { place: "SuperRich Thailand", rate: FALLBACK_RATES.superrich, fixedDkk: 0 };
+  data.superrich.rate = providerRate("superrich");
+  data.superrich.fixedDkk = data.superrich.fixedDkk || 0;
+
   data.tavex.place = "Tavex webshop";
   data.tavex.rate = providerRate("tavex");
   data.tavex.margin = Math.max(0, (1 - data.tavex.rate / marketRate) * 100);
@@ -379,7 +402,7 @@ async function updateMarketRateIfNeeded() {
   }
 
   if (data.market?.updatedAtHour === hourlyKey() && data.market?.rateVersion === RATE_VERSION && (data.market?.rate || 0) > 5) {
-    const providerCacheIsFresh = ["revolut", "wise", "forex", "tavex", "loomis"]
+    const providerCacheIsFresh = ["revolut", "wise", "forex", "tavex", "loomis", "superrich"]
       .every((provider) => data.providerRates?.[provider]?.updatedAtHour === hourlyKey());
     if (!providerCacheIsFresh) await fetchProviderRates();
     applyMarketRates();

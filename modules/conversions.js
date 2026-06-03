@@ -1,4 +1,4 @@
-// ATM Cash v1.31 - conversions, defaults, config, language and currency helpers
+// ATM Cash v1.32 - conversions, defaults, config, language and currency helpers
 let defaults = {
   market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v73", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
@@ -9,6 +9,7 @@ let defaults = {
   mastercard: { bank: "Danske Bank", type: "Mastercard Debit", rate: 5.040382949333, spread: 0.329, percent: 1.75, fixedDkk: 0, atm: 220 },
   loomis: { place: "Loomis online", rate: 4.789071, margin: 5.51, fixedDkk: 49.95, delivery: 0, other: 0 },
   forex: { place: "FOREX afhentning", rate: 4.724312730606, margin: 6.579, fixedDkk: 0, delivery: 0, other: 0 },
+  superrich: { place: "SuperRich Thailand", rate: 37.80, fixedDkk: 0 },
   tavex: { place: "Tavex webshop", rate: 4.840271055, margin: 4.299, fixedDkk: 0, delivery: 50, other: 0 }
 };
 
@@ -35,7 +36,7 @@ const translations = {
   "↗ Resultat": "↗ Result",
   "☰ Vælg metoder": "☰ Choose methods",
   "Vælg metoder": "Choose methods",
-  "Kurser opdateres hvert 10. minut.": "Rates update every 10 minutes.",
+  "Kurser opdateres hvert 10 minut": "Rates update every 10 minutes",
   "Kurser og gebyrer er vejledende og kan ændres.": "Rates and fees are indicative and may change.",
   "Valuta": "Currency",
   "Tips": "Tips",
@@ -78,6 +79,14 @@ const translations = {
   "Loomis-indstillinger": "Loomis settings",
   "FOREX-indstillinger": "FOREX settings",
   "Tavex-indstillinger": "Tavex settings",
+  "SuperRich-indstillinger": "SuperRich settings",
+  "EUR + SuperRich": "EUR + SuperRich",
+  "EUR kontanter": "EUR cash",
+  "EUR kontanter til Thailand": "EUR cash for Thailand",
+  "SuperRich kurs": "SuperRich rate",
+  "SuperRich · THB pr. EUR": "SuperRich · THB per EUR",
+  "Kurs · THB pr. EUR": "Rate · THB per EUR",
+  "DKK/EUR kurs": "DKK/EUR rate",
   "Gem Revolut-indstillinger": "Save Revolut settings",
   "Gem Wise-indstillinger": "Save Wise settings",
   "Gem Visa-indstillinger": "Save Visa settings",
@@ -178,8 +187,8 @@ function setLanguage(lang) {
 function translateNodeText(text) {
   if (currentLanguage() !== "en") return text;
   if (translations[text]) return translations[text];
-  if (text.startsWith("Kurser opdateres hvert 10. minut. Sidst opdateret ")) {
-    return text.replace("Kurser opdateres hvert 10. minut. Sidst opdateret ", "Rates update every 10 minutes. Last updated ");
+  if (text.startsWith("Kurser opdateres hvert 10 minut Sidst opdateret ")) {
+    return text.replace("Kurser opdateres hvert 10 minut Sidst opdateret ", "Rates update every 10 minutes Last updated ");
   }
   if (text.includes("Over grænse")) return text.replaceAll("Over grænse", "Over limit");
   if (text.includes("over grænse")) return text.replaceAll("over grænse", "over limit");
@@ -217,7 +226,7 @@ function translatePage() {
 }
 
 
-const allMethods = ["revolut", "wise", "visa", "mastercard", "loomis", "forex", "tavex"];
+const allMethods = ["revolut", "wise", "visa", "mastercard", "loomis", "forex", "superrich", "tavex"];
 let lastEditedCurrency = "dkk";
 
 function clone(obj) {
@@ -253,6 +262,10 @@ function loadData() {
     if (loaded.forex) {
       loaded.forex.delivery = 0;
       loaded.forex.other = 0;
+    }
+    if (!loaded.superrich) loaded.superrich = clone(defaults.superrich);
+    if (Array.isArray(loaded.visibleMethods) && !loaded.visibleMethods.includes("superrich")) {
+      loaded.visibleMethods = [...loaded.visibleMethods, "superrich"];
     }
     return loaded;
   } catch {
@@ -334,8 +347,8 @@ function updateConverterStatus() {
   const en = currentLanguage() === "en";
   const updated = formatRateUpdateTime(data.market?.updatedAtHour || data.market?.date);
   el.textContent = updated
-    ? (en ? `Rates update every 10 minutes. Last updated ${updated}.` : `Kurser opdateres hvert 10. minut. Sidst opdateret ${updated}.`)
-    : (en ? "Rates update every 10 minutes." : "Kurser opdateres hvert 10. minut.");
+    ? (en ? `Rates update every 10 minutes Last updated ${updated}` : `Kurser opdateres hvert 10 minut Sidst opdateret ${updated}`)
+    : (en ? "Rates update every 10 minutes" : "Kurser opdateres hvert 10 minut");
 }
 
 function updateConverterFrom(currency) {

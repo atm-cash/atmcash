@@ -1,4 +1,4 @@
-// ATM Cash v1.31 - method settings and saved method data
+// ATM Cash v1.32 - method settings and saved method data
 function syncInputs() {
   applyVisaBankPresetToData();
   setInputValue("revolutAtm", data.revolut.atm);
@@ -36,6 +36,12 @@ function syncInputs() {
   setInputValue("forexFixed", data.forex.fixedDkk);
   data.forex.delivery = 0;
   data.forex.other = 0;
+
+  data.superrich = data.superrich || { place: "SuperRich Thailand", rate: 37.80, fixedDkk: 0 };
+  if (![...document.getElementById("superrichPlace").options].some(o => o.value === data.superrich.place)) data.superrich.place = "SuperRich Thailand";
+  document.getElementById("superrichPlace").value = data.superrich.place;
+  setInputValue("superrichRate", data.superrich.rate);
+  setInputValue("superrichFixed", data.superrich.fixedDkk);
 
   
   if (!data.tavex.place || ![...document.getElementById("tavexPlace").options].some(o => o.value === data.tavex.place)) data.tavex.place = "Tavex webshop";
@@ -95,6 +101,14 @@ function saveMethod(method) {
     data.forex.fixedDkk = parseNumber(document.getElementById("forexFixed").value);
     data.forex.delivery = 0;
     data.forex.other = 0;
+    applyMarketRates();
+  }
+
+  if (method === "superrich") {
+    data.superrich = data.superrich || {};
+    data.superrich.place = document.getElementById("superrichPlace").value;
+    data.superrich.rate = parseNumber(document.getElementById("superrichRate").value);
+    data.superrich.fixedDkk = parseNumber(document.getElementById("superrichFixed").value);
     applyMarketRates();
   }
 

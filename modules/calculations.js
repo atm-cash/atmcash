@@ -1,4 +1,4 @@
-// ATM Cash v1.31 - price calculations and detail views
+// ATM Cash v1.32 - price calculations and detail views
 // v1.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
@@ -34,6 +34,29 @@ function cashSupplierFees(method, wantedThb = 0) {
   return { fixed: cfg.fixedDkk || 0, delivery, other: cfg.other || 0 };
 }
 
+function eurPerDkkRate() {
+  const rates = getCurrencyRates();
+  return rates.EUR || 0.134;
+}
+
+function dkkPerEurRate() {
+  const eurPerDkk = eurPerDkkRate();
+  return eurPerDkk > 0 ? 1 / eurPerDkk : 0;
+}
+
+function superrichEffectiveRate() {
+  const cfg = data.superrich || {};
+  return (cfg.rate || 0) * eurPerDkkRate();
+}
+
+function superrichCostForThb(targetThb) {
+  const cfg = data.superrich || {};
+  const eurThb = cfg.rate || 0;
+  const eurPerDkk = eurPerDkkRate();
+  if (!targetThb || targetThb <= 0 || !eurThb || !eurPerDkk) return 0;
+  return (targetThb / eurThb) / eurPerDkk + (cfg.fixedDkk || 0);
+}
+
 function calculateResults(dkk) {
   applyVisaBankPresetToData();
   const revolut = data.revolut;
@@ -59,6 +82,9 @@ function calculateResults(dkk) {
   const forexFees = cashSupplierFees("forex");
   const forexThb = Math.max(0, (dkk - forexFees.fixed - forexFees.delivery - forexFees.other) * forexRate);
 
+  const superrich = data.superrich || { rate: 0, fixedDkk: 0 };
+  const superrichThb = Math.max(0, (dkk - (superrich.fixedDkk || 0)) * eurPerDkkRate() * (superrich.rate || 0));
+
   const tavexRate = cashSupplierRate("tavex", data.tavex.rate);
   const tavexFees = cashSupplierFees("tavex");
   const tavexThb = Math.max(0, (dkk - tavexFees.fixed - tavexFees.delivery - tavexFees.other) * tavexRate);
@@ -70,6 +96,7 @@ function calculateResults(dkk) {
     { id: "mastercard", logoText: "", logoClass: "mastercard-logo", name: "Mastercard", sub: `${mastercard.bank} · ${formatDecimal(mastercard.percent)}%`, thb: mastercardThb },
     { id: "loomis", logoText: "L", logoClass: "loomis-logo", name: "Loomis", sub: "Kontanter hjemmefra", thb: loomisThb },
     { id: "forex", logoText: "FOREX", logoClass: "forex-logo", name: "FOREX", sub: "Kontanter hjemmefra", thb: forexThb },
+    { id: "superrich", logoText: "€", logoClass: "superrich-logo", name: "EUR + SuperRich", sub: "EUR kontanter i Thailand", thb: superrichThb },
     { id: "tavex", logoText: "TAVEX", logoClass: "tavex-logo", name: "Tavex", sub: "Kontanter hjemmefra", thb: tavexThb }
   ].sort((a, b) => b.thb - a.thb);
 }
@@ -217,6 +244,10 @@ function costForTargetThb(method, targetThb) {
     return high;
   }
 
+  if (method === "superrich") {
+    return superrichCostForThb(targetThb);
+  }
+
   // Cash exchange: exact target THB / rate + fees
   if (method === "loomis" || method === "forex" || method === "tavex") {
     const delivery = getDeliveryForMethod(method, targetThb);
@@ -268,7 +299,7 @@ function calculate() {
     }).join("");
 
     document.querySelectorAll("[data-open]").forEach((button) => {
-      button.addEventListener("click", () => showPage(button.dataset.open === 'revolut' ? 'revolutCalc' : button.dataset.open === 'wise' ? 'wiseCalc' : button.dataset.open === 'visa' ? 'visaCalc' : button.dataset.open === 'mastercard' ? 'mastercardCalc' : button.dataset.open === 'loomis' ? 'loomisCalc' : button.dataset.open === 'forex' ? 'forexCalc' : button.dataset.open === 'tavex' ? 'tavexCalc' : button.dataset.open));
+      button.addEventListener("click", () => showPage(button.dataset.open === 'revolut' ? 'revolutCalc' : button.dataset.open === 'wise' ? 'wiseCalc' : button.dataset.open === 'visa' ? 'visaCalc' : button.dataset.open === 'mastercard' ? 'mastercardCalc' : button.dataset.open === 'loomis' ? 'loomisCalc' : button.dataset.open === 'forex' ? 'forexCalc' : button.dataset.open === 'superrich' ? 'superrichCalc' : button.dataset.open === 'tavex' ? 'tavexCalc' : button.dataset.open));
     });
     translatePage();
 
@@ -303,7 +334,7 @@ function calculate() {
   }).join("");
 
   document.querySelectorAll("[data-open]").forEach((button) => {
-    button.addEventListener("click", () => showPage(button.dataset.open === 'revolut' ? 'revolutCalc' : button.dataset.open === 'wise' ? 'wiseCalc' : button.dataset.open === 'visa' ? 'visaCalc' : button.dataset.open === 'mastercard' ? 'mastercardCalc' : button.dataset.open === 'loomis' ? 'loomisCalc' : button.dataset.open === 'forex' ? 'forexCalc' : button.dataset.open === 'tavex' ? 'tavexCalc' : button.dataset.open));
+    button.addEventListener("click", () => showPage(button.dataset.open === 'revolut' ? 'revolutCalc' : button.dataset.open === 'wise' ? 'wiseCalc' : button.dataset.open === 'visa' ? 'visaCalc' : button.dataset.open === 'mastercard' ? 'mastercardCalc' : button.dataset.open === 'loomis' ? 'loomisCalc' : button.dataset.open === 'forex' ? 'forexCalc' : button.dataset.open === 'superrich' ? 'superrichCalc' : button.dataset.open === 'tavex' ? 'tavexCalc' : button.dataset.open));
   });
   translatePage();
 }
@@ -702,6 +733,74 @@ function calculateCashDetails(method, title) {
 }
 
 
+function calculateSuperrichDetails() {
+  const cfg = data.superrich || { place: "SuperRich Thailand", rate: 0, fixedDkk: 0 };
+  const eurThb = cfg.rate || 0;
+  const feeDkk = cfg.fixedDkk || 0;
+  const eurPerDkk = eurPerDkkRate();
+  const dkkPerEur = dkkPerEurRate();
+
+  let wantedCashThb;
+  let eurCash;
+  let beforeFeesDkk;
+  let finalTotalDkk;
+
+  if (lastEditedCurrency === "thb") {
+    wantedCashThb = parseNumber(document.getElementById("bestThb").value);
+    eurCash = eurThb > 0 ? wantedCashThb / eurThb : 0;
+    beforeFeesDkk = eurPerDkk > 0 ? eurCash / eurPerDkk : 0;
+    finalTotalDkk = beforeFeesDkk + feeDkk;
+  } else {
+    const dkk = amountToDkk(parseNumber(document.getElementById("dkkAmount").value));
+    beforeFeesDkk = Math.max(0, dkk - feeDkk);
+    eurCash = beforeFeesDkk * eurPerDkk;
+    wantedCashThb = eurCash * eurThb;
+    finalTotalDkk = beforeFeesDkk + feeDkk;
+  }
+
+  setText("superrichCalcSubtitle", `${formatNumber(wantedCashThb)} THB kontant`);
+  const totalEl = document.getElementById("superrichCalcTotal");
+  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>Total pris</span>`;
+
+  setText("superrichCalcCash", formatNumber(wantedCashThb));
+  setText("superrichCalcEur", `${formatNumber(eurCash)} EUR`);
+  setText("superrichCalcRate", formatDecimal(eurThb));
+  setText("superrichCalcFees", formatNumber(feeDkk));
+
+  setText("superrichLineWanted", `${formatNumber(wantedCashThb)} THB`);
+  setText("superrichLineRate", `${formatDecimal(eurThb)} THB/EUR`);
+  setText("superrichLineEur", `${formatNumber(eurCash)} EUR`);
+  setText("superrichLineDkkEur", `${formatDecimal(dkkPerEur)} DKK/EUR`);
+  setText("superrichLineBeforeFees", `${formatNumber(beforeFeesDkk)} DKK`);
+  setText("superrichLineFixed", `${formatNumber(feeDkk)} DKK`);
+  setTotalFeeLine("superrichLineTotalFee", feeDkk);
+  setText("superrichLineFinalTotal", `${formatNumber(finalTotalDkk)} DKK`);
+
+  const formula = document.getElementById("superrichFormula");
+  if (formula) {
+    if (lastEditedCurrency === "thb") {
+      formula.innerHTML = `
+        <strong>1.</strong> Du har valgt ${formatNumber(wantedCashThb)} THB på forsiden.<br>
+        <strong>2.</strong> SuperRich kurs: ${formatDecimal(eurThb)} THB/EUR.<br>
+        <strong>3.</strong> EUR behov: ${formatNumber(wantedCashThb)} / ${formatDecimal(eurThb)} = ${formatNumber(eurCash)} EUR.<br>
+        <strong>4.</strong> DKK pris: ${formatNumber(eurCash)} EUR × ${formatDecimal(dkkPerEur)} = ${formatNumber(beforeFeesDkk)} DKK.<br>
+        <strong>5.</strong> Gebyr: ${formatNumber(feeDkk)} DKK.<br>
+        <strong>6.</strong> Total pris: ${formatNumber(beforeFeesDkk)} + ${formatNumber(feeDkk)} = ${formatNumber(finalTotalDkk)} DKK.
+      `;
+    } else {
+      const dkk = amountToDkk(parseNumber(document.getElementById("dkkAmount").value));
+      formula.innerHTML = `
+        <strong>1.</strong> Der bruges ${formatNumber(dkk)} DKK som udgangspunkt.<br>
+        <strong>2.</strong> Gebyr trækkes fra: ${formatNumber(feeDkk)} DKK.<br>
+        <strong>3.</strong> EUR kontanter: ${formatNumber(beforeFeesDkk)} DKK / ${formatDecimal(dkkPerEur)} = ${formatNumber(eurCash)} EUR.<br>
+        <strong>4.</strong> SuperRich kurs: ${formatDecimal(eurThb)} THB/EUR.<br>
+        <strong>5.</strong> ${formatNumber(eurCash)} × ${formatDecimal(eurThb)} = ${formatNumber(wantedCashThb)} THB.<br>
+        <strong>6.</strong> Total pris: ${formatNumber(beforeFeesDkk)} + ${formatNumber(feeDkk)} = ${formatNumber(finalTotalDkk)} DKK.
+      `;
+    }
+  }
+}
+
 function calculateLoomisDetails() {
   calculateCashDetails("loomis", "Loomis");
 }
@@ -725,6 +824,7 @@ function methodTitle(method) {
     mastercard: "Mastercard-indstillinger",
     loomis: "Loomis-indstillinger",
     forex: "FOREX-indstillinger",
+    superrich: "SuperRich-indstillinger",
     tavex: "Tavex-indstillinger"
   };
   const enTitles = {
@@ -734,6 +834,7 @@ function methodTitle(method) {
     mastercard: "Mastercard settings",
     loomis: "Loomis settings",
     forex: "FOREX settings",
+    superrich: "SuperRich settings",
     tavex: "Tavex settings"
   };
   const titles = currentLanguage() === "en" ? enTitles : daTitles;

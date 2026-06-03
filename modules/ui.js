@@ -1,6 +1,6 @@
-// ATM Cash v1.1 - user interface, filters, accordions and startup
+// ATM Cash v1.32 - user interface, filters, accordions and startup
 function setupEmbeddedSettings() {
-  const methods = ["revolut", "wise", "visa", "mastercard", "loomis", "forex", "tavex"];
+  const methods = ["revolut", "wise", "visa", "mastercard", "loomis", "forex", "superrich", "tavex"];
 
   methods.forEach((method) => {
     const calcPage = document.getElementById(`${method}CalcPage`);
@@ -94,6 +94,7 @@ function syncFilters() {
     filterMastercard: "mastercard",
     filterLoomis: "loomis",
     filterForex: "forex",
+    filterSuperrich: "superrich",
     filterTavex: "tavex"
   };
 
@@ -236,6 +237,16 @@ async function init() {
   const openFOREXSettings = document.getElementById("openFOREXSettings");
   if (openFOREXSettings) {
     openFOREXSettings.addEventListener("click", () => showPage("forex"));
+  }
+
+  const editSuperrichSettingsBtn = document.getElementById("editSuperrichSettingsBtn");
+  if (editSuperrichSettingsBtn) {
+    editSuperrichSettingsBtn.addEventListener("click", () => showPage("superrich"));
+  }
+
+  const openSuperrichSettings = document.getElementById("openSuperrichSettings");
+  if (openSuperrichSettings) {
+    openSuperrichSettings.addEventListener("click", () => showPage("superrich"));
   }
 
   const editTavexSettingsBtn = document.getElementById("editTavexSettingsBtn");
