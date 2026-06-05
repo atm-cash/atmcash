@@ -160,12 +160,12 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v2.3";
+const RATE_VERSION = "v2.4";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.
 const FALLBACK_RATES = {
-  revolut: 5.0340,
+  revolut: 5.0314,
   wise: 5.07720,
   visa: 5.040756,
   mastercard: 5.040382949333,
@@ -175,7 +175,7 @@ const FALLBACK_RATES = {
 };
 
 const PROVIDER_RATE_SOURCES = {
-  revolut: "https://www.revolut.com/da-DK/currency-converter/convert-dkk-to-thb-exchange-rate/?amount=3000",
+  revolut: "https://www.revolut.com/da-DK/currency-converter/convert-dkk-to-thb-exchange-rate/?amount=2500",
   wise: "https://wise.com/dk/currency-converter/dkk-to-thb-rate?amount=1",
   forex: "https://www.forexvaluta.dk/valuta/thb/",
   tavex: "https://tavex.dk/valuta-prisliste/",
@@ -212,14 +212,25 @@ function rateFromDkkPerThb(dkkPerThb) {
 }
 
 async function fetchProviderText(url) {
-  const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-  try {
-    const direct = await fetch(url, { cache: "no-store" });
-    if (direct.ok) return await direct.text();
-  } catch {}
-  const response = await fetch(proxied, { cache: "no-store" });
-  if (!response.ok) throw new Error("Provider page could not be read");
-  return await response.text();
+  const noCacheUrl = url + (url.includes("?") ? "&" : "?") + "atmCashTs=" + Date.now();
+  const sources = [
+    noCacheUrl,
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(noCacheUrl)}`,
+    `https://corsproxy.io/?${encodeURIComponent(noCacheUrl)}`
+  ];
+
+  let lastError = null;
+  for (const source of sources) {
+    try {
+      const response = await fetch(source, { cache: "no-store" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const text = await response.text();
+      if (text && text.length > 200) return text;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw lastError || new Error("Provider page could not be read");
 }
 
 function parseDkkToThbRate(html) {
