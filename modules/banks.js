@@ -160,12 +160,12 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v2.1";
+const RATE_VERSION = "v2.3";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.
 const FALLBACK_RATES = {
-  revolut: 5.04747,
+  revolut: 5.0340,
   wise: 5.07720,
   visa: 5.040756,
   mastercard: 5.040382949333,
@@ -175,7 +175,7 @@ const FALLBACK_RATES = {
 };
 
 const PROVIDER_RATE_SOURCES = {
-  revolut: "https://www.revolut.com/da-DK/currency-converter/convert-dkk-to-thb-exchange-rate/?amount=1",
+  revolut: "https://www.revolut.com/da-DK/currency-converter/convert-dkk-to-thb-exchange-rate/?amount=3000",
   wise: "https://wise.com/dk/currency-converter/dkk-to-thb-rate?amount=1",
   forex: "https://www.forexvaluta.dk/valuta/thb/",
   tavex: "https://tavex.dk/valuta-prisliste/",
@@ -225,21 +225,52 @@ async function fetchProviderText(url) {
 function parseDkkToThbRate(html) {
   const text = String(html).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
   const patterns = [
-    /(?:kr\s*)?1\s*DKK\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i,
-    /1\s*(?:kr\.|DKK)\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i,
-    /1\s*Dansk(?:e)?\s*krone\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i,
-    /100\s*DKK\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i,
-    /1000\s*DKK\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i
+    { re: /(?:kr\s*)?1\s*DKK\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i, amount: 1 },
+    { re: /1\s*(?:kr\.|kr|DKK)\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i, amount: 1 },
+    { re: /1\s*Dansk(?:e)?\s*krone\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i, amount: 1 },
+    { re: /100\s*DKK\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i, amount: 100 },
+    { re: /1000\s*DKK\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i, amount: 1000 },
+    { re: /3000\s*(?:kr\.|kr|DKK)[\s\S]{0,250}?([\d.,]+)\s*(?:THB|฿)/i, amount: 3000 }
   ];
-  for (const pattern of patterns) {
-    const match = text.match(pattern);
+  for (const item of patterns) {
+    const match = text.match(item.re);
     if (!match) continue;
     const raw = parseRateNumber(match[1]);
-    if (raw > 50 && pattern.source.startsWith("1000")) return raw / 1000;
-    if (raw > 10 && pattern.source.startsWith("100")) return raw / 100;
-    if (raw > 3 && raw < 7) return raw;
+    const rate = item.amount === 1 ? raw : raw / item.amount;
+    if (rate > 3 && rate < 7) return rate;
   }
   return 0;
+}
+
+function parseRevolutRate(html) {
+  const text = String(html).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+
+  // Revolut må kun bruge Revoluts egen viste kurs.
+  // Den generelle DKK→THB SEO/markedsrate på siden kan være højere end den viste Revolut-kurs
+  // og må derfor ikke bruges til ATM Cash.
+  const currentRatePatterns = [
+    /(?:Vores\s+nuværende\s+kurs|Our\s+current\s+rate)[\s\S]{0,160}?1\s*(?:kr\.|kr|DKK)\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i,
+    /1\s*(?:kr\.|kr|DKK)\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)[\s\S]{0,160}?(?:Ingen\s+gebyrer|No\s+fees)/i
+  ];
+
+  for (const pattern of currentRatePatterns) {
+    const match = text.match(pattern);
+    if (!match) continue;
+    const rate = parseRateNumber(match[1]);
+    if (rate > 3 && rate < 7) return rate;
+  }
+
+  // Fallback kun til Revoluts egen converter-boks: DKK-beløb og THB-beløb.
+  // Eksempel: 3.000 kr. → 15.102,13 ฿ = 5,0340.
+  const converterPair = text.match(/(?:Beløb|Amount)[\s\S]{0,220}?([\d.,]+)\s*(?:kr\.|kr|DKK)[\s\S]{0,220}?(?:Vekslet\s+til|Converted\s+to)[\s\S]{0,220}?([\d.,]+)\s*(?:THB|฿)/i);
+  if (converterPair) {
+    const dkk = parseRateNumber(converterPair[1]);
+    const thb = parseRateNumber(converterPair[2]);
+    const rate = dkk > 0 ? thb / dkk : 0;
+    if (rate > 3 && rate < 7) return rate;
+  }
+
+  throw new Error("Revolut displayed rate not found");
 }
 
 function parseForexRate(html) {
@@ -261,7 +292,8 @@ function parseTavexRate(html) {
 async function fetchOneProviderRate(provider) {
   const html = await fetchProviderText(PROVIDER_RATE_SOURCES[provider]);
   let rate = 0;
-  if (provider === "forex") rate = parseForexRate(html);
+  if (provider === "revolut") rate = parseRevolutRate(html);
+  else if (provider === "forex") rate = parseForexRate(html);
   else if (provider === "tavex") rate = parseTavexRate(html);
   else rate = parseDkkToThbRate(html);
   if (!rate || rate < 3 || rate > 7) throw new Error(`Invalid ${provider} rate`);
@@ -288,11 +320,12 @@ async function fetchProviderRates() {
   }
 
   for (const provider of providers) {
-    if (!data.providerRates[provider]?.rate) {
+    if (!data.providerRates[provider]?.rate || data.providerRates[provider]?.updatedAtHour !== hourlyKey()) {
+      const previous = data.providerRates[provider]?.rate;
       data.providerRates[provider] = {
-        rate: FALLBACK_RATES[provider],
-        source: "fallback",
-        updatedAtHour: hourlyKey(),
+        rate: previous || FALLBACK_RATES[provider],
+        source: previous ? "stale" : "fallback",
+        updatedAtHour: previous ? (data.providerRates[provider]?.updatedAtHour || "") : hourlyKey(),
         ok: false
       };
     }
@@ -315,6 +348,16 @@ function updateRateStatus() {
     const updated = formatRateUpdateTime(data.market.updatedAtHour || data.market.date);
     el.appendChild(document.createElement("br"));
     el.appendChild(document.createTextNode(en ? `Last updated ${updated}` : `Sidst opdateret ${updated}`));
+  }
+
+  const revolutInfo = data.providerRates?.revolut;
+  if (revolutInfo) {
+    el.appendChild(document.createElement("br"));
+    if (revolutInfo.ok) {
+      el.appendChild(document.createTextNode(en ? "Revolut: live rate" : "Revolut: live kurs"));
+    } else {
+      el.appendChild(document.createTextNode(en ? "Revolut: source failed, using saved rate" : "Revolut: kilde fejlede, bruger gemt kurs"));
+    }
   }
   updateConverterStatus();
 }
