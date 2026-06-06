@@ -160,7 +160,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v2.4";
+const RATE_VERSION = "v2.5";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.
@@ -333,6 +333,19 @@ async function fetchProviderRates() {
   for (const provider of providers) {
     if (!data.providerRates[provider]?.rate || data.providerRates[provider]?.updatedAtHour !== hourlyKey()) {
       const previous = data.providerRates[provider]?.rate;
+
+      // Vigtigt: Revolut må ikke fastholde en gammel kurs, fordi den så ser korrekt ud
+      // den første dag og bliver forkert når Revolut ændrer kurs.
+      if (provider === "revolut") {
+        data.providerRates[provider] = {
+          rate: FALLBACK_RATES.revolut,
+          source: "fallback",
+          updatedAtHour: "",
+          ok: false
+        };
+        continue;
+      }
+
       data.providerRates[provider] = {
         rate: previous || FALLBACK_RATES[provider],
         source: previous ? "stale" : "fallback",
@@ -344,7 +357,15 @@ async function fetchProviderRates() {
 }
 
 function providerRate(provider) {
-  return data.providerRates?.[provider]?.rate || FALLBACK_RATES[provider];
+  const info = data.providerRates?.[provider];
+  if (provider === "revolut") {
+    // Revolut må ikke genbruge en gammel/stale kurs.
+    // Enten har vi en live-kurs fra Revolut i den aktuelle 10-minutters periode,
+    // eller også bruges fallback tydeligt markeret som fejlet kilde.
+    if (info?.ok === true && info.updatedAtHour === hourlyKey() && info.rate > 3 && info.rate < 7) return info.rate;
+    return FALLBACK_RATES.revolut;
+  }
+  return info?.rate || FALLBACK_RATES[provider];
 }
 
 function updateRateStatus() {
@@ -432,6 +453,12 @@ function applyMarketRates() {
 
 async function updateMarketRateIfNeeded() {
   ensureVisibleMethods();
+
+  // Ryd gammel Revolut-cache fra tidligere versioner. Den var årsagen til,
+  // at appen blev hængende på f.eks. 5,034 selv om Revolut viste 5,0314.
+  if (data.providerRates?.revolut && (data.providerRates.revolut.ok !== true || data.providerRates.revolut.updatedAtHour !== hourlyKey())) {
+    delete data.providerRates.revolut;
+  }
 
   if (data.market?.rateVersion !== RATE_VERSION) {
     data.providerRates = {};
