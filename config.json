@@ -3,7 +3,7 @@
     "rate": 5.057,
     "date": "",
     "source": "standard",
-    "rateVersion": "v2.5",
+    "rateVersion": "v2.6",
     "rates": {
       "DKK": 1,
       "THB": 5.057,
@@ -17,9 +17,10 @@
   "revolut": {
     "plan": "Premium",
     "limit": 3000,
-    "rate": 5.0314,
+    "rate": 0,
     "atm": 220,
-    "over": 2
+    "over": 2,
+    "rateUnavailable": true
   },
   "wise": {
     "limit": 1800,
@@ -71,8 +72,8 @@
   },
   "providerRates": {
     "revolut": {
-      "rate": 5.0314,
-      "source": "fallback",
+      "rate": 0,
+      "source": "unavailable",
       "updatedAtHour": "",
       "ok": false
     },
