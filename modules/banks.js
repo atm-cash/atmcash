@@ -160,12 +160,13 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v2.5";
+const RATE_VERSION = "v2.6";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.
+// Revolut has no fallback: it must be live from Revolut or unavailable.
 const FALLBACK_RATES = {
-  revolut: 5.0314,
+  revolut: 0,
   wise: 5.07720,
   visa: 5.040756,
   mastercard: 5.040382949333,
@@ -334,12 +335,12 @@ async function fetchProviderRates() {
     if (!data.providerRates[provider]?.rate || data.providerRates[provider]?.updatedAtHour !== hourlyKey()) {
       const previous = data.providerRates[provider]?.rate;
 
-      // Vigtigt: Revolut må ikke fastholde en gammel kurs, fordi den så ser korrekt ud
-      // den første dag og bliver forkert når Revolut ændrer kurs.
+      // Vigtigt: Revolut må aldrig bruge fallback eller gammel cache som rigtig kurs.
+      // Enten er der en live-kurs i denne 10-minutters periode, eller metoden er utilgængelig.
       if (provider === "revolut") {
         data.providerRates[provider] = {
-          rate: FALLBACK_RATES.revolut,
-          source: "fallback",
+          rate: 0,
+          source: "unavailable",
           updatedAtHour: "",
           ok: false
         };
@@ -356,14 +357,16 @@ async function fetchProviderRates() {
   }
 }
 
+function isRevolutLiveRateAvailable() {
+  const info = data.providerRates?.revolut;
+  return info?.ok === true && info.updatedAtHour === hourlyKey() && info.rate > 3 && info.rate < 7;
+}
+
 function providerRate(provider) {
   const info = data.providerRates?.[provider];
   if (provider === "revolut") {
-    // Revolut må ikke genbruge en gammel/stale kurs.
-    // Enten har vi en live-kurs fra Revolut i den aktuelle 10-minutters periode,
-    // eller også bruges fallback tydeligt markeret som fejlet kilde.
-    if (info?.ok === true && info.updatedAtHour === hourlyKey() && info.rate > 3 && info.rate < 7) return info.rate;
-    return FALLBACK_RATES.revolut;
+    // Ingen fallback. Ingen gammel cache. Ingen hardcoded Revolut-kurs.
+    return isRevolutLiveRateAvailable() ? info.rate : 0;
   }
   return info?.rate || FALLBACK_RATES[provider];
 }
@@ -388,7 +391,7 @@ function updateRateStatus() {
     if (revolutInfo.ok) {
       el.appendChild(document.createTextNode(en ? "Revolut: live rate" : "Revolut: live kurs"));
     } else {
-      el.appendChild(document.createTextNode(en ? "Revolut: source failed, using saved rate" : "Revolut: kilde fejlede, bruger gemt kurs"));
+      el.appendChild(document.createTextNode(en ? "Revolut: live rate unavailable" : "Revolut: live kurs utilgængelig"));
     }
   }
   updateConverterStatus();
@@ -414,6 +417,7 @@ function applyMarketRates() {
 
   data.revolut.referenceMargin = 0;
   data.revolut.rate = providerRate("revolut");
+  data.revolut.rateUnavailable = !isRevolutLiveRateAvailable();
 
   data.wise.referenceMargin = 0;
   data.wise.rate = providerRate("wise");
@@ -454,10 +458,14 @@ function applyMarketRates() {
 async function updateMarketRateIfNeeded() {
   ensureVisibleMethods();
 
-  // Ryd gammel Revolut-cache fra tidligere versioner. Den var årsagen til,
-  // at appen blev hængende på f.eks. 5,034 selv om Revolut viste 5,0314.
-  if (data.providerRates?.revolut && (data.providerRates.revolut.ok !== true || data.providerRates.revolut.updatedAtHour !== hourlyKey())) {
+  // Ryd gammel Revolut-cache fra tidligere versioner.
+  // Revolut må ikke starte på gammel/fallback kurs, før live-kilden er læst.
+  if (data.providerRates?.revolut && !isRevolutLiveRateAvailable()) {
     delete data.providerRates.revolut;
+    if (data.revolut) {
+      data.revolut.rate = 0;
+      data.revolut.rateUnavailable = true;
+    }
   }
 
   if (data.market?.rateVersion !== RATE_VERSION) {
