@@ -1,9 +1,9 @@
-// ATM Cash v3.5 - conversions, defaults, config, language and currency helpers
+// ATM Cash v2.5 - conversions, defaults, config, language and currency helpers
 let defaults = {
-  market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v3.5", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
+  market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v2.3", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
   language: "da",
-  revolut: { plan: "Premium", limit: 3000, rate: 5.0281, manualRate: 5.0281, rateSource: "manual", atm: 220, over: 2, rateUnavailable: false },
+  revolut: { plan: "Premium", limit: 3000, rate: 5.05441, atm: 220, over: 2 },
   wise: { limit: 1800, rate: 5.05441, atm: 220, over: 2.69 },
   visa: { bank: "Danske Bank", type: "Visa Debit", rawRate: 5.040756, rate: 4.965145, spread: 1.5, percent: 1, fixedDkk: 30, atm: 220 },
   mastercard: { bank: "Danske Bank", type: "Mastercard Debit", rate: 5.040382949333, spread: 0.329, percent: 1.75, fixedDkk: 0, atm: 220 },
@@ -272,21 +272,6 @@ function loadData() {
       loaded.forex.delivery = 0;
       loaded.forex.other = 0;
     }
-    // v3.5: Al kurs er manuel. Gammel live/cache slettes helt.
-    delete loaded.providerRates;
-    if (loaded.revolut) {
-      loaded.revolut.manualRate = Number(loaded.revolut.manualRate || loaded.revolut.rate || defaults.revolut.manualRate || 0);
-      loaded.revolut.rate = loaded.revolut.manualRate;
-      loaded.revolut.rateSource = loaded.revolut.manualRate > 3 ? "manual" : "unavailable";
-      loaded.revolut.rateUnavailable = !(loaded.revolut.manualRate > 3);
-    }
-    if (loaded.visa) {
-      loaded.visa.rawRate = Number(loaded.visa.rawRate || loaded.visa.rate || defaults.visa.rawRate || defaults.visa.rate || 0);
-    }
-    if (loaded.market) {
-      loaded.market.source = "manual";
-      loaded.market.rateVersion = "v3.5";
-    }
     return loaded;
   } catch {
     return clone(defaults);
@@ -365,7 +350,10 @@ function updateConverterStatus() {
   const el = document.getElementById("converterRateStatus");
   if (!el) return;
   const en = currentLanguage() === "en";
-  el.textContent = en ? "Manual rates · no live fetching" : "Manuelle kurser · ingen live-hentning";
+  const updated = formatRateUpdateTime(data.market?.updatedAtHour || data.market?.date);
+  el.textContent = updated
+    ? (en ? `Rates update every 10 minutes Last updated ${updated}` : `Kurser opdateres hvert 10 minut Sidst opdateret ${updated}`)
+    : (en ? "Rates update every 10 minutes" : "Kurser opdateres hvert 10 minut");
 }
 
 function updateConverterFrom(currency) {
