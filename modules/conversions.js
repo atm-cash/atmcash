@@ -1,4 +1,4 @@
-// ATM Cash v2.6 - conversions, defaults, config, language and currency helpers
+// ATM Cash v2.7 - conversions, defaults, config, language and currency helpers
 let defaults = {
   market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v2.3", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
@@ -272,7 +272,7 @@ function loadData() {
       loaded.forex.delivery = 0;
       loaded.forex.other = 0;
     }
-    // v2.6: Fjern gamle Revolut-kurser fra localStorage.
+    // v2.7: Fjern gamle Revolut-kurser fra localStorage.
     // Revolut må kun vise live-kurs fra Revolut-kilden.
     if (loaded.revolut) {
       loaded.revolut.rate = 0;

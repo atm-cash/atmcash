@@ -160,7 +160,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v2.6";
+const RATE_VERSION = "v2.7";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.
@@ -176,7 +176,7 @@ const FALLBACK_RATES = {
 };
 
 const PROVIDER_RATE_SOURCES = {
-  revolut: "https://www.revolut.com/da-DK/currency-converter/convert-dkk-to-thb-exchange-rate/?amount=2500",
+  revolut: "https://www.revolut.com/currency-converter/convert-dkk-to-thb-exchange-rate/?amount=1000",
   wise: "https://wise.com/dk/currency-converter/dkk-to-thb-rate?amount=1",
   forex: "https://www.forexvaluta.dk/valuta/thb/",
   tavex: "https://tavex.dk/valuta-prisliste/",
@@ -261,8 +261,13 @@ function parseRevolutRate(html) {
   // Den generelle DKK→THB SEO/markedsrate på siden kan være højere end den viste Revolut-kurs
   // og må derfor ikke bruges til ATM Cash.
   const currentRatePatterns = [
-    /(?:Vores\s+nuværende\s+kurs|Our\s+current\s+rate)[\s\S]{0,160}?1\s*(?:kr\.|kr|DKK)\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i,
-    /1\s*(?:kr\.|kr|DKK)\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)[\s\S]{0,160}?(?:Ingen\s+gebyrer|No\s+fees)/i
+    // Dansk side kan vise: "Vores nuværende kurs 1 kr. = 5,0281 ฿"
+    /(?:Vores\s+nuværende\s+kurs|Our\s+current\s+rate)[\s\S]{0,220}?1\s*(?:kr\.|kr|DKK)\s*[=|:]?\s*(?:฿|THB)?\s*([\d.,]+)/i,
+    // Revoluts server-HTML/search snippet kan vise: "Our current rate kr. 1 = ฿5.0281"
+    /(?:Vores\s+nuværende\s+kurs|Our\s+current\s+rate)[\s\S]{0,220}?(?:kr\.|kr|DKK)\s*1\s*[=|:]?\s*(?:฿|THB)?\s*([\d.,]+)/i,
+    // Ekstra sikkerhed hvis overskriften mangler tæt på converter-boksen
+    /1\s*(?:kr\.|kr|DKK)\s*[=|:]?\s*(?:฿|THB)?\s*([\d.,]+)[\s\S]{0,220}?(?:Ingen\s+gebyrer|Yderligere\s+gebyrer|No\s+fees|Additional\s+fees)/i,
+    /(?:kr\.|kr|DKK)\s*1\s*[=|:]?\s*(?:฿|THB)?\s*([\d.,]+)[\s\S]{0,220}?(?:Ingen\s+gebyrer|Yderligere\s+gebyrer|No\s+fees|Additional\s+fees)/i
   ];
 
   for (const pattern of currentRatePatterns) {
@@ -274,8 +279,15 @@ function parseRevolutRate(html) {
 
   // Fallback kun til Revoluts egen converter-boks: DKK-beløb og THB-beløb.
   // Eksempel: 3.000 kr. → 15.102,13 ฿ = 5,0340.
-  const converterPair = text.match(/(?:Beløb|Amount)[\s\S]{0,220}?([\d.,]+)\s*(?:kr\.|kr|DKK)[\s\S]{0,220}?(?:Vekslet\s+til|Converted\s+to)[\s\S]{0,220}?([\d.,]+)\s*(?:THB|฿)/i);
-  if (converterPair) {
+  const converterPatterns = [
+    // "Beløb DKK 1.000kr. ... Vekslet til THB 5.028,14฿"
+    /(?:Beløb|Amount)[\s\S]{0,260}?(?:DKK)?\s*([\d.,]+)\s*(?:kr\.|kr|DKK)[\s\S]{0,260}?(?:Vekslet\s+til|Converted\s+to)[\s\S]{0,260}?(?:THB)?\s*([\d.,]+)\s*(?:THB|฿)/i,
+    // "Amount DKK kr.1,000 Converted to THB ฿5,028.14"
+    /(?:Beløb|Amount)[\s\S]{0,260}?(?:kr\.|kr|DKK)\s*([\d.,]+)[\s\S]{0,260}?(?:Vekslet\s+til|Converted\s+to)[\s\S]{0,260}?(?:฿|THB)\s*([\d.,]+)/i
+  ];
+  for (const pattern of converterPatterns) {
+    const converterPair = text.match(pattern);
+    if (!converterPair) continue;
     const dkk = parseRateNumber(converterPair[1]);
     const thb = parseRateNumber(converterPair[2]);
     const rate = dkk > 0 ? thb / dkk : 0;
