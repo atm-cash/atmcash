@@ -3,7 +3,7 @@
     "rate": 5.057,
     "date": "",
     "source": "standard",
-    "rateVersion": "v3.0",
+    "rateVersion": "v3.1",
     "rates": {
       "DKK": 1,
       "THB": 5.057,
@@ -20,7 +20,9 @@
     "rate": 0,
     "atm": 220,
     "over": 2,
-    "rateUnavailable": true
+    "rateUnavailable": true,
+    "manualRate": 0,
+    "rateSource": "unavailable"
   },
   "wise": {
     "limit": 1800,

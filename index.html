@@ -78,7 +78,7 @@
         <button class="nav-tab" type="button" data-nav="tips"><span>ⓘ</span><strong>Tips</strong></button>
       </nav>
 
-      <div class="app-version" aria-label="Version">v3.0</div>
+      <div class="app-version" aria-label="Version">v3.1</div>
     </section>
 
 
@@ -345,6 +345,17 @@
           <div class="atm-sub">Fast gebyr ved hævning i automat</div>
         </div>
         <div class="atm-value"><input id="revolutAtm" inputmode="decimal" value="220" /><span>THB</span></div>
+      </section>
+
+
+
+      <section class="card atm-card">
+        <div class="atm-icon">↔</div>
+        <div>
+          <div class="atm-title">Revolut-kurs · THB pr. DKK</div>
+          <div class="atm-sub">Bruges kun hvis live-kurs ikke kan hentes. Sæt til 0 for ingen manuel kurs.</div>
+        </div>
+        <div class="atm-value"><input id="revolutManualRate" inputmode="decimal" value="0" /><span>THB</span></div>
       </section>
 
       <button type="button" data-save="revolut">Gem Revolut-indstillinger</button>
@@ -1283,9 +1294,9 @@
 
   </main>
 
-  <script src="modules/conversions.js?v=3.0"></script>
-  <script src="modules/banks.js?v=3.0"></script>
-  <script src="modules/methods.js?v=3.0"></script>
+  <script src="modules/conversions.js?v=3.1"></script>
+  <script src="modules/banks.js?v=3.1"></script>
+  <script src="modules/methods.js?v=3.1"></script>
   <script src="modules/calculations.js?v=3.0"></script>
   <script src="modules/ui.js?v=3.0"></script>
 </body>
