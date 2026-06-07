@@ -160,7 +160,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v2.8";
+const RATE_VERSION = "v2.9";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.
@@ -206,6 +206,44 @@ function parseRateNumber(value) {
     return Number(cleaned.replace(/\./g, "").replace(",", ".")) || 0;
   }
   return Number(cleaned.replace(",", ".")) || 0;
+}
+
+function parseRevolutRateFromAnyText(text) {
+  const clean = String(text || "").replace(/<[^>]+>/g, " ").replace(/&nbsp;|&#160;/g, " ").replace(/\s+/g, " ");
+  const patterns = [
+    /(?:Vores\s+nuværende\s+kurs|Our\s+current\s+rate)[\s\S]{0,300}?1\s*(?:kr\.|kr|DKK)\s*[=|:]?\s*(?:฿|THB)?\s*([\d.,]+)/i,
+    /(?:Vores\s+nuværende\s+kurs|Our\s+current\s+rate)[\s\S]{0,300}?(?:kr\.|kr|DKK)\s*\.?\s*1\s*[=|:]?\s*(?:฿|THB)?\s*([\d.,]+)/i,
+    /1\s*(?:kr\.|kr|DKK)\s*[=|:]?\s*(?:฿|THB)?\s*([\d.,]+)[\s\S]{0,300}?(?:Ingen\s+gebyrer|Yderligere\s+gebyrer|No\s+fees|Additional\s+fees)/i,
+    /(?:kr\.|kr|DKK)\s*\.?\s*1\s*[=|:]?\s*(?:฿|THB)?\s*([\d.,]+)[\s\S]{0,300}?(?:Ingen\s+gebyrer|Yderligere\s+gebyrer|No\s+fees|Additional\s+fees)/i
+  ];
+  for (const pattern of patterns) {
+    const match = clean.match(pattern);
+    if (!match) continue;
+    const rate = parseRateNumber(match[1]);
+    if (rate > 3 && rate < 7) return rate;
+  }
+  return 0;
+}
+
+async function fetchRevolutRateFromApi() {
+  const endpoints = [
+    `/api/revolut-rate?ts=${Date.now()}`,
+    `/.netlify/functions/revolut-rate?ts=${Date.now()}`
+  ];
+  let lastError = null;
+  for (const endpoint of endpoints) {
+    try {
+      const response = await fetch(endpoint, { cache: "no-store" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const contentType = response.headers.get("content-type") || "";
+      const body = contentType.includes("application/json") ? await response.json() : await response.text();
+      const rate = typeof body === "object" ? Number(body.rate) : parseRevolutRateFromAnyText(body);
+      if (rate > 3 && rate < 7) return rate;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw lastError || new Error("Revolut API endpoint not available");
 }
 
 function rateFromDkkPerThb(dkkPerThb) {
@@ -258,6 +296,8 @@ function parseDkkToThbRate(html) {
 }
 
 function parseRevolutRate(html) {
+  const directRate = parseRevolutRateFromAnyText(html);
+  if (directRate) return directRate;
   const text = String(html).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
 
   // Revolut må kun bruge Revoluts egen viste kurs.
@@ -317,12 +357,23 @@ function parseTavexRate(html) {
 }
 
 async function fetchOneProviderRate(provider) {
-  const html = await fetchProviderText(PROVIDER_RATE_SOURCES[provider]);
   let rate = 0;
-  if (provider === "revolut") rate = parseRevolutRate(html);
-  else if (provider === "forex") rate = parseForexRate(html);
-  else if (provider === "tavex") rate = parseTavexRate(html);
-  else rate = parseDkkToThbRate(html);
+  if (provider === "revolut") {
+    // v2.9: Revolut skal hentes via egen server/API først.
+    // Browser-scraping af revolut.com er ustabilt pga. CORS/JS-rendering.
+    // Hvis API ikke findes, prøves de gamle tekstkilder kun som ekstra mulighed.
+    try {
+      rate = await fetchRevolutRateFromApi();
+    } catch {
+      const html = await fetchProviderText(PROVIDER_RATE_SOURCES[provider]);
+      rate = parseRevolutRate(html);
+    }
+  } else {
+    const html = await fetchProviderText(PROVIDER_RATE_SOURCES[provider]);
+    if (provider === "forex") rate = parseForexRate(html);
+    else if (provider === "tavex") rate = parseTavexRate(html);
+    else rate = parseDkkToThbRate(html);
+  }
   if (!rate || rate < 3 || rate > 7) throw new Error(`Invalid ${provider} rate`);
   return rate;
 }
