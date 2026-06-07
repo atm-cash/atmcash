@@ -2,28 +2,24 @@
   "market": {
     "rate": 5.057,
     "date": "",
-    "source": "manual",
-    "rateVersion": "v3.5",
+    "source": "standard",
+    "rateVersion": "v2.5",
     "rates": {
       "DKK": 1,
       "THB": 5.057,
       "EUR": 0.134,
       "USD": 0.146,
       "GBP": 0.114
-    },
-    "updatedAtHour": ""
+    }
   },
   "homeCurrency": "DKK",
   "language": "da",
   "revolut": {
     "plan": "Premium",
     "limit": 3000,
-    "rate": 5.0281,
+    "rate": 5.0314,
     "atm": 220,
-    "over": 2,
-    "rateUnavailable": false,
-    "manualRate": 5.0281,
-    "rateSource": "manual"
+    "over": 2
   },
   "wise": {
     "limit": 1800,
@@ -38,8 +34,7 @@
     "spread": 1.5,
     "percent": 1,
     "fixedDkk": 30,
-    "atm": 220,
-    "rawRate": 5.16238
+    "atm": 220
   },
   "mastercard": {
     "bank": "Danske Bank",
@@ -73,6 +68,38 @@
     "fixedDkk": 0,
     "delivery": 50,
     "other": 0
+  },
+  "providerRates": {
+    "revolut": {
+      "rate": 5.0314,
+      "source": "fallback",
+      "updatedAtHour": "",
+      "ok": false
+    },
+    "wise": {
+      "rate": 5.0772,
+      "source": "fallback",
+      "updatedAtHour": "",
+      "ok": false
+    },
+    "forex": {
+      "rate": 4.72589,
+      "source": "fallback",
+      "updatedAtHour": "",
+      "ok": false
+    },
+    "tavex": {
+      "rate": 4.830917874396135,
+      "source": "fallback",
+      "updatedAtHour": "",
+      "ok": false
+    },
+    "loomis": {
+      "rate": 4.789071,
+      "source": "fallback",
+      "updatedAtHour": "",
+      "ok": false
+    }
   },
   "visibleMethods": [
     "revolut",
