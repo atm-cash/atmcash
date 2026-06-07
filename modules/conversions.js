@@ -1,15 +1,16 @@
-// ATM Cash v1.31 - conversions, defaults, config, language and currency helpers
+// ATM Cash v3.2 - conversions, defaults, config, language and currency helpers
 let defaults = {
-  market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v73", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
+  market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v3.2", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
   language: "da",
-  revolut: { plan: "Premium", limit: 3000, rate: 5.05441, atm: 220, over: 2 },
+  revolut: { plan: "Premium", limit: 3000, rate: 5.0281, manualRate: 5.0281, rateSource: "manual", atm: 220, over: 2, rateUnavailable: false },
   wise: { limit: 1800, rate: 5.05441, atm: 220, over: 2.69 },
   visa: { bank: "Danske Bank", type: "Visa Debit", rawRate: 5.040756, rate: 4.965145, spread: 1.5, percent: 1, fixedDkk: 30, atm: 220 },
   mastercard: { bank: "Danske Bank", type: "Mastercard Debit", rate: 5.040382949333, spread: 0.329, percent: 1.75, fixedDkk: 0, atm: 220 },
   loomis: { place: "Loomis online", rate: 4.789071, margin: 5.51, fixedDkk: 49.95, delivery: 0, other: 0 },
   forex: { place: "FOREX afhentning", rate: 4.724312730606, margin: 6.579, fixedDkk: 0, delivery: 0, other: 0 },
-  tavex: { place: "Tavex webshop", rate: 4.840271055, margin: 4.299, fixedDkk: 0, delivery: 50, other: 0 }
+  tavex: { place: "Tavex webshop", rate: 4.840271055, margin: 4.299, fixedDkk: 0, delivery: 50, other: 0 },
+  eurcash: { bank: "Nordea", exchangePlace: "SuperRich", dkkPerEur: 7.46, eurToThb: 37.95, maxDkkPerWithdrawal: 15000 }
 };
 
 let data;
@@ -35,7 +36,7 @@ const translations = {
   "↗ Resultat": "↗ Result",
   "☰ Vælg metoder": "☰ Choose methods",
   "Vælg metoder": "Choose methods",
-  "Kurser opdateres hvert 10. minut.": "Rates update every 10 minutes.",
+  "Kurser opdateres hvert 10 minut": "Rates update every 10 minutes",
   "Kurser og gebyrer er vejledende og kan ændres.": "Rates and fees are indicative and may change.",
   "Valuta": "Currency",
   "Tips": "Tips",
@@ -78,6 +79,13 @@ const translations = {
   "Loomis-indstillinger": "Loomis settings",
   "FOREX-indstillinger": "FOREX settings",
   "Tavex-indstillinger": "Tavex settings",
+  "THB modtaget": "THB received",
+  "EUR→THB kurs": "EUR→THB rate",
+  "DKK/EUR kurs": "DKK/EUR rate",
+  "Vekselsted": "Exchange office",
+  "EUR kontanter-indstillinger": "EUR cash settings",
+  "Gem EUR kontanter-indstillinger": "Save EUR cash settings",
+  "EUR kontanter": "EUR cash",
   "Gem Revolut-indstillinger": "Save Revolut settings",
   "Gem Wise-indstillinger": "Save Wise settings",
   "Gem Visa-indstillinger": "Save Visa settings",
@@ -178,8 +186,8 @@ function setLanguage(lang) {
 function translateNodeText(text) {
   if (currentLanguage() !== "en") return text;
   if (translations[text]) return translations[text];
-  if (text.startsWith("Kurser opdateres hvert 10. minut. Sidst opdateret ")) {
-    return text.replace("Kurser opdateres hvert 10. minut. Sidst opdateret ", "Rates update every 10 minutes. Last updated ");
+  if (text.startsWith("Kurser opdateres hvert 10 minut Sidst opdateret ")) {
+    return text.replace("Kurser opdateres hvert 10 minut Sidst opdateret ", "Rates update every 10 minutes Last updated ");
   }
   if (text.includes("Over grænse")) return text.replaceAll("Over grænse", "Over limit");
   if (text.includes("over grænse")) return text.replaceAll("over grænse", "over limit");
@@ -217,7 +225,7 @@ function translatePage() {
 }
 
 
-const allMethods = ["revolut", "wise", "visa", "mastercard", "loomis", "forex", "tavex"];
+const allMethods = ["revolut", "wise", "visa", "mastercard", "loomis", "forex", "tavex", "eurcash"];
 let lastEditedCurrency = "dkk";
 
 function clone(obj) {
@@ -250,9 +258,34 @@ function loadData() {
       }
       localStorage.setItem(visaDefaultOnKey, "1");
     }
+    if (!loaded.eurcash) {
+      loaded.eurcash = clone(defaults.eurcash);
+    }
+    const eurcashDefaultOnKey = "atmCashEurcashDefaultOnV20";
+    if (localStorage.getItem(eurcashDefaultOnKey) !== "1") {
+      if (Array.isArray(loaded.visibleMethods) && !loaded.visibleMethods.includes("eurcash")) {
+        loaded.visibleMethods = [...loaded.visibleMethods, "eurcash"];
+      }
+      localStorage.setItem(eurcashDefaultOnKey, "1");
+    }
     if (loaded.forex) {
       loaded.forex.delivery = 0;
       loaded.forex.other = 0;
+    }
+    // v3.2: Al kurs er manuel. Gammel live/cache slettes helt.
+    delete loaded.providerRates;
+    if (loaded.revolut) {
+      loaded.revolut.manualRate = Number(loaded.revolut.manualRate || loaded.revolut.rate || defaults.revolut.manualRate || 0);
+      loaded.revolut.rate = loaded.revolut.manualRate;
+      loaded.revolut.rateSource = loaded.revolut.manualRate > 3 ? "manual" : "unavailable";
+      loaded.revolut.rateUnavailable = !(loaded.revolut.manualRate > 3);
+    }
+    if (loaded.visa) {
+      loaded.visa.rawRate = Number(loaded.visa.rawRate || loaded.visa.rate || defaults.visa.rawRate || defaults.visa.rate || 0);
+    }
+    if (loaded.market) {
+      loaded.market.source = "manual";
+      loaded.market.rateVersion = "v3.2";
     }
     return loaded;
   } catch {
@@ -332,10 +365,7 @@ function updateConverterStatus() {
   const el = document.getElementById("converterRateStatus");
   if (!el) return;
   const en = currentLanguage() === "en";
-  const updated = formatRateUpdateTime(data.market?.updatedAtHour || data.market?.date);
-  el.textContent = updated
-    ? (en ? `Rates update every 10 minutes. Last updated ${updated}.` : `Kurser opdateres hvert 10. minut. Sidst opdateret ${updated}.`)
-    : (en ? "Rates update every 10 minutes." : "Kurser opdateres hvert 10. minut.");
+  el.textContent = en ? "Manual rates · no live fetching" : "Manuelle kurser · ingen live-hentning";
 }
 
 function updateConverterFrom(currency) {

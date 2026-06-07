@@ -1,6 +1,6 @@
-// ATM Cash v1.1 - user interface, filters, accordions and startup
+// ATM Cash v2.8 - user interface, filters, accordions and startup
 function setupEmbeddedSettings() {
-  const methods = ["revolut", "wise", "visa", "mastercard", "loomis", "forex", "tavex"];
+  const methods = ["revolut", "wise", "visa", "mastercard", "loomis", "forex", "tavex", "eurcash"];
 
   methods.forEach((method) => {
     const calcPage = document.getElementById(`${method}CalcPage`);
@@ -94,7 +94,8 @@ function syncFilters() {
     filterMastercard: "mastercard",
     filterLoomis: "loomis",
     filterForex: "forex",
-    filterTavex: "tavex"
+    filterTavex: "tavex",
+    filterEurcash: "eurcash"
   };
 
   Object.entries(map).forEach(([id, method]) => {
@@ -247,6 +248,22 @@ async function init() {
   if (openTavexSettings) {
     openTavexSettings.addEventListener("click", () => showPage("tavex"));
   }
+
+
+  const editEurcashSettingsBtn = document.getElementById("editEurcashSettingsBtn");
+  if (editEurcashSettingsBtn) {
+    editEurcashSettingsBtn.addEventListener("click", () => showPage("eurcash"));
+  }
+
+  const openEurcashSettings = document.getElementById("openEurcashSettings");
+  if (openEurcashSettings) {
+    openEurcashSettings.addEventListener("click", () => showPage("eurcash"));
+  }
+
+  ["eurcashDkkPerEur", "eurcashEurToThb", "eurcashMaxDkk"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("input", calculateEurcashDetails);
+  });
 
   document.querySelectorAll(".language-toggle[data-lang]").forEach((btn) => {
     btn.addEventListener("click", () => setLanguage(btn.dataset.lang));

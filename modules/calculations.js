@@ -1,4 +1,4 @@
-// ATM Cash v1.31 - price calculations and detail views
+// ATM Cash v2.8 - price calculations and detail views
 // v1.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
@@ -34,11 +34,23 @@ function cashSupplierFees(method, wantedThb = 0) {
   return { fixed: cfg.fixedDkk || 0, delivery, other: cfg.other || 0 };
 }
 
+function dkkPerEurRate() {
+  const eurPerDkk = getCurrencyRates().EUR || 0.134;
+  return eurPerDkk > 0 ? 1 / eurPerDkk : 7.46;
+}
+
+function eurcashEffectiveRate(cfg) {
+  const dkkPerEur = cfg?.dkkPerEur || dkkPerEurRate();
+  const eurToThb = cfg?.eurToThb || 37.95;
+  return dkkPerEur > 0 ? eurToThb / dkkPerEur : 0;
+}
+
 function calculateResults(dkk) {
   applyVisaBankPresetToData();
   const revolut = data.revolut;
+  const revolutAvailable = revolut.rate > 3 && revolut.rate < 7 && revolut.rateUnavailable !== true;
   const revolutOver = Math.max(0, dkk - revolut.limit);
-  const revolutThb = dkk * revolut.rate - revolutOver * revolut.rate * (revolut.over / 100) - revolut.atm;
+  const revolutThb = revolutAvailable ? (dkk * revolut.rate - revolutOver * revolut.rate * (revolut.over / 100) - revolut.atm) : -Infinity;
 
   const wise = data.wise;
   const wiseOver = Math.max(0, dkk - wise.limit);
@@ -63,14 +75,19 @@ function calculateResults(dkk) {
   const tavexFees = cashSupplierFees("tavex");
   const tavexThb = Math.max(0, (dkk - tavexFees.fixed - tavexFees.delivery - tavexFees.other) * tavexRate);
 
+  const eurcash = data.eurcash || {};
+  const eurcashRate = eurcashEffectiveRate(eurcash);
+  const eurcashThb = Math.max(0, dkk * eurcashRate);
+
   return [
-    { id: "revolut", logoText: "R", logoClass: "revolut-logo", name: "Revolut", sub: `${revolut.plan} · ATM ${revolut.atm} THB`, thb: revolutThb },
+    { id: "revolut", logoText: "R", logoClass: "revolut-logo", name: "Revolut", sub: revolutAvailable ? `${revolut.plan} · manuel kurs · ATM ${revolut.atm} THB` : "Manuel kurs mangler", thb: revolutThb },
     { id: "wise", logoText: "W", logoClass: "wise-logo", name: "Wise", sub: `Over grænse ${formatDecimal(wise.over)}% · ATM ${wise.atm} THB`, thb: wiseThb },
     { id: "visa", logoText: "VISA", logoClass: "visa-logo", name: "Visa", sub: `${visa.bank} · ${formatDecimal(visa.percent)}%`, thb: visaThb },
     { id: "mastercard", logoText: "", logoClass: "mastercard-logo", name: "Mastercard", sub: `${mastercard.bank} · ${formatDecimal(mastercard.percent)}%`, thb: mastercardThb },
     { id: "loomis", logoText: "L", logoClass: "loomis-logo", name: "Loomis", sub: "Kontanter hjemmefra", thb: loomisThb },
     { id: "forex", logoText: "FOREX", logoClass: "forex-logo", name: "FOREX", sub: "Kontanter hjemmefra", thb: forexThb },
-    { id: "tavex", logoText: "TAVEX", logoClass: "tavex-logo", name: "Tavex", sub: "Kontanter hjemmefra", thb: tavexThb }
+    { id: "tavex", logoText: "TAVEX", logoClass: "tavex-logo", name: "Tavex", sub: "Kontanter hjemmefra", thb: tavexThb },
+    { id: "eurcash", logoText: "€", logoClass: "eurcash-logo", name: "EUR kontanter", sub: `${eurcash.exchangePlace || "SuperRich"} · ${formatDecimal(eurcash.eurToThb || 37.95)} THB/EUR`, thb: eurcashThb }
   ].sort((a, b) => b.thb - a.thb);
 }
 
@@ -193,6 +210,12 @@ function costForTargetThb(method, targetThb) {
     return high;
   }
 
+  if (method === "eurcash") {
+    const c = data.eurcash || {};
+    const rate = eurcashEffectiveRate(c);
+    return { dkkCost: rate > 0 ? targetThb / rate : Infinity, thb: targetThb };
+  }
+
   if (method === "visa" || method === "mastercard") {
     const c = data[method];
     const atm = c.atm || 0;
@@ -268,7 +291,7 @@ function calculate() {
     }).join("");
 
     document.querySelectorAll("[data-open]").forEach((button) => {
-      button.addEventListener("click", () => showPage(button.dataset.open === 'revolut' ? 'revolutCalc' : button.dataset.open === 'wise' ? 'wiseCalc' : button.dataset.open === 'visa' ? 'visaCalc' : button.dataset.open === 'mastercard' ? 'mastercardCalc' : button.dataset.open === 'loomis' ? 'loomisCalc' : button.dataset.open === 'forex' ? 'forexCalc' : button.dataset.open === 'tavex' ? 'tavexCalc' : button.dataset.open));
+      button.addEventListener("click", () => showPage(button.dataset.open === 'revolut' ? 'revolutCalc' : button.dataset.open === 'wise' ? 'wiseCalc' : button.dataset.open === 'visa' ? 'visaCalc' : button.dataset.open === 'mastercard' ? 'mastercardCalc' : button.dataset.open === 'loomis' ? 'loomisCalc' : button.dataset.open === 'forex' ? 'forexCalc' : button.dataset.open === 'tavex' ? 'tavexCalc' : button.dataset.open === 'eurcash' ? 'eurcashCalc' : button.dataset.open));
     });
     translatePage();
 
@@ -303,7 +326,7 @@ function calculate() {
   }).join("");
 
   document.querySelectorAll("[data-open]").forEach((button) => {
-    button.addEventListener("click", () => showPage(button.dataset.open === 'revolut' ? 'revolutCalc' : button.dataset.open === 'wise' ? 'wiseCalc' : button.dataset.open === 'visa' ? 'visaCalc' : button.dataset.open === 'mastercard' ? 'mastercardCalc' : button.dataset.open === 'loomis' ? 'loomisCalc' : button.dataset.open === 'forex' ? 'forexCalc' : button.dataset.open === 'tavex' ? 'tavexCalc' : button.dataset.open));
+    button.addEventListener("click", () => showPage(button.dataset.open === 'revolut' ? 'revolutCalc' : button.dataset.open === 'wise' ? 'wiseCalc' : button.dataset.open === 'visa' ? 'visaCalc' : button.dataset.open === 'mastercard' ? 'mastercardCalc' : button.dataset.open === 'loomis' ? 'loomisCalc' : button.dataset.open === 'forex' ? 'forexCalc' : button.dataset.open === 'tavex' ? 'tavexCalc' : button.dataset.open === 'eurcash' ? 'eurcashCalc' : button.dataset.open));
   });
   translatePage();
 }
@@ -311,6 +334,26 @@ function calculate() {
 
 function calculateRevolutDetails() {
   const r = data.revolut;
+  if (!(r.rate > 3 && r.rate < 7) || r.rateUnavailable === true) {
+    setText("revolutCalcPlan", `Revolut ${r.plan}`);
+    setText("revolutCalcSubtitle", "Manuel kurs mangler");
+    const totalEl = document.getElementById("revolutCalcTotal");
+    if (totalEl) totalEl.innerHTML = `— ${homeCurrencyLabel()}<span>Total pris</span>`;
+    ["revolutCalcCash", "revolutCalcCount", "revolutCalcAtm"].forEach((id) => setText(id, "—"));
+    setText("lineWanted", "—");
+    setText("lineAtm", "—");
+    setText("lineTotalThb", "—");
+    setText("lineRate", "Manuel kurs mangler");
+    setText("lineBeforeFee", "—");
+    setText("lineLimit", `${formatNumber(r.limit)} DKK`);
+    setText("lineOverLimit", "—");
+    setText("lineRevolutFee", `${formatDecimal(r.over)}% = — DKK`);
+    setText("lineTotalFee", "— DKK");
+    setText("lineFinalTotal", "— DKK");
+    const formula = document.getElementById("revolutFormula");
+    if (formula) formula.innerHTML = "Skriv en manuel Revolut-kurs i indstillinger for at aktivere beregningen.";
+    return;
+  }
   const maxPerWithdrawal = parseNumber(document.getElementById("revolutMaxPerWithdrawal")?.value || "20000") || 20000;
 
   let wantedCashThb;
@@ -345,7 +388,7 @@ function calculateRevolutDetails() {
   }
 
   setText("revolutCalcPlan", `Revolut ${r.plan}`);
-  setText("revolutCalcSubtitle", `${formatNumber(wantedCashThb)} THB hævet i Thailand`);
+  setText("revolutCalcSubtitle", `${formatNumber(wantedCashThb)} THB hævet i Thailand · manuel kurs`);
   const totalEl = document.getElementById("revolutCalcTotal");
   if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>Total pris</span>`;
 
@@ -702,6 +745,69 @@ function calculateCashDetails(method, title) {
 }
 
 
+
+function calculateEurcashDetails() {
+  const c = data.eurcash || {};
+  const dkkPerEur = c.dkkPerEur || dkkPerEurRate();
+  const eurToThb = c.eurToThb || 37.95;
+  const maxDkk = parseNumber(document.getElementById("eurcashMaxDkk")?.value || c.maxDkkPerWithdrawal || "15000") || 15000;
+
+  let wantedCashThb;
+  let finalTotalDkk;
+  let eurCash;
+
+  if (lastEditedCurrency === "thb") {
+    wantedCashThb = parseNumber(document.getElementById("bestThb").value);
+    eurCash = eurToThb > 0 ? wantedCashThb / eurToThb : 0;
+    finalTotalDkk = eurCash * dkkPerEur;
+  } else {
+    finalTotalDkk = amountToDkk(parseNumber(document.getElementById("dkkAmount").value));
+    eurCash = dkkPerEur > 0 ? finalTotalDkk / dkkPerEur : 0;
+    wantedCashThb = eurCash * eurToThb;
+  }
+
+  const withdrawalCount = Math.max(1, Math.ceil(finalTotalDkk / maxDkk));
+  const effectiveRate = finalTotalDkk > 0 ? wantedCashThb / finalTotalDkk : 0;
+
+  setText("eurcashCalcSubtitle", `${formatNumber(wantedCashThb)} THB via EUR kontanter`);
+  const totalEl = document.getElementById("eurcashCalcTotal");
+  if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>Total pris</span>`;
+
+  setText("eurcashCalcCash", formatNumber(wantedCashThb));
+  setText("eurcashCalcCount", formatNumber(withdrawalCount));
+  setText("eurcashCalcEur", `${formatCurrencyInput(eurCash)} EUR`);
+  setText("eurcashCalcRate", `${formatDecimal(effectiveRate)} THB/DKK`);
+
+  setText("eurcashLineWanted", `${formatNumber(wantedCashThb)} THB`);
+  setText("eurcashLineDkkEur", `${formatDecimal(dkkPerEur)} DKK/EUR`);
+  setText("eurcashLineEur", `${formatCurrencyInput(eurCash)} EUR`);
+  setText("eurcashLineEurThb", `${formatDecimal(eurToThb)} THB/EUR`);
+  setText("eurcashLineReceived", `${formatNumber(wantedCashThb)} THB`);
+  setText("eurcashLineWithdrawals", `${withdrawalCount} × maks ${formatNumber(maxDkk)} DKK`);
+  setText("eurcashLineFinalTotal", `${formatNumber(finalTotalDkk)} DKK`);
+
+  const formula = document.getElementById("eurcashFormula");
+  if (formula) {
+    if (lastEditedCurrency === "thb") {
+      formula.innerHTML = `
+        <strong>1.</strong> Du har valgt ${formatNumber(wantedCashThb)} THB på forsiden.<br>
+        <strong>2.</strong> EUR kontanter: ${formatNumber(wantedCashThb)} / ${formatDecimal(eurToThb)} = ${formatCurrencyInput(eurCash)} EUR.<br>
+        <strong>3.</strong> DKK/EUR kurs: ${formatDecimal(dkkPerEur)} DKK/EUR.<br>
+        <strong>4.</strong> Total pris: ${formatCurrencyInput(eurCash)} × ${formatDecimal(dkkPerEur)} = ${formatNumber(finalTotalDkk)} DKK.<br>
+        <strong>5.</strong> Antal hævninger: ${formatNumber(finalTotalDkk)} / ${formatNumber(maxDkk)} = ${withdrawalCount}.
+      `;
+    } else {
+      formula.innerHTML = `
+        <strong>1.</strong> Der bruges ${formatNumber(finalTotalDkk)} DKK som udgangspunkt.<br>
+        <strong>2.</strong> EUR kontanter: ${formatNumber(finalTotalDkk)} / ${formatDecimal(dkkPerEur)} = ${formatCurrencyInput(eurCash)} EUR.<br>
+        <strong>3.</strong> EUR→THB kurs: ${formatDecimal(eurToThb)} THB/EUR.<br>
+        <strong>4.</strong> THB modtaget: ${formatCurrencyInput(eurCash)} × ${formatDecimal(eurToThb)} = ${formatNumber(wantedCashThb)} THB.<br>
+        <strong>5.</strong> Antal hævninger: ${formatNumber(finalTotalDkk)} / ${formatNumber(maxDkk)} = ${withdrawalCount}.
+      `;
+    }
+  }
+}
+
 function calculateLoomisDetails() {
   calculateCashDetails("loomis", "Loomis");
 }
@@ -725,7 +831,8 @@ function methodTitle(method) {
     mastercard: "Mastercard-indstillinger",
     loomis: "Loomis-indstillinger",
     forex: "FOREX-indstillinger",
-    tavex: "Tavex-indstillinger"
+    tavex: "Tavex-indstillinger",
+    eurcash: "EUR kontanter-indstillinger"
   };
   const enTitles = {
     revolut: "Revolut settings",
@@ -734,7 +841,8 @@ function methodTitle(method) {
     mastercard: "Mastercard settings",
     loomis: "Loomis settings",
     forex: "FOREX settings",
-    tavex: "Tavex settings"
+    tavex: "Tavex settings",
+    eurcash: "EUR cash settings"
   };
   const titles = currentLanguage() === "en" ? enTitles : daTitles;
   return titles[method] || (currentLanguage() === "en" ? "Settings" : "Indstillinger");
