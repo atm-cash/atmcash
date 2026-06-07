@@ -160,7 +160,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v2.7";
+const RATE_VERSION = "v2.8";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.
@@ -215,9 +215,12 @@ function rateFromDkkPerThb(dkkPerThb) {
 async function fetchProviderText(url) {
   const noCacheUrl = url + (url.includes("?") ? "&" : "?") + "atmCashTs=" + Date.now();
   const sources = [
-    noCacheUrl,
+    // Jina Reader renders/extracts Revolut's page and usually exposes the converter text.
+    // This is important because Revolut's normal page can be blocked by CORS or rendered by JS.
+    `https://r.jina.ai/${noCacheUrl}`,
     `https://api.allorigins.win/raw?url=${encodeURIComponent(noCacheUrl)}`,
-    `https://corsproxy.io/?${encodeURIComponent(noCacheUrl)}`
+    `https://corsproxy.io/?${encodeURIComponent(noCacheUrl)}`,
+    noCacheUrl
   ];
 
   let lastError = null;
@@ -262,12 +265,12 @@ function parseRevolutRate(html) {
   // og må derfor ikke bruges til ATM Cash.
   const currentRatePatterns = [
     // Dansk side kan vise: "Vores nuværende kurs 1 kr. = 5,0281 ฿"
-    /(?:Vores\s+nuværende\s+kurs|Our\s+current\s+rate)[\s\S]{0,220}?1\s*(?:kr\.|kr|DKK)\s*[=|:]?\s*(?:฿|THB)?\s*([\d.,]+)/i,
-    // Revoluts server-HTML/search snippet kan vise: "Our current rate kr. 1 = ฿5.0281"
-    /(?:Vores\s+nuværende\s+kurs|Our\s+current\s+rate)[\s\S]{0,220}?(?:kr\.|kr|DKK)\s*1\s*[=|:]?\s*(?:฿|THB)?\s*([\d.,]+)/i,
+    /(?:Vores\s+nuværende\s+kurs|Our\s+current\s+rate)[\s\S]{0,260}?1\s*(?:kr\.|kr|DKK)\s*[=|:]?\s*(?:฿|THB)?\s*([\d.,]+)/i,
+    // Revoluts server-HTML/Jina kan vise: "Our current rate kr. 1 = ฿5.0434"
+    /(?:Vores\s+nuværende\s+kurs|Our\s+current\s+rate)[\s\S]{0,260}?(?:kr\.|kr|DKK)\s*\.?\s*1\s*[=|:]?\s*(?:฿|THB)?\s*([\d.,]+)/i,
     // Ekstra sikkerhed hvis overskriften mangler tæt på converter-boksen
-    /1\s*(?:kr\.|kr|DKK)\s*[=|:]?\s*(?:฿|THB)?\s*([\d.,]+)[\s\S]{0,220}?(?:Ingen\s+gebyrer|Yderligere\s+gebyrer|No\s+fees|Additional\s+fees)/i,
-    /(?:kr\.|kr|DKK)\s*1\s*[=|:]?\s*(?:฿|THB)?\s*([\d.,]+)[\s\S]{0,220}?(?:Ingen\s+gebyrer|Yderligere\s+gebyrer|No\s+fees|Additional\s+fees)/i
+    /1\s*(?:kr\.|kr|DKK)\s*[=|:]?\s*(?:฿|THB)?\s*([\d.,]+)[\s\S]{0,260}?(?:Ingen\s+gebyrer|Yderligere\s+gebyrer|No\s+fees|Additional\s+fees)/i,
+    /(?:kr\.|kr|DKK)\s*\.?\s*1\s*[=|:]?\s*(?:฿|THB)?\s*([\d.,]+)[\s\S]{0,260}?(?:Ingen\s+gebyrer|Yderligere\s+gebyrer|No\s+fees|Additional\s+fees)/i
   ];
 
   for (const pattern of currentRatePatterns) {

@@ -1,4 +1,4 @@
-// ATM Cash v2.7 - user interface, filters, accordions and startup
+// ATM Cash v2.8 - user interface, filters, accordions and startup
 function setupEmbeddedSettings() {
   const methods = ["revolut", "wise", "visa", "mastercard", "loomis", "forex", "tavex", "eurcash"];
 
