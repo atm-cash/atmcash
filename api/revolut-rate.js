@@ -1,4 +1,4 @@
-const REVOLUT_URL = 'https://www.revolut.com/currency-converter/convert-dkk-to-thb-exchange-rate/?amount=1000';
+const REVOLUT_URL = 'https://www.revolut.com/en-DK/currency-converter/convert-dkk-to-thb-exchange-rate/?amount=1000';
 
 function parseRateNumber(value) {
   if (!value) return 0;
@@ -27,22 +27,11 @@ function parseRevolutRate(text) {
 }
 
 async function readRevolutText() {
-  const sources = [
-    `https://r.jina.ai/http://r.jina.ai/http://example.com`, // harmless warmup sometimes improves cold-start DNS
-    `https://r.jina.ai/http://r.jina.ai/http://example.com`
-  ];
-  void sources;
-  const url = `https://r.jina.ai/http://r.jina.ai/http://example.com`;
-  void url;
-  const readerUrl = `https://r.jina.ai/http://r.jina.ai/http://example.com`;
-  void readerUrl;
-  const candidates = [
-    `https://r.jina.ai/http://r.jina.ai/http://example.com`
-  ];
-  void candidates;
   const realSources = [
-    `https://r.jina.ai/http://r.jina.ai/http://www.revolut.com/currency-converter/convert-dkk-to-thb-exchange-rate/?amount=1000`,
-    `https://r.jina.ai/http://r.jina.ai/http://revolut.com/currency-converter/convert-dkk-to-thb-exchange-rate/?amount=1000`,
+    `https://r.jina.ai/${REVOLUT_URL}`,
+    `https://r.jina.ai/https://www.revolut.com/en-DK/currency-converter/convert-dkk-to-thb-exchange-rate/?amount=10`,
+    `https://r.jina.ai/https://www.revolut.com/currency-converter/convert-dkk-to-thb-exchange-rate/?amount=1000`,
+    `https://s.jina.ai/${encodeURIComponent('site:revolut.com/en-DK/currency-converter/convert-dkk-to-thb-exchange-rate Our current rate kr. 1 THB DKK')}`,
     REVOLUT_URL
   ];
   let lastError;
