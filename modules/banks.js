@@ -160,7 +160,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v2.9";
+const RATE_VERSION = "v3.0";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.
@@ -250,16 +250,39 @@ function rateFromDkkPerThb(dkkPerThb) {
   return dkkPerThb > 0 ? 1 / dkkPerThb : 0;
 }
 
+function revolutTextSources() {
+  const targets = [
+    "https://www.revolut.com/en-DK/currency-converter/convert-dkk-to-thb-exchange-rate/?amount=10",
+    "https://www.revolut.com/en-DK/currency-converter/convert-dkk-to-thb-exchange-rate/?amount=1000",
+    "https://www.revolut.com/currency-converter/convert-dkk-to-thb-exchange-rate/?amount=1000",
+    PROVIDER_RATE_SOURCES.revolut
+  ];
+  const uniqueTargets = [...new Set(targets)];
+  const sources = [];
+  for (const target of uniqueTargets) {
+    const noCacheUrl = target + (target.includes("?") ? "&" : "?") + "atmCashTs=" + Date.now();
+    // Korrekt Jina Reader-format er: https://r.jina.ai/https://...
+    // De gamle versioner brugte en forkert/dobbelt reader-URL og gav derfor ingen data.
+    sources.push(`https://r.jina.ai/${noCacheUrl}`);
+    sources.push(`https://r.jina.ai/http://${target.replace(/^https?:\/\//, "")}`);
+  }
+  // Sidste udvej: Jina Search kan ofte finde Revoluts indexerede "Our current rate"-tekst,
+  // uden at vi skal scrape Revolut direkte. Det er stadig Revolut-siden som kilde, ikke markedsrate.
+  sources.push(`https://s.jina.ai/${encodeURIComponent("site:revolut.com/en-DK/currency-converter/convert-dkk-to-thb-exchange-rate Our current rate kr. 1 THB DKK")}`);
+  sources.push(`https://s.jina.ai/${encodeURIComponent("Revolut DKK THB Our current rate kr. 1")}`);
+  return [...new Set(sources)];
+}
+
 async function fetchProviderText(url) {
   const noCacheUrl = url + (url.includes("?") ? "&" : "?") + "atmCashTs=" + Date.now();
-  const sources = [
-    // Jina Reader renders/extracts Revolut's page and usually exposes the converter text.
-    // This is important because Revolut's normal page can be blocked by CORS or rendered by JS.
-    `https://r.jina.ai/${noCacheUrl}`,
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(noCacheUrl)}`,
-    `https://corsproxy.io/?${encodeURIComponent(noCacheUrl)}`,
-    noCacheUrl
-  ];
+  const sources = url.includes("revolut.com")
+    ? revolutTextSources()
+    : [
+        `https://r.jina.ai/${noCacheUrl}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(noCacheUrl)}`,
+        `https://corsproxy.io/?${encodeURIComponent(noCacheUrl)}`,
+        noCacheUrl
+      ];
 
   let lastError = null;
   for (const source of sources) {
@@ -267,7 +290,7 @@ async function fetchProviderText(url) {
       const response = await fetch(source, { cache: "no-store" });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const text = await response.text();
-      if (text && text.length > 200) return text;
+      if (text && text.length > 80) return text;
     } catch (err) {
       lastError = err;
     }
@@ -359,14 +382,14 @@ function parseTavexRate(html) {
 async function fetchOneProviderRate(provider) {
   let rate = 0;
   if (provider === "revolut") {
-    // v2.9: Revolut skal hentes via egen server/API først.
-    // Browser-scraping af revolut.com er ustabilt pga. CORS/JS-rendering.
-    // Hvis API ikke findes, prøves de gamle tekstkilder kun som ekstra mulighed.
+    // v3.0: Statisk hosting har normalt ikke /api eller Netlify functions.
+    // Derfor læses Revolut først via eksterne reader/search-kilder, som kan kaldes direkte fra browseren.
+    // Server/API bruges kun som ekstra mulighed bagefter. Ingen fallback-kurs.
     try {
-      rate = await fetchRevolutRateFromApi();
-    } catch {
       const html = await fetchProviderText(PROVIDER_RATE_SOURCES[provider]);
       rate = parseRevolutRate(html);
+    } catch {
+      rate = await fetchRevolutRateFromApi();
     }
   } else {
     const html = await fetchProviderText(PROVIDER_RATE_SOURCES[provider]);
