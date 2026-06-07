@@ -1,4 +1,4 @@
-// ATM Cash v3.3 - bank presets and manual rate engine only
+// ATM Cash v3.4 - bank presets and manual rate engine only
 function goNav(page) {
   if (page === "home") showPage("home");
   if (page === "converter") {
@@ -112,7 +112,7 @@ function setInputValue(id, value) {
   if (el) el.value = formatDecimal(value);
 }
 
-const RATE_VERSION = "v3.3";
+const RATE_VERSION = "v3.4";
 
 function validThbRate(rate) { return Number(rate) > 3 && Number(rate) < 7; }
 function manualRateStatus(rate) { return validThbRate(rate) ? "manual" : "unavailable"; }
@@ -132,8 +132,38 @@ function isWeekendToday() {
 
 function revolutEffectiveRate(baseRate) { return baseRate; }
 
+function syncManualCardRatesFromInputs() {
+  // v3.4: Beregningen læser de synlige manuelle kursfelter direkte.
+  // Så kan et felt ikke kun være UI; det bliver altid rate-kilden.
+  const revolutInput = document.getElementById("revolutManualRate") || document.getElementById("quickRevolutRate");
+  const quickRevolutInput = document.getElementById("quickRevolutRate");
+  if (revolutInput || quickRevolutInput) {
+    const rate = parseNumber((quickRevolutInput && quickRevolutInput.value) || (revolutInput && revolutInput.value) || "0");
+    data.revolut.manualRate = rate;
+    data.revolut.rate = validThbRate(rate) ? rate : 0;
+    data.revolut.rateSource = validThbRate(rate) ? "manual" : "unavailable";
+    data.revolut.rateUnavailable = !validThbRate(rate);
+  }
+
+  const visaInput = document.getElementById("visaRate") || document.getElementById("quickVisaRate");
+  const quickVisaInput = document.getElementById("quickVisaRate");
+  if (visaInput || quickVisaInput) {
+    const raw = parseNumber((quickVisaInput && quickVisaInput.value) || (visaInput && visaInput.value) || "0");
+    data.visa.rawRate = raw;
+    data.visa.rate = validThbRate(raw) ? raw * (1 - (getVisaFxMarkupPercent(data.visa) / 100)) : 0;
+  }
+
+  const mcInput = document.getElementById("mastercardRate") || document.getElementById("quickMastercardRate");
+  const quickMcInput = document.getElementById("quickMastercardRate");
+  if (mcInput || quickMcInput) {
+    const rate = parseNumber((quickMcInput && quickMcInput.value) || (mcInput && mcInput.value) || "0");
+    data.mastercard.rate = validThbRate(rate) ? rate : 0;
+  }
+}
+
 function applyMarketRates() {
   applyVisaBankPresetToData();
+  syncManualCardRatesFromInputs();
   if (data.eurcash) {
     data.eurcash.dkkPerEur = data.eurcash.dkkPerEur || dkkPerEurRate();
     data.eurcash.eurToThb = data.eurcash.eurToThb || 37.95;

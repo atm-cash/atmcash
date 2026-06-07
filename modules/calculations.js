@@ -46,6 +46,7 @@ function eurcashEffectiveRate(cfg) {
 }
 
 function calculateResults(dkk) {
+  syncManualCardRatesFromInputs();
   applyVisaBankPresetToData();
   const revolut = data.revolut;
   const revolutAvailable = revolut.rate > 3 && revolut.rate < 7 && revolut.rateUnavailable !== true;
@@ -262,6 +263,7 @@ function resultCostListForThb(targetThb) {
 }
 
 function calculate() {
+  syncManualCardRatesFromInputs();
   if (lastEditedCurrency === "thb") {
     updateDirectionArrow();
 
@@ -333,6 +335,7 @@ function calculate() {
 
 
 function calculateRevolutDetails() {
+  syncManualCardRatesFromInputs();
   const r = data.revolut;
   if (!(r.rate > 3 && r.rate < 7) || r.rateUnavailable === true) {
     setText("revolutCalcPlan", `Revolut ${r.plan}`);
@@ -506,6 +509,7 @@ function calculateWiseDetails() {
 
 
 function calculateVisaDetails() {
+  syncManualCardRatesFromInputs();
   const c = data.visa;
   const maxPerWithdrawal = parseNumber(document.getElementById("visaMaxPerWithdrawal")?.value || "2000") || 2000;
 
@@ -590,6 +594,7 @@ function calculateVisaDetails() {
 
 
 function calculateMastercardDetails() {
+  syncManualCardRatesFromInputs();
   const c = data.mastercard;
   const maxPerWithdrawal = parseNumber(document.getElementById("mcMaxPerWithdrawal")?.value || "20000") || 20000;
 

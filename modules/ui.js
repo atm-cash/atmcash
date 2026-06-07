@@ -334,6 +334,7 @@ async function init() {
   ].forEach(([id, method]) => {
     const el = document.getElementById(id);
     if (el) {
+      el.addEventListener("input", () => setManualCardRate(method, el.value));
       el.addEventListener("change", () => setManualCardRate(method, el.value));
       el.addEventListener("blur", () => setManualCardRate(method, el.value));
     }
