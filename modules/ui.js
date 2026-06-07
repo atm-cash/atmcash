@@ -326,6 +326,19 @@ async function init() {
     });
   }
 
+
+  [
+    ["quickRevolutRate", "revolut"], ["revolutManualRate", "revolut"],
+    ["quickVisaRate", "visa"], ["visaRate", "visa"],
+    ["quickMastercardRate", "mastercard"], ["mastercardRate", "mastercard"]
+  ].forEach(([id, method]) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("change", () => setManualCardRate(method, el.value));
+      el.addEventListener("blur", () => setManualCardRate(method, el.value));
+    }
+  });
+
   document.querySelectorAll("[data-save]").forEach((btn) => {
     btn.addEventListener("click", () => saveMethod(btn.dataset.save));
   });

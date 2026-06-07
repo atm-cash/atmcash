@@ -1,6 +1,6 @@
-// ATM Cash v3.2 - conversions, defaults, config, language and currency helpers
+// ATM Cash v3.3 - conversions, defaults, config, language and currency helpers
 let defaults = {
-  market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v3.2", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
+  market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v3.3", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
   language: "da",
   revolut: { plan: "Premium", limit: 3000, rate: 5.0281, manualRate: 5.0281, rateSource: "manual", atm: 220, over: 2, rateUnavailable: false },
@@ -272,7 +272,7 @@ function loadData() {
       loaded.forex.delivery = 0;
       loaded.forex.other = 0;
     }
-    // v3.2: Al kurs er manuel. Gammel live/cache slettes helt.
+    // v3.3: Al kurs er manuel. Gammel live/cache slettes helt.
     delete loaded.providerRates;
     if (loaded.revolut) {
       loaded.revolut.manualRate = Number(loaded.revolut.manualRate || loaded.revolut.rate || defaults.revolut.manualRate || 0);
@@ -285,7 +285,7 @@ function loadData() {
     }
     if (loaded.market) {
       loaded.market.source = "manual";
-      loaded.market.rateVersion = "v3.2";
+      loaded.market.rateVersion = "v3.3";
     }
     return loaded;
   } catch {

@@ -1,8 +1,9 @@
-// ATM Cash v3.2 - method settings and saved method data
+// ATM Cash v3.3 - method settings and saved method data
 function syncInputs() {
   applyVisaBankPresetToData();
   setInputValue("revolutAtm", data.revolut.atm);
   setInputValue("revolutManualRate", data.revolut.manualRate || data.revolut.rate || 0);
+  setInputValue("quickRevolutRate", data.revolut.manualRate || data.revolut.rate || 0);
 
   setInputValue("wiseOver", data.wise.over);
   setInputValue("wiseRate", data.wise.rate);
@@ -11,6 +12,7 @@ function syncInputs() {
   document.getElementById("visaBank").value = data.visa.bank;
   document.getElementById("visaType").value = data.visa.type;
   setInputValue("visaRate", data.visa.rawRate || data.visa.rate || 0);
+  setInputValue("quickVisaRate", data.visa.rawRate || data.visa.rate || 0);
   setInputValue("visaPercent", data.visa.percent);
   setInputValue("visaSpread", data.visa.spread || 0);
   setInputValue("visaFixed", data.visa.fixedDkk);
@@ -20,6 +22,7 @@ function syncInputs() {
   document.getElementById("mastercardBank").value = data.mastercard.bank;
   document.getElementById("mastercardType").value = data.mastercard.type;
   setInputValue("mastercardRate", data.mastercard.rate || 0);
+  setInputValue("quickMastercardRate", data.mastercard.rate || 0);
   setInputValue("mastercardPercent", data.mastercard.percent);
   setInputValue("mastercardSpread", data.mastercard.spread || 0);
   setInputValue("mastercardFixed", data.mastercard.fixedDkk);
@@ -62,10 +65,41 @@ function syncInputs() {
   });
 }
 
+function setManualCardRate(method, value) {
+  const rate = parseNumber(value);
+  if (!(rate > 0)) return;
+  if (method === "revolut") {
+    data.revolut.manualRate = rate;
+    data.revolut.rate = rate;
+    data.revolut.rateSource = "manual";
+    data.revolut.rateUnavailable = !(rate > 3 && rate < 7);
+    setInputValue("revolutManualRate", rate);
+    setInputValue("quickRevolutRate", rate);
+  }
+  if (method === "visa") {
+    data.visa.rawRate = rate;
+    applyVisaBankPresetToData();
+    setInputValue("visaRate", rate);
+    setInputValue("quickVisaRate", rate);
+  }
+  if (method === "mastercard") {
+    data.mastercard.rate = rate;
+    setInputValue("mastercardRate", rate);
+    setInputValue("quickMastercardRate", rate);
+  }
+  applyMarketRates();
+  persist();
+  calculate();
+  const calcPage = currentCalcPageName();
+  if (calcPage === "revolutCalc") calculateRevolutDetails();
+  if (calcPage === "visaCalc") calculateVisaDetails();
+  if (calcPage === "mastercardCalc") calculateMastercardDetails();
+}
+
 function saveMethod(method) {
   if (method === "revolut") {
     data.revolut.atm = parseNumber(document.getElementById("revolutAtm").value);
-    data.revolut.manualRate = parseNumber(document.getElementById("revolutManualRate")?.value || "0");
+    data.revolut.manualRate = parseNumber(document.getElementById("revolutManualRate")?.value || document.getElementById("quickRevolutRate")?.value || "0");
     data.revolut.rate = data.revolut.manualRate;
     data.revolut.rateSource = "manual";
     data.revolut.rateUnavailable = !(data.revolut.rate > 3 && data.revolut.rate < 7);
@@ -81,7 +115,7 @@ function saveMethod(method) {
   if (method === "visa") {
     data.visa.bank = document.getElementById("visaBank").value;
     data.visa.type = document.getElementById("visaType").value;
-    data.visa.rawRate = parseNumber(document.getElementById("visaRate")?.value || data.visa.rawRate || data.visa.rate || "0");
+    data.visa.rawRate = parseNumber(document.getElementById("visaRate")?.value || document.getElementById("quickVisaRate")?.value || data.visa.rawRate || data.visa.rate || "0");
     data.visa.percent = parseNumber(document.getElementById("visaPercent").value);
     data.visa.spread = parseNumber(document.getElementById("visaSpread")?.value || "0");
     data.visa.fixedDkk = parseNumber(document.getElementById("visaFixed").value);
@@ -94,7 +128,7 @@ function saveMethod(method) {
   if (method === "mastercard") {
     data.mastercard.bank = document.getElementById("mastercardBank").value;
     data.mastercard.type = document.getElementById("mastercardType").value;
-    data.mastercard.rate = parseNumber(document.getElementById("mastercardRate")?.value || data.mastercard.rate || "0");
+    data.mastercard.rate = parseNumber(document.getElementById("mastercardRate")?.value || document.getElementById("quickMastercardRate")?.value || data.mastercard.rate || "0");
     data.mastercard.percent = parseNumber(document.getElementById("mastercardPercent").value);
     data.mastercard.spread = parseNumber(document.getElementById("mastercardSpread")?.value || "0");
     data.mastercard.fixedDkk = parseNumber(document.getElementById("mastercardFixed").value);

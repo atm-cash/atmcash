@@ -1,4 +1,4 @@
-// ATM Cash v3.2 - bank presets and manual rate engine only
+// ATM Cash v3.3 - bank presets and manual rate engine only
 function goNav(page) {
   if (page === "home") showPage("home");
   if (page === "converter") {
@@ -112,7 +112,7 @@ function setInputValue(id, value) {
   if (el) el.value = formatDecimal(value);
 }
 
-const RATE_VERSION = "v3.2";
+const RATE_VERSION = "v3.3";
 
 function validThbRate(rate) { return Number(rate) > 3 && Number(rate) < 7; }
 function manualRateStatus(rate) { return validThbRate(rate) ? "manual" : "unavailable"; }
