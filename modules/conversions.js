@@ -1,9 +1,9 @@
-// ATM Cash v3.0 - conversions, defaults, config, language and currency helpers
+// ATM Cash v3.1 - conversions, defaults, config, language and currency helpers
 let defaults = {
   market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v2.3", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
   language: "da",
-  revolut: { plan: "Premium", limit: 3000, rate: 0, atm: 220, over: 2, rateUnavailable: true },
+  revolut: { plan: "Premium", limit: 3000, rate: 0, manualRate: 0, rateSource: "unavailable", atm: 220, over: 2, rateUnavailable: true },
   wise: { limit: 1800, rate: 5.05441, atm: 220, over: 2.69 },
   visa: { bank: "Danske Bank", type: "Visa Debit", rawRate: 5.040756, rate: 4.965145, spread: 1.5, percent: 1, fixedDkk: 30, atm: 220 },
   mastercard: { bank: "Danske Bank", type: "Mastercard Debit", rate: 5.040382949333, spread: 0.329, percent: 1.75, fixedDkk: 0, atm: 220 },
@@ -277,6 +277,8 @@ function loadData() {
     if (loaded.revolut) {
       loaded.revolut.rate = 0;
       loaded.revolut.rateUnavailable = true;
+      loaded.revolut.manualRate = Number(loaded.revolut.manualRate || 0);
+      loaded.revolut.rateSource = loaded.revolut.manualRate > 3 ? "manual" : "unavailable";
     }
     if (loaded.providerRates?.revolut) {
       delete loaded.providerRates.revolut;

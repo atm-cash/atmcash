@@ -160,7 +160,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v3.0";
+const RATE_VERSION = "v3.1";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.
@@ -451,11 +451,17 @@ function isRevolutLiveRateAvailable() {
   return info?.ok === true && info.updatedAtHour === hourlyKey() && info.rate > 3 && info.rate < 7;
 }
 
+function getRevolutManualRate() {
+  const rate = Number(data.revolut?.manualRate || 0);
+  return rate > 3 && rate < 7 ? rate : 0;
+}
+
 function providerRate(provider) {
   const info = data.providerRates?.[provider];
   if (provider === "revolut") {
-    // Ingen fallback. Ingen gammel cache. Ingen hardcoded Revolut-kurs.
-    return isRevolutLiveRateAvailable() ? info.rate : 0;
+    if (isRevolutLiveRateAvailable()) return info.rate;
+    // Statisk hosting kan ikke hente Revolut stabilt. Manuel kurs er derfor en bevidst kilde, ikke fallback/cache.
+    return getRevolutManualRate();
   }
   return info?.rate || FALLBACK_RATES[provider];
 }
@@ -479,6 +485,8 @@ function updateRateStatus() {
     el.appendChild(document.createElement("br"));
     if (revolutInfo.ok) {
       el.appendChild(document.createTextNode(en ? "Revolut: live rate" : "Revolut: live kurs"));
+    } else if (getRevolutManualRate()) {
+      el.appendChild(document.createTextNode(en ? "Revolut: manual rate" : "Revolut: manuel kurs"));
     } else {
       el.appendChild(document.createTextNode(en ? "Revolut: live rate unavailable" : "Revolut: live kurs utilgængelig"));
     }
@@ -506,7 +514,8 @@ function applyMarketRates() {
 
   data.revolut.referenceMargin = 0;
   data.revolut.rate = providerRate("revolut");
-  data.revolut.rateUnavailable = !isRevolutLiveRateAvailable();
+  data.revolut.rateSource = isRevolutLiveRateAvailable() ? "live" : (getRevolutManualRate() ? "manual" : "unavailable");
+  data.revolut.rateUnavailable = !(data.revolut.rate > 3 && data.revolut.rate < 7);
 
   data.wise.referenceMargin = 0;
   data.wise.rate = providerRate("wise");

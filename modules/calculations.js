@@ -80,7 +80,7 @@ function calculateResults(dkk) {
   const eurcashThb = Math.max(0, dkk * eurcashRate);
 
   return [
-    { id: "revolut", logoText: "R", logoClass: "revolut-logo", name: "Revolut", sub: revolutAvailable ? `${revolut.plan} · ATM ${revolut.atm} THB` : "Live kurs utilgængelig", thb: revolutThb },
+    { id: "revolut", logoText: "R", logoClass: "revolut-logo", name: "Revolut", sub: revolutAvailable ? `${revolut.plan} · ${revolut.rateSource === "manual" ? "manuel kurs" : "live kurs"} · ATM ${revolut.atm} THB` : "Live kurs utilgængelig", thb: revolutThb },
     { id: "wise", logoText: "W", logoClass: "wise-logo", name: "Wise", sub: `Over grænse ${formatDecimal(wise.over)}% · ATM ${wise.atm} THB`, thb: wiseThb },
     { id: "visa", logoText: "VISA", logoClass: "visa-logo", name: "Visa", sub: `${visa.bank} · ${formatDecimal(visa.percent)}%`, thb: visaThb },
     { id: "mastercard", logoText: "", logoClass: "mastercard-logo", name: "Mastercard", sub: `${mastercard.bank} · ${formatDecimal(mastercard.percent)}%`, thb: mastercardThb },
@@ -388,7 +388,7 @@ function calculateRevolutDetails() {
   }
 
   setText("revolutCalcPlan", `Revolut ${r.plan}`);
-  setText("revolutCalcSubtitle", `${formatNumber(wantedCashThb)} THB hævet i Thailand`);
+  setText("revolutCalcSubtitle", `${formatNumber(wantedCashThb)} THB hævet i Thailand · ${r.rateSource === "manual" ? "manuel kurs" : "live kurs"}`);
   const totalEl = document.getElementById("revolutCalcTotal");
   if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>Total pris</span>`;
 

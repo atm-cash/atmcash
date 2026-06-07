@@ -1,7 +1,8 @@
-// ATM Cash v2.8 - method settings and saved method data
+// ATM Cash v3.1 - method settings and saved method data
 function syncInputs() {
   applyVisaBankPresetToData();
   setInputValue("revolutAtm", data.revolut.atm);
+  setInputValue("revolutManualRate", data.revolut.manualRate || 0);
 
   setInputValue("wiseOver", data.wise.over);
   setInputValue("wiseRate", data.wise.rate);
@@ -62,6 +63,8 @@ function syncInputs() {
 function saveMethod(method) {
   if (method === "revolut") {
     data.revolut.atm = parseNumber(document.getElementById("revolutAtm").value);
+    data.revolut.manualRate = parseNumber(document.getElementById("revolutManualRate")?.value || "0");
+    applyMarketRates();
   }
 
   if (method === "wise") {
