@@ -8,7 +8,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ATM Cash</title>
-  <link rel="stylesheet" href="style.css?v=1.31" />
+  <link rel="stylesheet" href="style.css?v=3.0" />
 </head>
 <body>
   <main class="phone">
@@ -68,7 +68,7 @@
           <h2>↗ Resultat</h2>
           <button class="update" type="button" id="calculateBtn">☰ Vælg metoder</button>
         </div>
-        <div class="rate"><span id="rateStatus">Kurser opdateres hvert 10. minut.</span><br>Kurser og gebyrer er vejledende og kan ændres.</div>
+        <div class="rate"><span id="rateStatus">Manuelle kurser · ingen live-hentning</span><br>Kurser og gebyrer er vejledende og kan ændres.</div>
 
         <section id="results"></section>
       </div>
@@ -78,7 +78,7 @@
         <button class="nav-tab" type="button" data-nav="tips"><span>ⓘ</span><strong>Tips</strong></button>
       </nav>
 
-      <div class="app-version" aria-label="Version">v1.31</div>
+      <div class="app-version" aria-label="Version">v3.2</div>
     </section>
 
 
@@ -114,7 +114,7 @@
       </section>
 
       <section class="card small-note">
-        <div id="converterRateStatus">Kurser opdateres hvert 10. minut.</div>
+        <div id="converterRateStatus">Manuelle kurser · ingen live-hentning</div>
         <div>Kurserne er vejledende.</div>
       </section>
 
@@ -345,6 +345,17 @@
           <div class="atm-sub">Fast gebyr ved hævning i automat</div>
         </div>
         <div class="atm-value"><input id="revolutAtm" inputmode="decimal" value="220" /><span>THB</span></div>
+      </section>
+
+
+
+      <section class="card atm-card">
+        <div class="atm-icon">↔</div>
+        <div>
+          <div class="atm-title">Revolut-kurs · THB pr. DKK</div>
+          <div class="atm-sub">Manuel Revolut-kurs. Ingen live-hentning i denne version.</div>
+        </div>
+        <div class="atm-value"><input id="revolutManualRate" inputmode="decimal" value="0" /><span>THB</span></div>
       </section>
 
       <button type="button" data-save="revolut">Gem Revolut-indstillinger</button>
@@ -631,6 +642,16 @@
       </section>
 
       <section class="card">
+        <div class="section-label">Manuel kurs</div>
+        <div class="fee-grid">
+          <div class="fee-box">
+            <input id="visaRate" inputmode="decimal" value="5,16238" />
+            <div class="unit">Rå Visa-kurs · THB pr. DKK</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
         <div class="section-label">Gebyrer</div>
         <div class="fee-grid">
           <div class="fee-box">
@@ -752,6 +773,16 @@
             <option>Mastercard Debit</option>
             <option>Mastercard Credit</option>
           </select>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-label">Manuel kurs</div>
+        <div class="fee-grid">
+          <div class="fee-box">
+            <input id="mastercardRate" inputmode="decimal" value="5,04038" />
+            <div class="unit">Mastercard-kurs · THB pr. DKK</div>
+          </div>
         </div>
       </section>
 
@@ -1137,6 +1168,127 @@
     </section>
 
 
+
+    <section id="eurcashCalcPage" class="page">
+      <div class="topbar">
+        <button class="icon-btn back-btn" type="button">‹</button>
+        <div class="title"><h1>EUR kontanter</h1><div>Beregning af EUR kontanter</div></div>
+        <button class="icon-btn" type="button" id="openEurcashSettings">⚙︎</button>
+      </div>
+
+      <section class="card calc-summary">
+        <div class="method-logo eurcash-logo">€</div>
+        <div>
+          <div class="main-title" id="eurcashCalcCard">EUR kontanter</div>
+          <div class="main-sub" id="eurcashCalcSubtitle">Beregning ud fra forsiden</div>
+        </div>
+        <div class="main-value" id="eurcashCalcTotal">0 DKK<span>Total pris</span></div>
+      </section>
+
+      <div class="calc-scroll">
+        <section class="card">
+          <div class="section-label">Hævning</div>
+          <div class="fee-grid eurcash-withdrawal-grid">
+            <div class="fee-box">
+              <div class="calc-value" id="eurcashCalcCash">0</div>
+              <div class="unit">Kontanter · THB</div>
+            </div>
+            <div class="fee-box">
+              <input id="eurcashMaxDkk" inputmode="decimal" value="15.000" />
+              <div class="unit">Maks pr. hævning · DKK</div>
+            </div>
+            <div class="fee-box">
+              <div class="calc-value" id="eurcashCalcCount">0</div>
+              <div class="unit">Antal hævninger</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="section-label">Udregning</div>
+          <div class="calc-line">
+            <div>Kontanter ønsket</div>
+            <strong id="eurcashLineWanted">0 THB</strong>
+          </div>
+          <div class="calc-line">
+            <div>DKK/EUR kurs</div>
+            <strong id="eurcashLineDkkEur">0 DKK/EUR</strong>
+          </div>
+          <div class="calc-line">
+            <div>EUR kontanter</div>
+            <strong id="eurcashLineEur">0 EUR</strong>
+          </div>
+          <div class="calc-line">
+            <div>EUR→THB kurs</div>
+            <strong id="eurcashLineEurThb">0 THB/EUR</strong>
+          </div>
+          <div class="calc-line">
+            <div>THB modtaget</div>
+            <strong id="eurcashLineReceived">0 THB</strong>
+          </div>
+          <div class="calc-line">
+            <div>Antal hævninger</div>
+            <strong id="eurcashLineWithdrawals">0</strong>
+          </div>
+          <div class="calc-line total-line">
+            <div>Total pris</div>
+            <strong id="eurcashLineFinalTotal">0 DKK</strong>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="section-label">Sådan er det beregnet</div>
+          <div class="formula" id="eurcashFormula"></div>
+        </section>
+
+        <button type="button" id="editEurcashSettingsBtn">Rediger EUR kontanter-indstillinger</button>
+      </div>
+    </section>
+
+    <section id="eurcashPage" class="page">
+      <div class="topbar">
+        <button class="icon-btn back-btn" type="button">‹</button>
+        <div class="title"><h1>EUR kontanter</h1><div>Hæv EUR i Danmark og veksl i Thailand</div></div>
+        <button class="icon-btn" type="button" data-save="eurcash">✓</button>
+      </div>
+
+      <section class="card">
+        <div class="section-label">Bank og vekselsted</div>
+        <select id="eurcashBank">
+          <option value="Nordea">Nordea</option>
+          <option value="Anden bank">Anden bank</option>
+        </select>
+        <select id="eurcashPlace">
+          <option value="SuperRich">SuperRich</option>
+          <option value="Andet vekselsted">Andet vekselsted</option>
+        </select>
+      </section>
+
+      <section class="card">
+        <div class="section-label">Kurs</div>
+        <div class="fee-grid">
+          <div class="fee-box">
+            <input id="eurcashDkkPerEur" inputmode="decimal" value="7,46" />
+            <div class="unit">DKK/EUR kurs</div>
+          </div>
+          <div class="fee-box">
+            <input id="eurcashEurToThb" inputmode="decimal" value="37,95" />
+            <div class="unit">EUR→THB kurs</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card info-card">
+        <div class="info-icon">€</div>
+        <div>
+          <div class="info-title">Ingen ATM-gebyr</div>
+          <div class="info-sub">Metoden regner med EUR kontanter hjemmefra, som veksles til THB i Thailand.</div>
+        </div>
+      </section>
+
+      <button type="button" data-save="eurcash">Gem EUR kontanter-indstillinger</button>
+    </section>
+
     <section id="filterPage" class="page">
       <div class="topbar">
         <button class="icon-btn back-btn" type="button">‹</button>
@@ -1154,6 +1306,7 @@
         <label class="filter-row"><span class="method-logo loomis-logo">L</span><span>Loomis</span><input type="checkbox" id="filterLoomis" value="loomis" /></label>
         <label class="filter-row"><span class="method-logo forex-logo">FOREX</span><span>FOREX</span><input type="checkbox" id="filterForex" value="forex" /></label>
         <label class="filter-row"><span class="method-logo tavex-logo">TAVEX</span><span>Tavex</span><input type="checkbox" id="filterTavex" value="tavex" /></label>
+        <label class="filter-row"><span class="method-logo eurcash-logo">€</span><span>EUR kontanter</span><input type="checkbox" id="filterEurcash" value="eurcash" /></label>
       </section>
 
       <button type="button" id="saveFiltersBtn">Gem valg</button>
@@ -1161,10 +1314,10 @@
 
   </main>
 
-  <script src="modules/conversions.js?v=1.31"></script>
-  <script src="modules/banks.js?v=1.31"></script>
-  <script src="modules/methods.js?v=1.31"></script>
-  <script src="modules/calculations.js?v=1.31"></script>
-  <script src="modules/ui.js?v=1.31"></script>
+  <script src="modules/conversions.js?v=3.2"></script>
+  <script src="modules/banks.js?v=3.2"></script>
+  <script src="modules/methods.js?v=3.2"></script>
+  <script src="modules/calculations.js?v=3.2"></script>
+  <script src="modules/ui.js?v=3.2"></script>
 </body>
 </html>
