@@ -1,4 +1,4 @@
-// ATM Cash v2.8 - user interface, filters, accordions and startup
+// ATM Cash v3.5 - user interface, filters, accordions and startup
 function setupEmbeddedSettings() {
   const methods = ["revolut", "wise", "visa", "mastercard", "loomis", "forex", "tavex", "eurcash"];
 
@@ -334,9 +334,17 @@ async function init() {
   ].forEach(([id, method]) => {
     const el = document.getElementById(id);
     if (el) {
-      el.addEventListener("input", () => setManualCardRate(method, el.value));
-      el.addEventListener("change", () => setManualCardRate(method, el.value));
-      el.addEventListener("blur", () => setManualCardRate(method, el.value));
+      const commit = () => setManualCardRate(method, el.value);
+      el.addEventListener("input", commit);
+      el.addEventListener("change", commit);
+      el.addEventListener("blur", commit);
+      el.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          commit();
+          el.blur();
+        }
+      });
     }
   });
 
@@ -356,6 +364,14 @@ async function init() {
       calculate();
       if (currentCalcPageName() === "revolutCalc") calculateRevolutDetails();
     });
+  });
+
+  document.addEventListener("click", (event) => {
+    const back = event.target.closest(".back-btn, .back-tab[data-nav='home']");
+    if (back) {
+      event.preventDefault();
+      showPage("home");
+    }
   });
   translatePage();
 }

@@ -1,4 +1,4 @@
-// ATM Cash v3.4 - bank presets and manual rate engine only
+// ATM Cash v3.5 - bank presets and manual rate engine only
 function goNav(page) {
   if (page === "home") showPage("home");
   if (page === "converter") {
@@ -112,7 +112,7 @@ function setInputValue(id, value) {
   if (el) el.value = formatDecimal(value);
 }
 
-const RATE_VERSION = "v3.4";
+const RATE_VERSION = "v3.5";
 
 function validThbRate(rate) { return Number(rate) > 3 && Number(rate) < 7; }
 function manualRateStatus(rate) { return validThbRate(rate) ? "manual" : "unavailable"; }
@@ -133,56 +133,33 @@ function isWeekendToday() {
 function revolutEffectiveRate(baseRate) { return baseRate; }
 
 function syncManualCardRatesFromInputs() {
-  // v3.4: Beregningen læser de synlige manuelle kursfelter direkte.
-  // Så kan et felt ikke kun være UI; det bliver altid rate-kilden.
-  const revolutInput = document.getElementById("revolutManualRate") || document.getElementById("quickRevolutRate");
-  const quickRevolutInput = document.getElementById("quickRevolutRate");
-  if (revolutInput || quickRevolutInput) {
-    const rate = parseNumber((quickRevolutInput && quickRevolutInput.value) || (revolutInput && revolutInput.value) || "0");
-    data.revolut.manualRate = rate;
-    data.revolut.rate = validThbRate(rate) ? rate : 0;
-    data.revolut.rateSource = validThbRate(rate) ? "manual" : "unavailable";
-    data.revolut.rateUnavailable = !validThbRate(rate);
-  }
+  // v3.5: Data er den eneste rate-kilde. Felter må ikke overskrive hinanden skjult.
+  const rev = Number(data.revolut?.manualRate || data.revolut?.rate || 0);
+  data.revolut.manualRate = rev;
+  data.revolut.rate = validThbRate(rev) ? rev : 0;
+  data.revolut.rateSource = validThbRate(rev) ? "manual" : "unavailable";
+  data.revolut.rateUnavailable = !validThbRate(rev);
 
-  const visaInput = document.getElementById("visaRate") || document.getElementById("quickVisaRate");
-  const quickVisaInput = document.getElementById("quickVisaRate");
-  if (visaInput || quickVisaInput) {
-    const raw = parseNumber((quickVisaInput && quickVisaInput.value) || (visaInput && visaInput.value) || "0");
-    data.visa.rawRate = raw;
-    data.visa.rate = validThbRate(raw) ? raw * (1 - (getVisaFxMarkupPercent(data.visa) / 100)) : 0;
-  }
+  const visaRaw = Number(data.visa?.rawRate || 0);
+  data.visa.rawRate = visaRaw;
+  data.visa.rate = validThbRate(visaRaw) ? visaRaw * (1 - (getVisaFxMarkupPercent(data.visa) / 100)) : 0;
 
-  const mcInput = document.getElementById("mastercardRate") || document.getElementById("quickMastercardRate");
-  const quickMcInput = document.getElementById("quickMastercardRate");
-  if (mcInput || quickMcInput) {
-    const rate = parseNumber((quickMcInput && quickMcInput.value) || (mcInput && mcInput.value) || "0");
-    data.mastercard.rate = validThbRate(rate) ? rate : 0;
-  }
+  const mc = Number(data.mastercard?.manualRate || data.mastercard?.rate || 0);
+  data.mastercard.manualRate = mc;
+  data.mastercard.rate = validThbRate(mc) ? mc : 0;
 }
 
 function applyMarketRates() {
   applyVisaBankPresetToData();
   syncManualCardRatesFromInputs();
+
   if (data.eurcash) {
     data.eurcash.dkkPerEur = data.eurcash.dkkPerEur || dkkPerEurRate();
     data.eurcash.eurToThb = data.eurcash.eurToThb || 37.95;
     data.eurcash.maxDkkPerWithdrawal = data.eurcash.maxDkkPerWithdrawal || 15000;
   }
 
-  data.revolut.manualRate = Number(data.revolut.manualRate || data.revolut.rate || 0);
-  data.revolut.rate = validThbRate(data.revolut.manualRate) ? data.revolut.manualRate : 0;
-  data.revolut.rateSource = manualRateStatus(data.revolut.rate);
-  data.revolut.rateUnavailable = !validThbRate(data.revolut.rate);
-
   data.wise.rate = Number(data.wise.rate || 0);
-
-  const visaRaw = Number(data.visa.rawRate || data.visa.rate || 0);
-  data.visa.rawRate = visaRaw;
-  data.visa.rate = validThbRate(visaRaw) ? visaRaw * (1 - (getVisaFxMarkupPercent(data.visa) / 100)) : 0;
-
-  data.mastercard.rate = Number(data.mastercard.rate || 0);
-
   data.loomis.rate = Number(data.loomis.rate || 0);
   data.forex.rate = Number(data.forex.rate || 0);
   data.tavex.rate = Number(data.tavex.rate || 0);
