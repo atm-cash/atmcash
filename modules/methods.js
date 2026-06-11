@@ -1,9 +1,7 @@
-// ATM Cash v3.6 - method settings and saved method data
+// ATM Cash v2.7 - method settings and saved method data
 function syncInputs() {
   applyVisaBankPresetToData();
   setInputValue("revolutAtm", data.revolut.atm);
-  setInputValue("revolutManualRate", data.revolut.manualRate || "");
-  setInputValue("quickRevolutRate", data.revolut.manualRate || "");
 
   setInputValue("wiseOver", data.wise.over);
   setInputValue("wiseRate", data.wise.rate);
@@ -11,8 +9,6 @@ function syncInputs() {
 
   document.getElementById("visaBank").value = data.visa.bank;
   document.getElementById("visaType").value = data.visa.type;
-  setInputValue("visaRate", data.visa.manualRate || "");
-  setInputValue("quickVisaRate", data.visa.manualRate || "");
   setInputValue("visaPercent", data.visa.percent);
   setInputValue("visaSpread", data.visa.spread || 0);
   setInputValue("visaFixed", data.visa.fixedDkk);
@@ -21,8 +17,6 @@ function syncInputs() {
 
   document.getElementById("mastercardBank").value = data.mastercard.bank;
   document.getElementById("mastercardType").value = data.mastercard.type;
-  setInputValue("mastercardRate", data.mastercard.rate || 0);
-  setInputValue("quickMastercardRate", data.mastercard.rate || 0);
   setInputValue("mastercardPercent", data.mastercard.percent);
   setInputValue("mastercardSpread", data.mastercard.spread || 0);
   setInputValue("mastercardFixed", data.mastercard.fixedDkk);
@@ -65,41 +59,9 @@ function syncInputs() {
   });
 }
 
-
-function setManualCardRate(method, value) {
-  const raw = String(value ?? "").trim();
-  const manual = raw ? optionalManualRate(parseNumber(raw)) : null;
-
-  if (method === "revolut") {
-    data.revolut.manualRate = manual;
-  }
-
-  if (method === "visa") {
-    data.visa.manualRate = manual;
-  }
-
-  if (method === "mastercard") {
-    data.mastercard.manualRate = manual;
-    if (manual) data.mastercard.rate = manual;
-    setInputValue("mastercardRate", data.mastercard.rate || "");
-    setInputValue("quickMastercardRate", data.mastercard.rate || "");
-  }
-
-  applyMarketRates();
-  persist();
-  calculate();
-  const calcPage = currentCalcPageName();
-  if (calcPage === "revolutCalc") calculateRevolutDetails();
-  if (calcPage === "visaCalc") calculateVisaDetails();
-  if (calcPage === "mastercardCalc") calculateMastercardDetails();
-}
-
 function saveMethod(method) {
   if (method === "revolut") {
     data.revolut.atm = parseNumber(document.getElementById("revolutAtm").value);
-    const raw = document.getElementById("revolutManualRate")?.value || document.getElementById("quickRevolutRate")?.value || "";
-    data.revolut.manualRate = String(raw).trim() ? optionalManualRate(parseNumber(raw)) : null;
-    applyMarketRates();
   }
 
   if (method === "wise") {
@@ -111,8 +73,6 @@ function saveMethod(method) {
   if (method === "visa") {
     data.visa.bank = document.getElementById("visaBank").value;
     data.visa.type = document.getElementById("visaType").value;
-    const raw = document.getElementById("visaRate")?.value || document.getElementById("quickVisaRate")?.value || "";
-    data.visa.manualRate = String(raw).trim() ? optionalManualRate(parseNumber(raw)) : null;
     data.visa.percent = parseNumber(document.getElementById("visaPercent").value);
     data.visa.spread = parseNumber(document.getElementById("visaSpread")?.value || "0");
     data.visa.fixedDkk = parseNumber(document.getElementById("visaFixed").value);
@@ -125,8 +85,6 @@ function saveMethod(method) {
   if (method === "mastercard") {
     data.mastercard.bank = document.getElementById("mastercardBank").value;
     data.mastercard.type = document.getElementById("mastercardType").value;
-    data.mastercard.rate = parseNumber(document.getElementById("mastercardRate")?.value || document.getElementById("quickMastercardRate")?.value || data.mastercard.rate || "0");
-    data.mastercard.manualRate = optionalManualRate(data.mastercard.rate);
     data.mastercard.percent = parseNumber(document.getElementById("mastercardPercent").value);
     data.mastercard.spread = parseNumber(document.getElementById("mastercardSpread")?.value || "0");
     data.mastercard.fixedDkk = parseNumber(document.getElementById("mastercardFixed").value);
@@ -136,16 +94,12 @@ function saveMethod(method) {
 
   if (method === "loomis") {
     data.loomis.place = document.getElementById("loomisPlace").value;
-    data.loomis.rate = parseNumber(document.getElementById("loomisRate")?.value || data.loomis.rate || "0");
-    data.loomis.margin = parseNumber(document.getElementById("loomisMargin")?.value || data.loomis.margin || "0");
     data.loomis.fixedDkk = parseNumber(document.getElementById("loomisFixed").value);
     applyMarketRates();
   }
 
   if (method === "forex") {
     data.forex.place = document.getElementById("forexPlace").value;
-    data.forex.rate = parseNumber(document.getElementById("forexRate")?.value || data.forex.rate || "0");
-    data.forex.margin = parseNumber(document.getElementById("forexMargin")?.value || data.forex.margin || "0");
     data.forex.fixedDkk = parseNumber(document.getElementById("forexFixed").value);
     data.forex.delivery = 0;
     data.forex.other = 0;
@@ -154,8 +108,6 @@ function saveMethod(method) {
 
   if (method === "tavex") {
     data.tavex.place = document.getElementById("tavexPlace").value;
-    data.tavex.rate = parseNumber(document.getElementById("tavexRate")?.value || data.tavex.rate || "0");
-    data.tavex.margin = parseNumber(document.getElementById("tavexMargin")?.value || data.tavex.margin || "0");
     data.tavex.fixedDkk = 0;
     data.tavex.delivery = 50;
     data.tavex.other = 0;
@@ -175,6 +127,10 @@ function saveMethod(method) {
   calculate();
   syncInputs();
   const calcPage = currentCalcPageName();
-  if (calcPage) showPage(calcPage);
-  else showPage("home");
+  if (calcPage) {
+    showPage(calcPage);
+  } else {
+    showPage("home");
+  }
 }
+
