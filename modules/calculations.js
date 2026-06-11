@@ -1,4 +1,4 @@
-// ATM Cash v2.1 - price calculations and detail views
+// ATM Cash v2.7 - price calculations and detail views
 // v1.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
@@ -48,8 +48,9 @@ function eurcashEffectiveRate(cfg) {
 function calculateResults(dkk) {
   applyVisaBankPresetToData();
   const revolut = data.revolut;
+  const revolutAvailable = revolut.rate > 3 && revolut.rate < 7 && revolut.rateUnavailable !== true;
   const revolutOver = Math.max(0, dkk - revolut.limit);
-  const revolutThb = dkk * revolut.rate - revolutOver * revolut.rate * (revolut.over / 100) - revolut.atm;
+  const revolutThb = revolutAvailable ? (dkk * revolut.rate - revolutOver * revolut.rate * (revolut.over / 100) - revolut.atm) : -Infinity;
 
   const wise = data.wise;
   const wiseOver = Math.max(0, dkk - wise.limit);
@@ -79,7 +80,7 @@ function calculateResults(dkk) {
   const eurcashThb = Math.max(0, dkk * eurcashRate);
 
   return [
-    { id: "revolut", logoText: "R", logoClass: "revolut-logo", name: "Revolut", sub: `${revolut.plan} · ATM ${revolut.atm} THB`, thb: revolutThb },
+    { id: "revolut", logoText: "R", logoClass: "revolut-logo", name: "Revolut", sub: revolutAvailable ? `${revolut.plan} · ATM ${revolut.atm} THB` : "Live kurs utilgængelig", thb: revolutThb },
     { id: "wise", logoText: "W", logoClass: "wise-logo", name: "Wise", sub: `Over grænse ${formatDecimal(wise.over)}% · ATM ${wise.atm} THB`, thb: wiseThb },
     { id: "visa", logoText: "VISA", logoClass: "visa-logo", name: "Visa", sub: `${visa.bank} · ${formatDecimal(visa.percent)}%`, thb: visaThb },
     { id: "mastercard", logoText: "", logoClass: "mastercard-logo", name: "Mastercard", sub: `${mastercard.bank} · ${formatDecimal(mastercard.percent)}%`, thb: mastercardThb },
@@ -333,6 +334,26 @@ function calculate() {
 
 function calculateRevolutDetails() {
   const r = data.revolut;
+  if (!(r.rate > 3 && r.rate < 7) || r.rateUnavailable === true) {
+    setText("revolutCalcPlan", `Revolut ${r.plan}`);
+    setText("revolutCalcSubtitle", "Live kurs utilgængelig");
+    const totalEl = document.getElementById("revolutCalcTotal");
+    if (totalEl) totalEl.innerHTML = `— ${homeCurrencyLabel()}<span>Total pris</span>`;
+    ["revolutCalcCash", "revolutCalcCount", "revolutCalcAtm"].forEach((id) => setText(id, "—"));
+    setText("lineWanted", "—");
+    setText("lineAtm", "—");
+    setText("lineTotalThb", "—");
+    setText("lineRate", "Live kurs utilgængelig");
+    setText("lineBeforeFee", "—");
+    setText("lineLimit", `${formatNumber(r.limit)} DKK`);
+    setText("lineOverLimit", "—");
+    setText("lineRevolutFee", `${formatDecimal(r.over)}% = — DKK`);
+    setText("lineTotalFee", "— DKK");
+    setText("lineFinalTotal", "— DKK");
+    const formula = document.getElementById("revolutFormula");
+    if (formula) formula.innerHTML = "Revolut live-kurs kunne ikke hentes. Beregningen er deaktiveret, så der ikke bruges gammel eller forkert kurs.";
+    return;
+  }
   const maxPerWithdrawal = parseNumber(document.getElementById("revolutMaxPerWithdrawal")?.value || "20000") || 20000;
 
   let wantedCashThb;
