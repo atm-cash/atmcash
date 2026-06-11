@@ -160,7 +160,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v2.7";
+const RATE_VERSION = "v4.0";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.
@@ -418,6 +418,23 @@ function revolutEffectiveRate(baseRate) {
   return baseRate;
 }
 
+function visaBaseRate() {
+  const manualRate = parseNumber(data.visa?.manualRate || "");
+  if (manualRate > 0) return manualRate;
+  const rates = getCurrencyRates();
+  return rates.THB || data.market?.rate || 5.0570;
+}
+
+function updateVisaRateFromSettings() {
+  if (!data.visa) return;
+  applyVisaBankPresetToData();
+  const baseRate = visaBaseRate();
+  const visaFxMarkup = getVisaFxMarkupPercent(data.visa);
+  data.visa.rawRate = baseRate;
+  data.visa.rate = baseRate * (1 - visaFxMarkup / 100);
+  data.visa.spread = visaFxMarkup;
+}
+
 function applyMarketRates() {
   applyVisaBankPresetToData();
   const marketRate = data.market?.rate || 5.0570;
@@ -434,10 +451,7 @@ function applyMarketRates() {
   data.wise.referenceMargin = 0;
   data.wise.rate = providerRate("wise");
 
-  const visaFxMarkup = getVisaFxMarkupPercent(data.visa);
-  data.visa.rawRate = FALLBACK_RATES.visa;
-  data.visa.rate = FALLBACK_RATES.visa * (1 - visaFxMarkup / 100);
-  data.visa.spread = visaFxMarkup;
+  updateVisaRateFromSettings();
 
   data.mastercard.rate = FALLBACK_RATES.mastercard;
   data.mastercard.spread = Math.max(0, (1 - data.mastercard.rate / marketRate) * 100);

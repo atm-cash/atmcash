@@ -1,4 +1,4 @@
-// ATM Cash v2.7 - method settings and saved method data
+// ATM Cash v4.0 - method settings and saved method data
 function syncInputs() {
   applyVisaBankPresetToData();
   setInputValue("revolutAtm", data.revolut.atm);
@@ -10,6 +10,7 @@ function syncInputs() {
   document.getElementById("visaBank").value = data.visa.bank;
   document.getElementById("visaType").value = data.visa.type;
   setInputValue("visaPercent", data.visa.percent);
+  setInputValue("visaManualRate", data.visa.manualRate || "");
   setInputValue("visaSpread", data.visa.spread || 0);
   setInputValue("visaFixed", data.visa.fixedDkk);
   applyVisaNordeaPresetToInputs();
@@ -73,6 +74,8 @@ function saveMethod(method) {
   if (method === "visa") {
     data.visa.bank = document.getElementById("visaBank").value;
     data.visa.type = document.getElementById("visaType").value;
+    const visaManualRateInput = document.getElementById("visaManualRate")?.value || "";
+    data.visa.manualRate = visaManualRateInput.trim();
     data.visa.percent = parseNumber(document.getElementById("visaPercent").value);
     data.visa.spread = parseNumber(document.getElementById("visaSpread")?.value || "0");
     data.visa.fixedDkk = parseNumber(document.getElementById("visaFixed").value);
