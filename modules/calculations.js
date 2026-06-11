@@ -1,4 +1,4 @@
-// ATM Cash v2.7 - price calculations and detail views
+// ATM Cash v3.7 - price calculations and detail views
 // v1.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
@@ -11,9 +11,9 @@ function cashSupplierPrice(method) {
   return CASH_SUPPLIER_PRICES[method] || null;
 }
 
-function cashSupplierRate(method, fallbackRate) {
+function cashSupplierRate(method, configuredRate) {
   const official = cashSupplierPrice(method);
-  return official ? 1 / official.dkkPerThb : fallbackRate;
+  return official ? 1 / official.dkkPerThb : configuredRate;
 }
 
 function cashSupplierFees(method, wantedThb = 0) {
@@ -46,9 +46,10 @@ function eurcashEffectiveRate(cfg) {
 }
 
 function calculateResults(dkk) {
+  syncManualCardRatesFromInputs();
   applyVisaBankPresetToData();
   const revolut = data.revolut;
-  const revolutAvailable = revolut.rate > 3 && revolut.rate < 7 && revolut.rateUnavailable !== true;
+  const revolutAvailable = validThbRate(revolut.rate);
   const revolutOver = Math.max(0, dkk - revolut.limit);
   const revolutThb = revolutAvailable ? (dkk * revolut.rate - revolutOver * revolut.rate * (revolut.over / 100) - revolut.atm) : -Infinity;
 
@@ -80,7 +81,7 @@ function calculateResults(dkk) {
   const eurcashThb = Math.max(0, dkk * eurcashRate);
 
   return [
-    { id: "revolut", logoText: "R", logoClass: "revolut-logo", name: "Revolut", sub: revolutAvailable ? `${revolut.plan} · ATM ${revolut.atm} THB` : "Live kurs utilgængelig", thb: revolutThb },
+    { id: "revolut", logoText: "R", logoClass: "revolut-logo", name: "Revolut", sub: revolutAvailable ? `${revolut.plan} · ${revolut.rateSource === "manual" ? "manuel kurs" : "valutaomregner"} · ATM ${revolut.atm} THB` : "Kurs mangler", thb: revolutThb },
     { id: "wise", logoText: "W", logoClass: "wise-logo", name: "Wise", sub: `Over grænse ${formatDecimal(wise.over)}% · ATM ${wise.atm} THB`, thb: wiseThb },
     { id: "visa", logoText: "VISA", logoClass: "visa-logo", name: "Visa", sub: `${visa.bank} · ${formatDecimal(visa.percent)}%`, thb: visaThb },
     { id: "mastercard", logoText: "", logoClass: "mastercard-logo", name: "Mastercard", sub: `${mastercard.bank} · ${formatDecimal(mastercard.percent)}%`, thb: mastercardThb },
@@ -262,6 +263,7 @@ function resultCostListForThb(targetThb) {
 }
 
 function calculate() {
+  syncManualCardRatesFromInputs();
   if (lastEditedCurrency === "thb") {
     updateDirectionArrow();
 
@@ -333,17 +335,18 @@ function calculate() {
 
 
 function calculateRevolutDetails() {
+  syncManualCardRatesFromInputs();
   const r = data.revolut;
-  if (!(r.rate > 3 && r.rate < 7) || r.rateUnavailable === true) {
+  if (!validThbRate(r.rate)) {
     setText("revolutCalcPlan", `Revolut ${r.plan}`);
-    setText("revolutCalcSubtitle", "Live kurs utilgængelig");
+    setText("revolutCalcSubtitle", "Kurs mangler");
     const totalEl = document.getElementById("revolutCalcTotal");
     if (totalEl) totalEl.innerHTML = `— ${homeCurrencyLabel()}<span>Total pris</span>`;
     ["revolutCalcCash", "revolutCalcCount", "revolutCalcAtm"].forEach((id) => setText(id, "—"));
     setText("lineWanted", "—");
     setText("lineAtm", "—");
     setText("lineTotalThb", "—");
-    setText("lineRate", "Live kurs utilgængelig");
+    setText("lineRate", "Kurs mangler");
     setText("lineBeforeFee", "—");
     setText("lineLimit", `${formatNumber(r.limit)} DKK`);
     setText("lineOverLimit", "—");
@@ -351,7 +354,7 @@ function calculateRevolutDetails() {
     setText("lineTotalFee", "— DKK");
     setText("lineFinalTotal", "— DKK");
     const formula = document.getElementById("revolutFormula");
-    if (formula) formula.innerHTML = "Revolut live-kurs kunne ikke hentes. Beregningen er deaktiveret, så der ikke bruges gammel eller forkert kurs.";
+    if (formula) formula.innerHTML = "Valutaomregnerens kurs mangler. Tjek valutaomregneren eller skriv en manuel kurs.";
     return;
   }
   const maxPerWithdrawal = parseNumber(document.getElementById("revolutMaxPerWithdrawal")?.value || "20000") || 20000;
@@ -388,7 +391,7 @@ function calculateRevolutDetails() {
   }
 
   setText("revolutCalcPlan", `Revolut ${r.plan}`);
-  setText("revolutCalcSubtitle", `${formatNumber(wantedCashThb)} THB hævet i Thailand`);
+  setText("revolutCalcSubtitle", `${formatNumber(wantedCashThb)} THB hævet i Thailand · ${r.rateSource === "manual" ? "manuel kurs" : "valutaomregner"}`);
   const totalEl = document.getElementById("revolutCalcTotal");
   if (totalEl) totalEl.innerHTML = `${formatNumber(dkkToHome(finalTotalDkk))} ${homeCurrencyLabel()}<span>Total pris</span>`;
 
@@ -399,7 +402,7 @@ function calculateRevolutDetails() {
   setText("lineWanted", `${formatNumber(wantedCashThb)} THB`);
   setText("lineAtm", `${withdrawalCount} × ${formatNumber(r.atm)} = ${formatNumber(atmFeeThb)} THB`);
   setText("lineTotalThb", `${formatNumber(totalThbWithFees)} THB`);
-  setText("lineRate", `${formatDecimal(r.rate)} THB/DKK`);
+  setText("lineRate", `${formatDecimal(r.rate)} THB/DKK (${r.rateSource === "manual" ? "manuel" : "valutaomregner"})`);
   setText("lineBeforeFee", `${formatNumber(beforeRevolutFeeDkk)} DKK`);
   setText("lineLimit", `${formatNumber(r.limit)} DKK`);
   setText("lineOverLimit", `${formatNumber(overLimitDkk)} DKK`);
@@ -414,7 +417,7 @@ function calculateRevolutDetails() {
       <strong>2.</strong> Det kræver ${withdrawalCount} hævning${withdrawalCount === 1 ? "" : "er"} ved maks ${formatNumber(maxPerWithdrawal)} DKK pr. gang.<br>
       <strong>3.</strong> ATM-gebyr: ${withdrawalCount} × ${formatNumber(r.atm)} THB = ${formatNumber(atmFeeThb)} THB.<br>
       <strong>4.</strong> Total inkl. ATM-gebyr: ${formatNumber(wantedCashThb)} + ${formatNumber(atmFeeThb)} = ${formatNumber(totalThbWithFees)} THB.<br>
-      <strong>5.</strong> ${formatNumber(totalThbWithFees)} / ${formatDecimal(r.rate)} = ${formatNumber(beforeRevolutFeeDkk)} DKK.<br>
+      <strong>5.</strong> Kurskilde: ${r.rateSource === "manual" ? "manuel" : "valutaomregner"}. ${formatNumber(totalThbWithFees)} / ${formatDecimal(r.rate)} = ${formatNumber(beforeRevolutFeeDkk)} DKK.<br>
       <strong>6.</strong> Over grænsen: ${formatNumber(overLimitDkk)} DKK × ${formatDecimal(r.over)}% = ${formatNumber(revolutFeeDkk)} DKK.<br>
       <strong>8.</strong> Total: ${formatNumber(beforeRevolutFeeDkk)} + ${formatNumber(revolutFeeDkk)} = ${formatNumber(finalTotalDkk)} DKK.
     `;
@@ -506,6 +509,7 @@ function calculateWiseDetails() {
 
 
 function calculateVisaDetails() {
+  syncManualCardRatesFromInputs();
   const c = data.visa;
   const maxPerWithdrawal = parseNumber(document.getElementById("visaMaxPerWithdrawal")?.value || "2000") || 2000;
 
@@ -559,7 +563,7 @@ function calculateVisaDetails() {
   setText("visaLineWanted", `${formatNumber(wantedCashThb)} THB`);
   setText("visaLineAtm", `${withdrawalCount} × ${formatNumber(c.atm)} = ${formatNumber(atmFeeThb)} THB`);
   setText("visaLineTotalThb", `${formatNumber(totalThbWithFees)} THB`);
-  setText("visaLineRate", `${formatDecimal(c.rate)} THB/DKK`);
+  setText("visaLineRate", `${formatDecimal(c.rawRate)} → ${formatDecimal(c.rate)} THB/DKK`);
   setText("visaLineMarkup", `${formatDecimal(c.spread || 0)}%`);
   setText("visaLineBeforeFee", `${formatNumber(beforeBankFeeDkk)} DKK`);
   const visaMinimumFeeDkk = getVisaMinimumFeeDkk(c);
@@ -580,7 +584,7 @@ function calculateVisaDetails() {
       <strong>2.</strong> Det kræver ${withdrawalCount} hævning${withdrawalCount === 1 ? "" : "er"} ved maks ${formatNumber(maxPerWithdrawal)} DKK pr. gang.<br>
       <strong>3.</strong> ATM-gebyr: ${withdrawalCount} × ${formatNumber(c.atm)} THB = ${formatNumber(atmFeeThb)} THB.<br>
       <strong>4.</strong> Total inkl. ATM-gebyr: ${formatNumber(wantedCashThb)} + ${formatNumber(atmFeeThb)} = ${formatNumber(totalThbWithFees)} THB.<br>
-      <strong>5.</strong> Visa kurs: ${formatDecimal(c.rawRate || c.rate)} - bankens valutakurstillæg ${formatDecimal(c.spread || 0)}% = ${formatDecimal(c.rate)} THB/DKK.<br>
+      <strong>5.</strong> Visa grundkurs: ${formatDecimal(c.rawRate)} THB/DKK (${c.manualRate ? "manuel" : "valutaomregner"}). Efter ${formatDecimal(c.spread || 0)}% valutakurstillæg = ${formatDecimal(c.rate)} THB/DKK.<br>
       <strong>6.</strong> ${formatNumber(totalThbWithFees)} / ${formatDecimal(c.rate)} = ${formatNumber(beforeBankFeeDkk)} DKK før hævegebyr.<br>
       <strong>7.</strong> Hævegebyr: ${visaMinimumFeeDkk ? c.percent ? `${formatDecimal(c.percent)}% / min. ${withdrawalCount} × ${formatNumber(visaMinimumFeeDkk)} DKK` : `${withdrawalCount} × ${formatNumber(visaMinimumFeeDkk)} DKK` : `${formatDecimal(c.percent)}%`} = ${formatNumber(percentFeeDkk)} DKK.<br>
       <strong>8.</strong> Total: ${formatNumber(beforeBankFeeDkk)} + ${formatNumber(percentFeeDkk)}${getVisaFixedExtraDkk(c) ? ` + ${formatNumber(getVisaFixedExtraDkk(c))}` : ""} = ${formatNumber(finalTotalDkk)} DKK.
@@ -590,6 +594,7 @@ function calculateVisaDetails() {
 
 
 function calculateMastercardDetails() {
+  syncManualCardRatesFromInputs();
   const c = data.mastercard;
   const maxPerWithdrawal = parseNumber(document.getElementById("mcMaxPerWithdrawal")?.value || "20000") || 20000;
 
