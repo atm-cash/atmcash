@@ -1,11 +1,11 @@
-// ATM Cash v3.7 - conversions, defaults, config, language and currency helpers
+// ATM Cash v2.5 - conversions, defaults, config, language and currency helpers
 let defaults = {
-  market: { rate: 5.05441, date: "", source: "open.er-api.com", rateVersion: "v3.7", updatedAt: 0, rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
+  market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v2.3", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
   language: "da",
-  revolut: { plan: "Premium", limit: 3000, rate: 0, manualRate: null, rateSource: "market", atm: 220, over: 2 },
+  revolut: { plan: "Premium", limit: 3000, rate: 5.05441, atm: 220, over: 2 },
   wise: { limit: 1800, rate: 5.05441, atm: 220, over: 2.69 },
-  visa: { bank: "Danske Bank", type: "Visa Debit", rawRate: 0, rate: 0, manualRate: null, spread: 1.5, percent: 1, fixedDkk: 30, atm: 220 },
+  visa: { bank: "Danske Bank", type: "Visa Debit", rawRate: 5.040756, rate: 4.965145, spread: 1.5, percent: 1, fixedDkk: 30, atm: 220 },
   mastercard: { bank: "Danske Bank", type: "Mastercard Debit", rate: 5.040382949333, spread: 0.329, percent: 1.75, fixedDkk: 0, atm: 220 },
   loomis: { place: "Loomis online", rate: 4.789071, margin: 5.51, fixedDkk: 49.95, delivery: 0, other: 0 },
   forex: { place: "FOREX afhentning", rate: 4.724312730606, margin: 6.579, fixedDkk: 0, delivery: 0, other: 0 },
@@ -272,23 +272,6 @@ function loadData() {
       loaded.forex.delivery = 0;
       loaded.forex.other = 0;
     }
-    // v3.7: Revolut og Visa bruger valutaomregnerens THB-kurs som standard.
-    // Manuelle kurser gemmes og må ikke slettes ved versionsskift.
-    delete loaded.providerRates;
-    if (loaded.revolut) {
-      delete loaded.revolut.rateUnavailable;
-    }
-    if (loaded.revolut) {
-      loaded.revolut.manualRate = validThbRate(loaded.revolut.manualRate) ? Number(loaded.revolut.manualRate) : null;
-      loaded.revolut.rateSource = loaded.revolut.manualRate ? "manual" : "market";
-    }
-    if (loaded.visa) {
-      loaded.visa.manualRate = validThbRate(loaded.visa.manualRate) ? Number(loaded.visa.manualRate) : null;
-    }
-    if (loaded.market) {
-      loaded.market.source = "open.er-api.com";
-      loaded.market.rateVersion = "v3.7";
-    }
     return loaded;
   } catch {
     return clone(defaults);
@@ -323,38 +306,9 @@ function formatCurrencyInput(value) {
   return value.toLocaleString("da-DK", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-async function fetchCurrencyConverterRates() {
-  const now = Date.now();
-  const last = Number(data.market?.updatedAt || 0);
-  if (last && now - last < 10 * 60 * 1000 && validThbRate(data.market?.rates?.THB)) return;
-
-  try {
-    const response = await fetch("https://open.er-api.com/v6/latest/DKK", { cache: "no-store" });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const json = await response.json();
-    if (!json || !json.rates || !validThbRate(json.rates.THB)) throw new Error("Invalid rate response");
-
-    data.market = data.market || {};
-    data.market.rate = Number(json.rates.THB);
-    data.market.rates = {
-      DKK: 1,
-      THB: Number(json.rates.THB),
-      EUR: Number(json.rates.EUR || data.market?.rates?.EUR || 0.134),
-      USD: Number(json.rates.USD || data.market?.rates?.USD || 0.146),
-      GBP: Number(json.rates.GBP || data.market?.rates?.GBP || 0.114)
-    };
-    data.market.source = "open.er-api.com";
-    data.market.rateVersion = "v3.7";
-    data.market.updatedAt = now;
-    data.market.date = new Date(now).toLocaleString("da-DK", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
-  } catch (error) {
-    console.warn("Currency converter rate could not be updated. Using last saved market rate.", error);
-  }
-}
-
 function getCurrencyRates() {
-  const baseRates = { DKK: 1, THB: data.market?.rate || 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 };
-  return { ...baseRates, ...(data.market?.rates || {}), DKK: 1 };
+  const fallback = { DKK: 1, THB: data.market?.rate || 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 };
+  return { ...fallback, ...(data.market?.rates || {}), DKK: 1 };
 }
 
 function getHomeCurrency() {
@@ -392,48 +346,14 @@ function syncHomeCurrencyUi() {
   if (flag) flag.className = homeFlagClass();
 }
 
-function marketThbRate() {
-  const rates = getCurrencyRates();
-  return Number(rates.THB || data.market?.rate || 0);
-}
-
-function validThbRate(rate) {
-  const n = Number(rate);
-  return Number.isFinite(n) && n > 3 && n < 7;
-}
-
-function optionalManualRate(value) {
-  const n = Number(value);
-  return validThbRate(n) ? n : null;
-}
-
-function revolutBaseRate() {
-  return optionalManualRate(data.revolut?.manualRate) || marketThbRate();
-}
-
-function visaBaseRate() {
-  return optionalManualRate(data.visa?.manualRate) || marketThbRate();
-}
-
-function visaEffectiveRate(rawRate, spreadPercent) {
-  const spread = Number(spreadPercent || 0) / 100;
-  return validThbRate(rawRate) ? rawRate / (1 + spread) : 0;
-}
-
-function marketUpdatedText() {
-  const updated = data.market?.date || "";
-  if (!updated) return currentLanguage() === "en"
-    ? "Rates update every 10 minutes. Rates are indicative."
-    : "Kurser opdateres hvert 10 minut. Kurserne er vejledende.";
-  return currentLanguage() === "en"
-    ? `Rates update every 10 minutes Last updated ${updated}. Rates are indicative.`
-    : `Kurser opdateres hvert 10 minut Sidst opdateret ${updated}. Kurserne er vejledende.`;
-}
-
 function updateConverterStatus() {
   const el = document.getElementById("converterRateStatus");
   if (!el) return;
-  el.textContent = marketUpdatedText();
+  const en = currentLanguage() === "en";
+  const updated = formatRateUpdateTime(data.market?.updatedAtHour || data.market?.date);
+  el.textContent = updated
+    ? (en ? `Rates update every 10 minutes Last updated ${updated}` : `Kurser opdateres hvert 10 minut Sidst opdateret ${updated}`)
+    : (en ? "Rates update every 10 minutes" : "Kurser opdateres hvert 10 minut");
 }
 
 function updateConverterFrom(currency) {

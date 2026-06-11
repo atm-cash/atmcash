@@ -1,4 +1,4 @@
-// ATM Cash v3.7 - user interface, filters, accordions and startup
+// ATM Cash v2.5 - user interface, filters, accordions and startup
 function setupEmbeddedSettings() {
   const methods = ["revolut", "wise", "visa", "mastercard", "loomis", "forex", "tavex", "eurcash"];
 
@@ -134,8 +134,8 @@ async function init() {
   updateRateStatus();
   calculate();
   setupConverter();
-  updateMarketRateIfNeeded().catch((error) => console.warn("Rate update failed", error));
-  setInterval(() => updateMarketRateIfNeeded().catch((error) => console.warn("Rate update failed", error)), RATE_UPDATE_INTERVAL_MS);
+  updateMarketRateIfNeeded();
+  setInterval(updateMarketRateIfNeeded, RATE_UPDATE_INTERVAL_MS);
 
   document.querySelectorAll("[data-nav]").forEach((btn) => {
     btn.addEventListener("click", () => goNav(btn.dataset.nav));
@@ -326,28 +326,6 @@ async function init() {
     });
   }
 
-
-  [
-    ["revolutManualRate", "revolut"],
-    ["visaRate", "visa"],
-    ["mastercardRate", "mastercard"]
-  ].forEach(([id, method]) => {
-    const el = document.getElementById(id);
-    if (el) {
-      const commit = () => setManualCardRate(method, el.value);
-      el.addEventListener("input", commit);
-      el.addEventListener("change", commit);
-      el.addEventListener("blur", commit);
-      el.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          commit();
-          el.blur();
-        }
-      });
-    }
-  });
-
   document.querySelectorAll("[data-save]").forEach((btn) => {
     btn.addEventListener("click", () => saveMethod(btn.dataset.save));
   });
@@ -364,14 +342,6 @@ async function init() {
       calculate();
       if (currentCalcPageName() === "revolutCalc") calculateRevolutDetails();
     });
-  });
-
-  document.addEventListener("click", (event) => {
-    const back = event.target.closest(".back-btn, .back-tab[data-nav='home']");
-    if (back) {
-      event.preventDefault();
-      showPage("home");
-    }
   });
   translatePage();
 }
