@@ -1,4 +1,4 @@
-// ATM Cash v4.0 - price calculations and detail views
+// ATM Cash v4.1 - price calculations and detail views
 // v1.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
@@ -416,7 +416,7 @@ function calculateRevolutDetails() {
       <strong>4.</strong> Total inkl. ATM-gebyr: ${formatNumber(wantedCashThb)} + ${formatNumber(atmFeeThb)} = ${formatNumber(totalThbWithFees)} THB.<br>
       <strong>5.</strong> ${formatNumber(totalThbWithFees)} / ${formatDecimal(r.rate)} = ${formatNumber(beforeRevolutFeeDkk)} DKK.<br>
       <strong>6.</strong> Over grænsen: ${formatNumber(overLimitDkk)} DKK × ${formatDecimal(r.over)}% = ${formatNumber(revolutFeeDkk)} DKK.<br>
-      <strong>8.</strong> Total: ${formatNumber(beforeRevolutFeeDkk)} + ${formatNumber(revolutFeeDkk)} = ${formatNumber(finalTotalDkk)} DKK.
+      <strong>9.</strong> Total: ${formatNumber(beforeRevolutFeeDkk)} + ${formatNumber(revolutFeeDkk)} = ${formatNumber(finalTotalDkk)} DKK.
     `;
   }
 }
@@ -499,7 +499,7 @@ function calculateWiseDetails() {
       <strong>4.</strong> Total inkl. ATM-gebyr: ${formatNumber(wantedCashThb)} + ${formatNumber(atmFeeThb)} = ${formatNumber(totalThbWithFees)} THB.<br>
       <strong>5.</strong> ${formatNumber(totalThbWithFees)} / ${formatDecimal(w.rate)} = ${formatNumber(beforeWiseFeeDkk)} DKK.<br>
       <strong>6.</strong> Over grænsen: ${formatNumber(overLimitDkk)} DKK × ${formatDecimal(w.over)}% = ${formatNumber(wiseFeeDkk)} DKK.<br>
-      <strong>8.</strong> Total: ${formatNumber(beforeWiseFeeDkk)} + ${formatNumber(wiseFeeDkk)} = ${formatNumber(finalTotalDkk)} DKK.
+      <strong>9.</strong> Total: ${formatNumber(beforeWiseFeeDkk)} + ${formatNumber(wiseFeeDkk)} = ${formatNumber(finalTotalDkk)} DKK.
     `;
   }
 }
@@ -560,7 +560,7 @@ function calculateVisaDetails() {
   setText("visaLineWanted", `${formatNumber(wantedCashThb)} THB`);
   setText("visaLineAtm", `${withdrawalCount} × ${formatNumber(c.atm)} = ${formatNumber(atmFeeThb)} THB`);
   setText("visaLineTotalThb", `${formatNumber(totalThbWithFees)} THB`);
-  setText("visaLineRate", `${formatDecimal(c.rate)} THB/DKK`);
+  setText("visaLineRate", `${formatDecimal(c.rawRate || c.rate)} THB/DKK`);
   setText("visaLineMarkup", `${formatDecimal(c.spread || 0)}%`);
   setText("visaLineBeforeFee", `${formatNumber(beforeBankFeeDkk)} DKK`);
   const visaMinimumFeeDkk = getVisaMinimumFeeDkk(c);
@@ -581,10 +581,11 @@ function calculateVisaDetails() {
       <strong>2.</strong> Det kræver ${withdrawalCount} hævning${withdrawalCount === 1 ? "" : "er"} ved maks ${formatNumber(maxPerWithdrawal)} DKK pr. gang.<br>
       <strong>3.</strong> ATM-gebyr: ${withdrawalCount} × ${formatNumber(c.atm)} THB = ${formatNumber(atmFeeThb)} THB.<br>
       <strong>4.</strong> Total inkl. ATM-gebyr: ${formatNumber(wantedCashThb)} + ${formatNumber(atmFeeThb)} = ${formatNumber(totalThbWithFees)} THB.<br>
-      <strong>5.</strong> Visa grundkurs: ${formatDecimal(c.rawRate || c.rate)} THB/DKK (${c.manualRate ? "manuel" : "valutaomregner"}). Bankens valutakurstillæg ${formatDecimal(c.spread || 0)}% giver ${formatDecimal(c.rate)} THB/DKK.<br>
-      <strong>6.</strong> ${formatNumber(totalThbWithFees)} / ${formatDecimal(c.rate)} = ${formatNumber(beforeBankFeeDkk)} DKK før hævegebyr.<br>
-      <strong>7.</strong> Hævegebyr: ${visaMinimumFeeDkk ? c.percent ? `${formatDecimal(c.percent)}% / min. ${withdrawalCount} × ${formatNumber(visaMinimumFeeDkk)} DKK` : `${withdrawalCount} × ${formatNumber(visaMinimumFeeDkk)} DKK` : `${formatDecimal(c.percent)}%`} = ${formatNumber(percentFeeDkk)} DKK.<br>
-      <strong>8.</strong> Total: ${formatNumber(beforeBankFeeDkk)} + ${formatNumber(percentFeeDkk)}${getVisaFixedExtraDkk(c) ? ` + ${formatNumber(getVisaFixedExtraDkk(c))}` : ""} = ${formatNumber(finalTotalDkk)} DKK.
+      <strong>5.</strong> Visa-kurs: ${formatDecimal(c.rawRate || c.rate)} THB/DKK (${c.manualRate ? "manuel" : "valutaomregner"}).<br>
+      <strong>6.</strong> Bankens valutakurstillæg ${formatDecimal(c.spread || 0)}% giver beregningskurs ${formatDecimal(c.rate)} THB/DKK.<br>
+      <strong>7.</strong> ${formatNumber(totalThbWithFees)} / ${formatDecimal(c.rate)} = ${formatNumber(beforeBankFeeDkk)} DKK før hævegebyr.<br>
+      <strong>8.</strong> Hævegebyr: ${visaMinimumFeeDkk ? c.percent ? `${formatDecimal(c.percent)}% / min. ${withdrawalCount} × ${formatNumber(visaMinimumFeeDkk)} DKK` : `${withdrawalCount} × ${formatNumber(visaMinimumFeeDkk)} DKK` : `${formatDecimal(c.percent)}%`} = ${formatNumber(percentFeeDkk)} DKK.<br>
+      <strong>9.</strong> Total: ${formatNumber(beforeBankFeeDkk)} + ${formatNumber(percentFeeDkk)}${getVisaFixedExtraDkk(c) ? ` + ${formatNumber(getVisaFixedExtraDkk(c))}` : ""} = ${formatNumber(finalTotalDkk)} DKK.
     `;
   }
 }
@@ -654,8 +655,8 @@ function calculateMastercardDetails() {
       <strong>4.</strong> Total inkl. ATM-gebyr: ${formatNumber(wantedCashThb)} + ${formatNumber(atmFeeThb)} = ${formatNumber(totalThbWithFees)} THB.<br>
       <strong>5.</strong> Mastercard kurs: mid-market ${formatDecimal(mcMarketRate)} minus ${formatDecimal(c.spread || 0)}% spread = ${formatDecimal(c.rate)} THB/DKK.<br>
       <strong>6.</strong> ${formatNumber(totalThbWithFees)} / ${formatDecimal(c.rate)} = ${formatNumber(beforeBankFeeDkk)} DKK før hævegebyr.<br>
-      <strong>7.</strong> Hævegebyr: ${formatDecimal(c.percent)}% = ${formatNumber(percentFeeDkk)} DKK.<br>
-      <strong>8.</strong> Total: ${formatNumber(beforeBankFeeDkk)} + ${formatNumber(percentFeeDkk)} + ${formatNumber(c.fixedDkk)} = ${formatNumber(finalTotalDkk)} DKK.
+      <strong>8.</strong> Hævegebyr: ${formatDecimal(c.percent)}% = ${formatNumber(percentFeeDkk)} DKK.<br>
+      <strong>9.</strong> Total: ${formatNumber(beforeBankFeeDkk)} + ${formatNumber(percentFeeDkk)} + ${formatNumber(c.fixedDkk)} = ${formatNumber(finalTotalDkk)} DKK.
     `;
   }
 }
