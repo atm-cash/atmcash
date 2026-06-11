@@ -3,7 +3,7 @@
     "rate": 5.057,
     "date": "",
     "source": "standard",
-    "rateVersion": "v2.7",
+    "rateVersion": "v4.0",
     "rates": {
       "DKK": 1,
       "THB": 5.057,
@@ -31,11 +31,13 @@
   "visa": {
     "bank": "Danske Bank",
     "type": "Visa Debit",
-    "rate": 5.16238,
+    "rate": 4.981145000000001,
     "spread": 1.5,
     "percent": 1,
     "fixedDkk": 30,
-    "atm": 220
+    "atm": 220,
+    "manualRate": "",
+    "rawRate": 5.057
   },
   "mastercard": {
     "bank": "Danske Bank",
