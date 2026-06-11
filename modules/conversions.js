@@ -1,6 +1,6 @@
-// ATM Cash v2.5 - conversions, defaults, config, language and currency helpers
+// ATM Cash v2.1 - conversions, defaults, config, language and currency helpers
 let defaults = {
-  market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v2.3", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
+  market: { rate: 5.05441, date: "", source: "standard", rateVersion: "v2.1", rates: { DKK: 1, THB: 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
   homeCurrency: "DKK",
   language: "da",
   revolut: { plan: "Premium", limit: 3000, rate: 5.05441, atm: 220, over: 2 },

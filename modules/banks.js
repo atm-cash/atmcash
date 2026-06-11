@@ -160,12 +160,12 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v2.5";
+const RATE_VERSION = "v2.1";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.
 const FALLBACK_RATES = {
-  revolut: 5.0314,
+  revolut: 5.04747,
   wise: 5.07720,
   visa: 5.040756,
   mastercard: 5.040382949333,
@@ -175,7 +175,7 @@ const FALLBACK_RATES = {
 };
 
 const PROVIDER_RATE_SOURCES = {
-  revolut: "https://www.revolut.com/da-DK/currency-converter/convert-dkk-to-thb-exchange-rate/?amount=2500",
+  revolut: "https://www.revolut.com/da-DK/currency-converter/convert-dkk-to-thb-exchange-rate/?amount=1",
   wise: "https://wise.com/dk/currency-converter/dkk-to-thb-rate?amount=1",
   forex: "https://www.forexvaluta.dk/valuta/thb/",
   tavex: "https://tavex.dk/valuta-prisliste/",
@@ -212,76 +212,34 @@ function rateFromDkkPerThb(dkkPerThb) {
 }
 
 async function fetchProviderText(url) {
-  const noCacheUrl = url + (url.includes("?") ? "&" : "?") + "atmCashTs=" + Date.now();
-  const sources = [
-    noCacheUrl,
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(noCacheUrl)}`,
-    `https://corsproxy.io/?${encodeURIComponent(noCacheUrl)}`
-  ];
-
-  let lastError = null;
-  for (const source of sources) {
-    try {
-      const response = await fetch(source, { cache: "no-store" });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const text = await response.text();
-      if (text && text.length > 200) return text;
-    } catch (err) {
-      lastError = err;
-    }
-  }
-  throw lastError || new Error("Provider page could not be read");
+  const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+  try {
+    const direct = await fetch(url, { cache: "no-store" });
+    if (direct.ok) return await direct.text();
+  } catch {}
+  const response = await fetch(proxied, { cache: "no-store" });
+  if (!response.ok) throw new Error("Provider page could not be read");
+  return await response.text();
 }
 
 function parseDkkToThbRate(html) {
   const text = String(html).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
   const patterns = [
-    { re: /(?:kr\s*)?1\s*DKK\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i, amount: 1 },
-    { re: /1\s*(?:kr\.|kr|DKK)\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i, amount: 1 },
-    { re: /1\s*Dansk(?:e)?\s*krone\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i, amount: 1 },
-    { re: /100\s*DKK\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i, amount: 100 },
-    { re: /1000\s*DKK\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i, amount: 1000 },
-    { re: /3000\s*(?:kr\.|kr|DKK)[\s\S]{0,250}?([\d.,]+)\s*(?:THB|฿)/i, amount: 3000 }
+    /(?:kr\s*)?1\s*DKK\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i,
+    /1\s*(?:kr\.|DKK)\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i,
+    /1\s*Dansk(?:e)?\s*krone\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i,
+    /100\s*DKK\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i,
+    /1000\s*DKK\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i
   ];
-  for (const item of patterns) {
-    const match = text.match(item.re);
-    if (!match) continue;
-    const raw = parseRateNumber(match[1]);
-    const rate = item.amount === 1 ? raw : raw / item.amount;
-    if (rate > 3 && rate < 7) return rate;
-  }
-  return 0;
-}
-
-function parseRevolutRate(html) {
-  const text = String(html).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
-
-  // Revolut må kun bruge Revoluts egen viste kurs.
-  // Den generelle DKK→THB SEO/markedsrate på siden kan være højere end den viste Revolut-kurs
-  // og må derfor ikke bruges til ATM Cash.
-  const currentRatePatterns = [
-    /(?:Vores\s+nuværende\s+kurs|Our\s+current\s+rate)[\s\S]{0,160}?1\s*(?:kr\.|kr|DKK)\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)/i,
-    /1\s*(?:kr\.|kr|DKK)\s*[=|:]?\s*([\d.,]+)\s*(?:THB|฿)[\s\S]{0,160}?(?:Ingen\s+gebyrer|No\s+fees)/i
-  ];
-
-  for (const pattern of currentRatePatterns) {
+  for (const pattern of patterns) {
     const match = text.match(pattern);
     if (!match) continue;
-    const rate = parseRateNumber(match[1]);
-    if (rate > 3 && rate < 7) return rate;
+    const raw = parseRateNumber(match[1]);
+    if (raw > 50 && pattern.source.startsWith("1000")) return raw / 1000;
+    if (raw > 10 && pattern.source.startsWith("100")) return raw / 100;
+    if (raw > 3 && raw < 7) return raw;
   }
-
-  // Fallback kun til Revoluts egen converter-boks: DKK-beløb og THB-beløb.
-  // Eksempel: 3.000 kr. → 15.102,13 ฿ = 5,0340.
-  const converterPair = text.match(/(?:Beløb|Amount)[\s\S]{0,220}?([\d.,]+)\s*(?:kr\.|kr|DKK)[\s\S]{0,220}?(?:Vekslet\s+til|Converted\s+to)[\s\S]{0,220}?([\d.,]+)\s*(?:THB|฿)/i);
-  if (converterPair) {
-    const dkk = parseRateNumber(converterPair[1]);
-    const thb = parseRateNumber(converterPair[2]);
-    const rate = dkk > 0 ? thb / dkk : 0;
-    if (rate > 3 && rate < 7) return rate;
-  }
-
-  throw new Error("Revolut displayed rate not found");
+  return 0;
 }
 
 function parseForexRate(html) {
@@ -303,8 +261,7 @@ function parseTavexRate(html) {
 async function fetchOneProviderRate(provider) {
   const html = await fetchProviderText(PROVIDER_RATE_SOURCES[provider]);
   let rate = 0;
-  if (provider === "revolut") rate = parseRevolutRate(html);
-  else if (provider === "forex") rate = parseForexRate(html);
+  if (provider === "forex") rate = parseForexRate(html);
   else if (provider === "tavex") rate = parseTavexRate(html);
   else rate = parseDkkToThbRate(html);
   if (!rate || rate < 3 || rate > 7) throw new Error(`Invalid ${provider} rate`);
@@ -331,25 +288,11 @@ async function fetchProviderRates() {
   }
 
   for (const provider of providers) {
-    if (!data.providerRates[provider]?.rate || data.providerRates[provider]?.updatedAtHour !== hourlyKey()) {
-      const previous = data.providerRates[provider]?.rate;
-
-      // Vigtigt: Revolut må ikke fastholde en gammel kurs, fordi den så ser korrekt ud
-      // den første dag og bliver forkert når Revolut ændrer kurs.
-      if (provider === "revolut") {
-        data.providerRates[provider] = {
-          rate: FALLBACK_RATES.revolut,
-          source: "fallback",
-          updatedAtHour: "",
-          ok: false
-        };
-        continue;
-      }
-
+    if (!data.providerRates[provider]?.rate) {
       data.providerRates[provider] = {
-        rate: previous || FALLBACK_RATES[provider],
-        source: previous ? "stale" : "fallback",
-        updatedAtHour: previous ? (data.providerRates[provider]?.updatedAtHour || "") : hourlyKey(),
+        rate: FALLBACK_RATES[provider],
+        source: "fallback",
+        updatedAtHour: hourlyKey(),
         ok: false
       };
     }
@@ -357,15 +300,7 @@ async function fetchProviderRates() {
 }
 
 function providerRate(provider) {
-  const info = data.providerRates?.[provider];
-  if (provider === "revolut") {
-    // Revolut må ikke genbruge en gammel/stale kurs.
-    // Enten har vi en live-kurs fra Revolut i den aktuelle 10-minutters periode,
-    // eller også bruges fallback tydeligt markeret som fejlet kilde.
-    if (info?.ok === true && info.updatedAtHour === hourlyKey() && info.rate > 3 && info.rate < 7) return info.rate;
-    return FALLBACK_RATES.revolut;
-  }
-  return info?.rate || FALLBACK_RATES[provider];
+  return data.providerRates?.[provider]?.rate || FALLBACK_RATES[provider];
 }
 
 function updateRateStatus() {
@@ -380,16 +315,6 @@ function updateRateStatus() {
     const updated = formatRateUpdateTime(data.market.updatedAtHour || data.market.date);
     el.appendChild(document.createElement("br"));
     el.appendChild(document.createTextNode(en ? `Last updated ${updated}` : `Sidst opdateret ${updated}`));
-  }
-
-  const revolutInfo = data.providerRates?.revolut;
-  if (revolutInfo) {
-    el.appendChild(document.createElement("br"));
-    if (revolutInfo.ok) {
-      el.appendChild(document.createTextNode(en ? "Revolut: live rate" : "Revolut: live kurs"));
-    } else {
-      el.appendChild(document.createTextNode(en ? "Revolut: source failed, using saved rate" : "Revolut: kilde fejlede, bruger gemt kurs"));
-    }
   }
   updateConverterStatus();
 }
@@ -453,12 +378,6 @@ function applyMarketRates() {
 
 async function updateMarketRateIfNeeded() {
   ensureVisibleMethods();
-
-  // Ryd gammel Revolut-cache fra tidligere versioner. Den var årsagen til,
-  // at appen blev hængende på f.eks. 5,034 selv om Revolut viste 5,0314.
-  if (data.providerRates?.revolut && (data.providerRates.revolut.ok !== true || data.providerRates.revolut.updatedAtHour !== hourlyKey())) {
-    delete data.providerRates.revolut;
-  }
 
   if (data.market?.rateVersion !== RATE_VERSION) {
     data.providerRates = {};
