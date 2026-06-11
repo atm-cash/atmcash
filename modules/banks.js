@@ -160,7 +160,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v4.1";
+const RATE_VERSION = "v4.2";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.
@@ -215,23 +215,24 @@ function rateFromDkkPerThb(dkkPerThb) {
 async function fetchProviderText(url) {
   const noCacheUrl = url + (url.includes("?") ? "&" : "?") + "atmCashTs=" + Date.now();
   const sources = [
-    noCacheUrl,
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(noCacheUrl)}`,
-    `https://corsproxy.io/?${encodeURIComponent(noCacheUrl)}`
+    { label: "direct", url: noCacheUrl },
+    { label: "allorigins", url: `https://api.allorigins.win/raw?url=${encodeURIComponent(noCacheUrl)}` },
+    { label: "corsproxy", url: `https://corsproxy.io/?${encodeURIComponent(noCacheUrl)}` }
   ];
 
-  let lastError = null;
+  const errors = [];
   for (const source of sources) {
     try {
-      const response = await fetch(source, { cache: "no-store" });
+      const response = await fetch(source.url, { cache: "no-store" });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const text = await response.text();
       if (text && text.length > 200) return text;
+      errors.push(`${source.label}: tomt/kort svar`);
     } catch (err) {
-      lastError = err;
+      errors.push(`${source.label}: ${err?.message || err}`);
     }
   }
-  throw lastError || new Error("Provider page could not be read");
+  throw new Error(errors.join(" | ") || "Provider page could not be read");
 }
 
 function parseDkkToThbRate(html) {
@@ -327,45 +328,55 @@ async function fetchOneProviderRate(provider) {
 async function fetchProviderRates() {
   const providers = ["revolut", "wise", "forex", "tavex", "loomis"];
   data.providerRates = data.providerRates || {};
-  const results = await Promise.allSettled(providers.map(async (provider) => {
-    const rate = await fetchOneProviderRate(provider);
-    return { provider, rate };
+
+  const results = await Promise.all(providers.map(async (provider) => {
+    try {
+      const rate = await fetchOneProviderRate(provider);
+      return { provider, rate, ok: true };
+    } catch (err) {
+      return { provider, ok: false, error: err?.message || String(err) };
+    }
   }));
 
   for (const result of results) {
-    if (result.status !== "fulfilled") continue;
-    const { provider, rate } = result.value;
-    data.providerRates[provider] = {
-      rate,
-      source: PROVIDER_RATE_SOURCES[provider],
-      updatedAtHour: hourlyKey(),
-      ok: true
-    };
-  }
-
-  for (const provider of providers) {
-    if (!data.providerRates[provider]?.rate || data.providerRates[provider]?.updatedAtHour !== hourlyKey()) {
-      const previous = data.providerRates[provider]?.rate;
-
-      // Vigtigt: Revolut må aldrig bruge fallback eller gammel cache som rigtig kurs.
-      // Enten er der en live-kurs i denne 10-minutters periode, eller metoden er utilgængelig.
-      if (provider === "revolut") {
-        data.providerRates[provider] = {
-          rate: 0,
-          source: "unavailable",
-          updatedAtHour: "",
-          ok: false
-        };
-        continue;
-      }
-
+    const { provider } = result;
+    if (result.ok) {
       data.providerRates[provider] = {
-        rate: previous || FALLBACK_RATES[provider],
-        source: previous ? "stale" : "fallback",
-        updatedAtHour: previous ? (data.providerRates[provider]?.updatedAtHour || "") : hourlyKey(),
-        ok: false
+        rate: result.rate,
+        source: PROVIDER_RATE_SOURCES[provider],
+        updatedAtHour: hourlyKey(),
+        lastLiveAt: hourlyKey(),
+        ok: true,
+        error: ""
       };
+      continue;
     }
+
+    const previousInfo = data.providerRates[provider] || {};
+    const previousWasLive = previousInfo.ok === true && previousInfo.rate > 3 && previousInfo.rate < 7;
+
+    // Vigtigt: Revolut må aldrig bruge fallback eller gammel cache som rigtig kurs.
+    // Enten er der en live-kurs i denne 10-minutters periode, eller metoden er utilgængelig.
+    if (provider === "revolut") {
+      data.providerRates[provider] = {
+        rate: 0,
+        source: "unavailable",
+        updatedAtHour: "",
+        lastLiveAt: previousInfo.lastLiveAt || "",
+        ok: false,
+        error: result.error || "Live-kurs utilgængelig"
+      };
+      continue;
+    }
+
+    data.providerRates[provider] = {
+      rate: previousWasLive ? previousInfo.rate : FALLBACK_RATES[provider],
+      source: previousWasLive ? "stale" : "fallback",
+      updatedAtHour: previousWasLive ? (previousInfo.updatedAtHour || previousInfo.lastLiveAt || "") : hourlyKey(),
+      lastLiveAt: previousInfo.lastLiveAt || (previousWasLive ? previousInfo.updatedAtHour : ""),
+      ok: false,
+      error: result.error || "Live-kurs kunne ikke hentes"
+    };
   }
 }
 
@@ -404,6 +415,23 @@ function updateRateStatus() {
       el.appendChild(document.createTextNode(en ? "Revolut: live rate" : "Revolut: live kurs"));
     } else {
       el.appendChild(document.createTextNode(en ? "Revolut: live rate unavailable" : "Revolut: live kurs utilgængelig"));
+    }
+  }
+
+  const wiseInfo = data.providerRates?.wise;
+  if (wiseInfo) {
+    el.appendChild(document.createElement("br"));
+    if (wiseInfo.ok) {
+      el.appendChild(document.createTextNode(en ? "Wise: live rate" : "Wise: live kurs"));
+    } else if (wiseInfo.source === "stale") {
+      const updated = formatRateUpdateTime(wiseInfo.lastLiveAt || wiseInfo.updatedAtHour || "");
+      el.appendChild(document.createTextNode(en ? `Wise: using last fetched rate ${updated}` : `Wise: bruger sidst hentede kurs ${updated}`));
+    } else {
+      el.appendChild(document.createTextNode(en ? "Wise: fallback rate" : "Wise: fallback-kurs"));
+    }
+    if (wiseInfo.error) {
+      el.appendChild(document.createElement("br"));
+      el.appendChild(document.createTextNode(`Wise fejl: ${wiseInfo.error}`));
     }
   }
   updateConverterStatus();
@@ -495,7 +523,9 @@ async function updateMarketRateIfNeeded() {
   }
 
   if (data.market?.rateVersion !== RATE_VERSION) {
-    data.providerRates = {};
+    // Bevar sidst succesfuldt hentede provider-kurser, så Wise kan bruge seneste live-kurs
+    // hvis en ny live-hentning fejler efter versionsopdatering.
+    data.providerRates = data.providerRates || {};
     if (data.market) data.market.updatedAtHour = "";
   }
 
