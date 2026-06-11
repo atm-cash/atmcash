@@ -2,16 +2,15 @@
   "market": {
     "rate": 5.057,
     "date": "",
-    "source": "open.er-api.com",
-    "rateVersion": "v3.6",
+    "source": "standard",
+    "rateVersion": "v2.7",
     "rates": {
       "DKK": 1,
       "THB": 5.057,
       "EUR": 0.134,
       "USD": 0.146,
       "GBP": 0.114
-    },
-    "updatedAtHour": ""
+    }
   },
   "homeCurrency": "DKK",
   "language": "da",
@@ -21,8 +20,7 @@
     "rate": 0,
     "atm": 220,
     "over": 2,
-    "manualRate": null,
-    "rateSource": "market"
+    "rateUnavailable": true
   },
   "wise": {
     "limit": 1800,
@@ -33,13 +31,11 @@
   "visa": {
     "bank": "Danske Bank",
     "type": "Visa Debit",
-    "rate": 0,
+    "rate": 5.16238,
     "spread": 1.5,
     "percent": 1,
     "fixedDkk": 30,
-    "atm": 220,
-    "rawRate": 0,
-    "manualRate": null
+    "atm": 220
   },
   "mastercard": {
     "bank": "Danske Bank",
@@ -73,6 +69,38 @@
     "fixedDkk": 0,
     "delivery": 50,
     "other": 0
+  },
+  "providerRates": {
+    "revolut": {
+      "rate": 0,
+      "source": "unavailable",
+      "updatedAtHour": "",
+      "ok": false
+    },
+    "wise": {
+      "rate": 5.0772,
+      "source": "fallback",
+      "updatedAtHour": "",
+      "ok": false
+    },
+    "forex": {
+      "rate": 4.72589,
+      "source": "fallback",
+      "updatedAtHour": "",
+      "ok": false
+    },
+    "tavex": {
+      "rate": 4.830917874396135,
+      "source": "fallback",
+      "updatedAtHour": "",
+      "ok": false
+    },
+    "loomis": {
+      "rate": 4.789071,
+      "source": "fallback",
+      "updatedAtHour": "",
+      "ok": false
+    }
   },
   "visibleMethods": [
     "revolut",
