@@ -1,4 +1,4 @@
-// ATM Cash v5.2 - price calculations and detail views
+// ATM Cash v5.3 - price calculations and detail views
 // v1.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
@@ -237,7 +237,7 @@ function costForTargetThb(method, targetThb) {
   if (method === "eurcash") {
     const c = data.eurcash || {};
     const rate = eurcashEffectiveRate(c);
-    return { dkkCost: rate > 0 ? targetThb / rate : Infinity, thb: targetThb };
+    return rate > 0 ? targetThb / rate : Infinity;
   }
 
   if (method === "visa" || method === "mastercard") {
