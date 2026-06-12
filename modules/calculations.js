@@ -1,4 +1,4 @@
-// ATM Cash v5.3 - price calculations and detail views
+// ATM Cash v5.4 - price calculations and detail views
 // v1.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
@@ -286,6 +286,17 @@ function resultCostListForThb(targetThb) {
 }
 
 function calculate() {
+  const dkkInput = document.getElementById("dkkAmount");
+  const thbInput = document.getElementById("bestThb");
+  const currentDkkInput = amountToDkk(parseNumber(dkkInput?.value || "0"));
+  const currentThbInput = parseNumber(thbInput?.value || "0");
+
+  // v5.4: If the THB field contains an amount and the DKK field is empty/0,
+  // treat THB as the active input even after reload/cache restores values.
+  if (currentThbInput > 0 && currentDkkInput <= 0) {
+    lastEditedCurrency = "thb";
+  }
+
   if (lastEditedCurrency === "thb") {
     updateDirectionArrow();
 
