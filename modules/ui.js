@@ -1,4 +1,4 @@
-// ATM Cash v4.8 - user interface, filters, accordions and startup
+// ATM Cash v4.9 - user interface, filters, accordions and startup
 function setupEmbeddedSettings() {
   const methods = ["revolut", "wise", "visa", "mastercard", "loomis", "forex", "tavex", "eurcash"];
 
@@ -304,6 +304,12 @@ async function init() {
   const visaType = document.getElementById("visaType");
   [visaBank, visaType].forEach((el) => {
     if (el) el.addEventListener("change", applyVisaNordeaPresetToInputs);
+  });
+
+  const mastercardBank = document.getElementById("mastercardBank");
+  const mastercardType = document.getElementById("mastercardType");
+  [mastercardBank, mastercardType].forEach((el) => {
+    if (el) el.addEventListener("change", applyMastercardPresetToInputs);
   });
 
   const loomisPlace = document.getElementById("loomisPlace");

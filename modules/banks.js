@@ -160,7 +160,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v4.8";
+const RATE_VERSION = "v4.9";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 const NATIONALBANK_DEFAULT_RATES = { DKK: 1, THB: 5.086469989827060, EUR: 0.133791793211404, USD: 0.154356718376167, GBP: 0.115502783617085 };
 const NATIONALBANK_DEFAULT_RATE = NATIONALBANK_DEFAULT_RATES.THB;
@@ -450,13 +450,38 @@ function isWeekendToday() {
 }
 
 function revolutEffectiveRate(baseRate) {
-  // v4.8: Revolut estimeres ud fra Nationalbankens THB-grundkurs minus 0,95%.
+  // v4.9: Revolut estimeres ud fra Nationalbankens THB-grundkurs minus 0,95%.
   return baseRate * 0.9905;
 }
 
 function wiseEffectiveRate(baseRate) {
-  // v4.8: Wise estimeres ud fra Nationalbankens THB-grundkurs minus 0,43%.
+  // v4.9: Wise estimeres ud fra Nationalbankens THB-grundkurs minus 0,43%.
   return baseRate * 0.9957;
+}
+
+function mastercardEffectiveRate(baseRate, card = data.mastercard) {
+  const markup = Number(card?.spread || 0);
+  return baseRate / (1 + markup / 100);
+}
+
+function applyMastercardModelToData() {
+  if (!data.mastercard) return;
+  const baseRate = getCurrencyRates().THB || data.market?.rate || NATIONALBANK_DEFAULT_RATE;
+  data.mastercard.rawRate = baseRate;
+  data.mastercard.spread = 1.5;
+  data.mastercard.rate = mastercardEffectiveRate(baseRate, data.mastercard);
+  data.mastercard.percent = 2;
+  data.mastercard.fixedDkk = 50;
+  data.mastercard.atm = data.mastercard.atm || 220;
+}
+
+function applyMastercardPresetToInputs() {
+  const percent = document.getElementById("mastercardPercent");
+  const spread = document.getElementById("mastercardSpread");
+  const fixed = document.getElementById("mastercardFixed");
+  if (percent) percent.value = formatDecimal(2);
+  if (spread) spread.value = formatDecimal(1.5);
+  if (fixed) fixed.value = formatDecimal(50);
 }
 
 function visaBaseRate() {
@@ -502,10 +527,7 @@ function applyMarketRates() {
   };
 
   updateVisaRateFromSettings();
-
-  data.mastercard.rate = marketRate;
-  data.mastercard.spread = 0;
-  data.mastercard.fixedDkk = 0;
+  applyMastercardModelToData();
 
   data.loomis.place = "Loomis online";
   data.loomis.rate = providerRate("loomis");

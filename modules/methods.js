@@ -1,4 +1,4 @@
-// ATM Cash v4.8 - method settings and saved method data
+// ATM Cash v4.9 - method settings and saved method data
 function syncInputs() {
   applyVisaBankPresetToData();
   setInputValue("revolutAtm", data.revolut.atm);
@@ -22,6 +22,7 @@ function syncInputs() {
   setInputValue("mastercardSpread", data.mastercard.spread || 0);
   setInputValue("mastercardFixed", data.mastercard.fixedDkk);
   setInputValue("mastercardAtm", data.mastercard.atm);
+  if (typeof applyMastercardPresetToInputs === "function") applyMastercardPresetToInputs();
 
   
   if (![...document.getElementById("loomisPlace").options].some(o => o.value === data.loomis.place)) data.loomis.place = "Loomis online";

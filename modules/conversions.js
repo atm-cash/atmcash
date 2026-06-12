@@ -1,12 +1,12 @@
-// ATM Cash v4.8 - conversions, defaults, config, language and currency helpers
+// ATM Cash v4.9 - conversions, defaults, config, language and currency helpers
 let defaults = {
-  market: { rate: 5.086469989827060, date: "", source: "nationalbanken", rateVersion: "v4.8", rates: { DKK: 1, THB: 5.086469989827060, EUR: 0.133791793211404, USD: 0.154356718376167, GBP: 0.115502783617085 } },
+  market: { rate: 5.086469989827060, date: "", source: "nationalbanken", rateVersion: "v4.9", rates: { DKK: 1, THB: 5.086469989827060, EUR: 0.133791793211404, USD: 0.154356718376167, GBP: 0.115502783617085 } },
   homeCurrency: "DKK",
   language: "da",
   revolut: { plan: "Premium", limit: 3000, rate: 5.086469989827060 * 0.9905, atm: 220, over: 2, rateUnavailable: false, referenceMargin: 0.95 },
   wise: { limit: 1800, rate: 5.064598168870804, atm: 220, over: 2.69, referenceMargin: 0.43 },
   visa: { bank: "Danske Bank", type: "Visa Debit", manualRate: "", rawRate: 5.086469989827060, rate: 5.010172939979654, spread: 1.5, percent: 1, fixedDkk: 30, atm: 220 },
-  mastercard: { bank: "Danske Bank", type: "Mastercard Debit", rate: 5.086469989827060, spread: 0, percent: 1.75, fixedDkk: 0, atm: 220 },
+  mastercard: { bank: "Nordea", type: "Mastercard Debit", rawRate: 5.086469989827060, rate: 5.086469989827060 / 1.015, spread: 1.5, percent: 2, fixedDkk: 50, atm: 220 },
   loomis: { place: "Loomis online", rate: 4.789071, margin: 5.51, fixedDkk: 49.95, delivery: 0, other: 0 },
   forex: { place: "FOREX afhentning", rate: 4.724312730606, margin: 6.579, fixedDkk: 0, delivery: 0, other: 0 },
   tavex: { place: "Tavex webshop", rate: 4.840271055, margin: 4.299, fixedDkk: 0, delivery: 50, other: 0 },
@@ -103,6 +103,8 @@ const translations = {
   "Bankgebyr · %": "Bank fee · %",
   "Fast bankgebyr": "Fixed bank fee",
   "Fast bankgebyr · DKK": "Fixed bank fee · DKK",
+  "Minimum hævegebyr": "Minimum withdrawal fee",
+  "Min. hævegebyr · DKK": "Min. withdrawal fee · DKK",
   "Fast gebyr": "Fixed fee",
   "Fast gebyr · DKK": "Fixed fee · DKK",
   "Gebyr": "Fee",
@@ -111,6 +113,7 @@ const translations = {
   "Gebyrer · DKK": "Fees · DKK",
   "Valutakurs-spread": "Exchange rate spread",
   "Valutakurs-spread · %": "Exchange rate spread · %",
+  "Valutakurstillæg · %": "Exchange rate markup · %",
   "Bankens valutakurstillæg": "Bankens valutakurstillæg",
   "Bankens valutakurstillæg · %": "Bankens valutakurstillæg · %",
   "Kurs": "Rate",
@@ -272,7 +275,7 @@ function loadData() {
       loaded.forex.delivery = 0;
       loaded.forex.other = 0;
     }
-    // v4.8: Revolut og Wise bruger Nationalbankens grundkurs med fast justering, ikke live scraping.
+    // v4.9: Revolut og Wise bruger Nationalbankens grundkurs med fast justering, ikke live scraping.
     if (loaded.revolut) {
       loaded.revolut.rate = defaults.market.rate * 0.9905;
       loaded.revolut.rateUnavailable = false;
@@ -289,6 +292,15 @@ function loadData() {
     }
     if (loaded.visa && loaded.visa.manualRate === undefined) {
       loaded.visa.manualRate = "";
+    }
+    // v4.9: Mastercard skrives om som Visa-model: Nationalbank grundkurs, 1,5% valutakurstillæg, 2% / min. 50 DKK.
+    if (loaded.mastercard) {
+      loaded.mastercard.rawRate = defaults.market.rate;
+      loaded.mastercard.spread = 1.5;
+      loaded.mastercard.rate = defaults.market.rate / 1.015;
+      loaded.mastercard.percent = 2;
+      loaded.mastercard.fixedDkk = 50;
+      loaded.mastercard.atm = loaded.mastercard.atm || 220;
     }
     return loaded;
   } catch {

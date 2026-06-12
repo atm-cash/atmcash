@@ -1,4 +1,4 @@
-// ATM Cash v4.8 - price calculations and detail views
+// ATM Cash v4.9 - price calculations and detail views
 // v1.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
@@ -61,7 +61,31 @@ function calculateResults(dkk) {
   const visaThb = visaBeforeFeeDkk * visa.rate - visa.atm;
 
   const mastercard = data.mastercard;
-  const mastercardThb = (dkk - mastercard.fixedDkk) * mastercard.rate * (1 - mastercard.percent / 100) - mastercard.atm;
+  if (typeof applyMastercardModelToData === "function") applyMastercardModelToData();
+  const mastercardMaxPerWithdrawal = parseNumber(document.getElementById("mcMaxPerWithdrawal")?.value || "20000") || 20000;
+  let mastercardWithdrawalCount = Math.max(1, Math.ceil(dkk / mastercardMaxPerWithdrawal));
+  let mastercardAtmFeeThb = 0;
+  let mastercardAtmFeeDkk = 0;
+  let mastercardBeforeFeeDkk = 0;
+  let mastercardGrossThb = 0;
+  for (let i = 0; i < 8; i += 1) {
+    mastercardAtmFeeThb = mastercardWithdrawalCount * mastercard.atm;
+    mastercardAtmFeeDkk = mastercardAtmFeeThb / mastercard.rate;
+    const afterAtmDkk = Math.max(0, dkk - mastercardAtmFeeDkk);
+    const minFee = (mastercard.fixedDkk || 0) * mastercardWithdrawalCount;
+    const percent = (mastercard.percent || 0) / 100;
+    if (percent > 0) {
+      const beforeByPercent = afterAtmDkk / (1 + percent);
+      mastercardBeforeFeeDkk = beforeByPercent * percent >= minFee ? beforeByPercent : Math.max(0, afterAtmDkk - minFee);
+    } else {
+      mastercardBeforeFeeDkk = Math.max(0, afterAtmDkk - minFee);
+    }
+    mastercardGrossThb = mastercardBeforeFeeDkk * mastercard.rate;
+    const nextCount = Math.max(1, Math.ceil((mastercardBeforeFeeDkk + Math.max(mastercardBeforeFeeDkk * percent, minFee) + mastercardAtmFeeDkk) / mastercardMaxPerWithdrawal));
+    if (nextCount === mastercardWithdrawalCount) break;
+    mastercardWithdrawalCount = nextCount;
+  }
+  const mastercardThb = Math.max(0, mastercardGrossThb - mastercardAtmFeeThb);
 
   const loomisRate = cashSupplierRate("loomis", data.loomis.rate);
   const loomisFees = cashSupplierFees("loomis");
@@ -591,7 +615,29 @@ function calculateVisaDetails() {
 }
 
 
+function getMastercardMinimumFeeDkk(card) {
+  return card.fixedDkk || 0;
+}
+
+function getMastercardFeeDkk(beforeFeeDkk, card, withdrawalCount = 1) {
+  const percentFee = beforeFeeDkk * ((card.percent || 0) / 100);
+  const minimumFee = getMastercardMinimumFeeDkk(card) * Math.max(1, withdrawalCount || 1);
+  return minimumFee ? Math.max(percentFee, minimumFee) : percentFee;
+}
+
+function getBeforeMastercardFeeDkkFromTotal(totalDkk, card, withdrawalCount = 1) {
+  const percent = (card.percent || 0) / 100;
+  const minimumFee = getMastercardMinimumFeeDkk(card) * Math.max(1, withdrawalCount || 1);
+  if (minimumFee && totalDkk <= minimumFee) return 0;
+  if (percent <= 0) return Math.max(0, totalDkk - minimumFee);
+  const beforeByPercent = totalDkk / (1 + percent);
+  return beforeByPercent * percent >= minimumFee
+    ? beforeByPercent
+    : Math.max(0, totalDkk - minimumFee);
+}
+
 function calculateMastercardDetails() {
+  if (typeof applyMastercardModelToData === "function") applyMastercardModelToData();
   const c = data.mastercard;
   const maxPerWithdrawal = parseNumber(document.getElementById("mcMaxPerWithdrawal")?.value || "20000") || 20000;
 
@@ -605,24 +651,32 @@ function calculateMastercardDetails() {
 
   if (lastEditedCurrency === "thb") {
     wantedCashThb = parseNumber(document.getElementById("bestThb").value);
-    withdrawalCount = Math.max(1, Math.ceil(wantedCashThb / maxPerWithdrawal));
-    atmFeeThb = withdrawalCount * c.atm;
-    totalThbWithFees = wantedCashThb + atmFeeThb;
-    beforeBankFeeDkk = totalThbWithFees / c.rate;
-    finalTotalDkk = beforeBankFeeDkk / (1 - (c.percent || 0) / 100) + (c.fixedDkk || 0);
-    percentFeeDkk = Math.max(0, finalTotalDkk - beforeBankFeeDkk - (c.fixedDkk || 0));
+    withdrawalCount = 1;
+    for (let i = 0; i < 8; i += 1) {
+      atmFeeThb = withdrawalCount * c.atm;
+      totalThbWithFees = wantedCashThb + atmFeeThb;
+      beforeBankFeeDkk = totalThbWithFees / c.rate;
+      percentFeeDkk = getMastercardFeeDkk(beforeBankFeeDkk, c, withdrawalCount);
+      finalTotalDkk = beforeBankFeeDkk + percentFeeDkk;
+      const nextCount = Math.max(1, Math.ceil(finalTotalDkk / maxPerWithdrawal));
+      if (nextCount === withdrawalCount) break;
+      withdrawalCount = nextCount;
+    }
   } else {
     const dkk = amountToDkk(parseNumber(document.getElementById("dkkAmount").value));
-    const afterFixed = Math.max(0, dkk - (c.fixedDkk || 0));
-    const afterPercent = afterFixed * (1 - (c.percent || 0) / 100);
-    const grossThb = afterPercent * c.rate;
-    withdrawalCount = Math.max(1, Math.ceil(grossThb / maxPerWithdrawal));
-    atmFeeThb = withdrawalCount * c.atm;
-    wantedCashThb = Math.max(0, grossThb - atmFeeThb);
-    totalThbWithFees = wantedCashThb + atmFeeThb;
-    beforeBankFeeDkk = totalThbWithFees / c.rate;
-    percentFeeDkk = beforeBankFeeDkk * (c.percent / 100);
-    finalTotalDkk = beforeBankFeeDkk + percentFeeDkk + (c.fixedDkk || 0);
+    withdrawalCount = Math.max(1, Math.ceil(dkk / maxPerWithdrawal));
+    for (let i = 0; i < 8; i += 1) {
+      atmFeeThb = withdrawalCount * c.atm;
+      const atmFeeDkk = atmFeeThb / c.rate;
+      beforeBankFeeDkk = getBeforeMastercardFeeDkkFromTotal(Math.max(0, dkk - atmFeeDkk), c, withdrawalCount);
+      totalThbWithFees = beforeBankFeeDkk * c.rate;
+      wantedCashThb = Math.max(0, totalThbWithFees - atmFeeThb);
+      percentFeeDkk = getMastercardFeeDkk(beforeBankFeeDkk, c, withdrawalCount);
+      finalTotalDkk = beforeBankFeeDkk + percentFeeDkk + atmFeeDkk;
+      const nextCount = Math.max(1, Math.ceil(finalTotalDkk / maxPerWithdrawal));
+      if (nextCount === withdrawalCount) break;
+      withdrawalCount = nextCount;
+    }
   }
 
   setText("mcCalcCard", c.type);
@@ -637,13 +691,12 @@ function calculateMastercardDetails() {
   setText("mcLineWanted", `${formatNumber(wantedCashThb)} THB`);
   setText("mcLineAtm", `${withdrawalCount} × ${formatNumber(c.atm)} = ${formatNumber(atmFeeThb)} THB`);
   setText("mcLineTotalThb", `${formatNumber(totalThbWithFees)} THB`);
-  setText("mcLineRate", `${formatDecimal(c.rate)} THB/DKK`);
-  const mcMarketRate = data.market?.rate || c.rate;
-  setText("mcLineSpread", `${formatDecimal(c.spread || 0)}% (mid-market ${formatDecimal(mcMarketRate)} → Mastercard ${formatDecimal(c.rate)})`);
+  setText("mcLineRate", `${formatDecimal(c.rawRate || data.market?.rate || c.rate)} THB/DKK`);
+  setText("mcLineSpread", `${formatDecimal(c.spread || 0)}%`);
   setText("mcLineBeforeFee", `${formatNumber(beforeBankFeeDkk)} DKK`);
-  setText("mcLineFixed", `${formatNumber(c.fixedDkk)} DKK`);
-  setText("mcLinePercent", `${formatDecimal(c.percent)}% = ${formatNumber(percentFeeDkk)} DKK`);
-  setTotalFeeLine("mcLineTotalFee", (atmFeeThb / c.rate) + spreadCostDkk(totalThbWithFees, mcMarketRate, c.rate) + percentFeeDkk + (c.fixedDkk || 0));
+  setText("mcLineFixed", `${withdrawalCount} × ${formatNumber(getMastercardMinimumFeeDkk(c))} = ${formatNumber(getMastercardMinimumFeeDkk(c) * withdrawalCount)} DKK`);
+  setText("mcLinePercent", `${formatDecimal(c.percent)}% / min. ${withdrawalCount} × ${formatNumber(getMastercardMinimumFeeDkk(c))} = ${formatNumber(percentFeeDkk)} DKK`);
+  setTotalFeeLine("mcLineTotalFee", (atmFeeThb / c.rate) + spreadCostDkk(totalThbWithFees, c.rawRate || c.rate, c.rate) + percentFeeDkk);
   setText("mcLineFinalTotal", `${formatNumber(finalTotalDkk)} DKK`);
 
   const formula = document.getElementById("mcFormula");
@@ -653,10 +706,11 @@ function calculateMastercardDetails() {
       <strong>2.</strong> Det kræver ${withdrawalCount} hævning${withdrawalCount === 1 ? "" : "er"} ved maks ${formatNumber(maxPerWithdrawal)} DKK pr. gang.<br>
       <strong>3.</strong> ATM-gebyr: ${withdrawalCount} × ${formatNumber(c.atm)} THB = ${formatNumber(atmFeeThb)} THB.<br>
       <strong>4.</strong> Total inkl. ATM-gebyr: ${formatNumber(wantedCashThb)} + ${formatNumber(atmFeeThb)} = ${formatNumber(totalThbWithFees)} THB.<br>
-      <strong>5.</strong> Mastercard kurs: mid-market ${formatDecimal(mcMarketRate)} minus ${formatDecimal(c.spread || 0)}% spread = ${formatDecimal(c.rate)} THB/DKK.<br>
-      <strong>6.</strong> ${formatNumber(totalThbWithFees)} / ${formatDecimal(c.rate)} = ${formatNumber(beforeBankFeeDkk)} DKK før hævegebyr.<br>
-      <strong>8.</strong> Hævegebyr: ${formatDecimal(c.percent)}% = ${formatNumber(percentFeeDkk)} DKK.<br>
-      <strong>9.</strong> Total: ${formatNumber(beforeBankFeeDkk)} + ${formatNumber(percentFeeDkk)} + ${formatNumber(c.fixedDkk)} = ${formatNumber(finalTotalDkk)} DKK.
+      <strong>5.</strong> Mastercard grundkurs: ${formatDecimal(c.rawRate || data.market?.rate || c.rate)} THB/DKK (Nationalbanken).<br>
+      <strong>6.</strong> Bankens valutakurstillæg ${formatDecimal(c.spread || 0)}% giver beregningskurs ${formatDecimal(c.rate)} THB/DKK.<br>
+      <strong>7.</strong> ${formatNumber(totalThbWithFees)} / ${formatDecimal(c.rate)} = ${formatNumber(beforeBankFeeDkk)} DKK før hævegebyr.<br>
+      <strong>8.</strong> Hævegebyr: ${formatDecimal(c.percent)}% / min. ${withdrawalCount} × ${formatNumber(getMastercardMinimumFeeDkk(c))} DKK = ${formatNumber(percentFeeDkk)} DKK.<br>
+      <strong>9.</strong> Total: ${formatNumber(beforeBankFeeDkk)} + ${formatNumber(percentFeeDkk)} = ${formatNumber(finalTotalDkk)} DKK.
     `;
   }
 }
