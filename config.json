@@ -1,12 +1,12 @@
 {
   "market": {
-    "rate": 5.057,
+    "rate": 5.058168942842691,
     "date": "",
-    "source": "standard",
-    "rateVersion": "v4.2",
+    "source": "nationalbanken",
+    "rateVersion": "v4.4",
     "rates": {
       "DKK": 1,
-      "THB": 5.057,
+      "THB": 5.058168942842691,
       "EUR": 0.134,
       "USD": 0.146,
       "GBP": 0.114
@@ -24,20 +24,20 @@
   },
   "wise": {
     "limit": 1800,
-    "rate": 5.0772,
+    "rate": 5.058168942842691,
     "atm": 220,
     "over": 2.69
   },
   "visa": {
     "bank": "Danske Bank",
     "type": "Visa Debit",
-    "rate": 4.981145000000001,
+    "rate": 4.9822964087000505,
     "spread": 1.5,
     "percent": 1,
     "fixedDkk": 30,
     "atm": 220,
     "manualRate": "",
-    "rawRate": 5.057
+    "rawRate": 5.058168942842691
   },
   "mastercard": {
     "bank": "Danske Bank",
