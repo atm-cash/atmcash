@@ -1,4 +1,4 @@
-// ATM Cash v4.9 - price calculations and detail views
+// ATM Cash v5.0 - price calculations and detail views
 // v1.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
@@ -694,7 +694,6 @@ function calculateMastercardDetails() {
   setText("mcLineRate", `${formatDecimal(c.rawRate || data.market?.rate || c.rate)} THB/DKK`);
   setText("mcLineSpread", `${formatDecimal(c.spread || 0)}%`);
   setText("mcLineBeforeFee", `${formatNumber(beforeBankFeeDkk)} DKK`);
-  setText("mcLineFixed", `${withdrawalCount} × ${formatNumber(getMastercardMinimumFeeDkk(c))} = ${formatNumber(getMastercardMinimumFeeDkk(c) * withdrawalCount)} DKK`);
   setText("mcLinePercent", `${formatDecimal(c.percent)}% / min. ${withdrawalCount} × ${formatNumber(getMastercardMinimumFeeDkk(c))} = ${formatNumber(percentFeeDkk)} DKK`);
   setTotalFeeLine("mcLineTotalFee", (atmFeeThb / c.rate) + spreadCostDkk(totalThbWithFees, c.rawRate || c.rate, c.rate) + percentFeeDkk);
   setText("mcLineFinalTotal", `${formatNumber(finalTotalDkk)} DKK`);
