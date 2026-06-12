@@ -1,4 +1,4 @@
-// ATM Cash v5.9 - method settings and saved method data
+// ATM Cash v6.0 - method settings and saved method data
 function syncInputs() {
   applyVisaBankPresetToData();
   setInputValue("revolutAtm", data.revolut.atm);

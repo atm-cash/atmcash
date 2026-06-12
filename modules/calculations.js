@@ -1,4 +1,4 @@
-// ATM Cash v5.9 - price calculations and detail views
+// ATM Cash v6.0 - price calculations and detail views
 // v1.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
@@ -62,7 +62,7 @@ function calculateResults(dkk) {
 
   const mastercard = data.mastercard;
   if (typeof applyMastercardModelToData === "function") applyMastercardModelToData();
-  // v5.9: Mastercard skal bruge samme THB-beregning som Visa på forsiden.
+  // v6.0: Mastercard skal bruge samme THB-beregning som Visa på forsiden.
   // Kun Mastercard-gebyret adskiller sig i detaljevisningen.
   const mastercardThb = visaThb;
 
@@ -97,7 +97,7 @@ function calculateResults(dkk) {
 
 function visibleResultsForDkk(dkk) {
   ensureVisibleMethods();
-  const allowed = getHomeCurrency() === "DKK" ? data.visibleMethods : ["revolut", "wise"];
+  const allowed = getHomeCurrency() === "DKK" ? data.visibleMethods : ["revolut", "wise", "eurcash"];
   return calculateResults(dkk).filter((item) => allowed.includes(item.id));
 }
 
@@ -256,7 +256,7 @@ function costForTargetThb(method, targetThb) {
 }
 
 function resultCostListForThb(targetThb) {
-  const allowed = getHomeCurrency() === "DKK" ? data.visibleMethods : ["revolut", "wise"];
+  const allowed = getHomeCurrency() === "DKK" ? data.visibleMethods : ["revolut", "wise", "eurcash"];
   const baseResults = calculateResults(1000).filter((item) => allowed.includes(item.id));
 
   return baseResults.map((item) => ({
@@ -274,7 +274,7 @@ function calculate() {
   const activeAmount = document.body?.dataset?.activeAmount || "";
   const focusedId = document.activeElement?.id || "";
 
-  // v5.9: Robust THB→DKK detection. The right THB field wins when it is focused,
+  // v6.0: Robust THB→DKK detection. The right THB field wins when it is focused,
   // when its input handler marked it active, or when DKK is empty/0 and THB has a value.
   const useThbInput = currentThbInput > 0 && (
     activeAmount === "thb" ||
@@ -668,7 +668,7 @@ function calculateMastercardDetails() {
     for (let i = 0; i < 8; i += 1) {
       atmFeeThb = withdrawalCount * c.atm;
       const atmFeeDkk = atmFeeThb / c.rate;
-      // v5.9: Kontanter ønsket og total THB inkl. ATM skal være 100% samme som Visa.
+      // v6.0: Kontanter ønsket og total THB inkl. ATM skal være 100% samme som Visa.
       beforeBankFeeDkk = getBeforeCardFeeDkkFromTotal(Math.max(0, dkk - atmFeeDkk), visaModel, withdrawalCount);
       totalThbWithFees = beforeBankFeeDkk * c.rate;
       wantedCashThb = Math.max(0, totalThbWithFees - atmFeeThb);
