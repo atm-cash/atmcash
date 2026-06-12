@@ -1,4 +1,4 @@
-// ATM Cash v5.4 - user interface, filters, accordions and startup
+// ATM Cash v5.5 - user interface, filters, accordions and startup
 function setupEmbeddedSettings() {
   const methods = ["revolut", "wise", "visa", "mastercard", "loomis", "forex", "tavex", "eurcash"];
 
@@ -282,16 +282,28 @@ async function init() {
 
   const dkkAmount = document.getElementById("dkkAmount");
   if (dkkAmount) {
+    dkkAmount.addEventListener("focus", () => {
+      lastEditedCurrency = "dkk";
+      if (document.body?.dataset) document.body.dataset.activeAmount = "dkk";
+      updateDirectionArrow();
+    });
     dkkAmount.addEventListener("input", () => {
       lastEditedCurrency = "dkk";
+      if (document.body?.dataset) document.body.dataset.activeAmount = "dkk";
       calculate();
     });
   }
 
   const bestThb = document.getElementById("bestThb");
   if (bestThb) {
+    bestThb.addEventListener("focus", () => {
+      lastEditedCurrency = "thb";
+      if (document.body?.dataset) document.body.dataset.activeAmount = "thb";
+      updateDirectionArrow();
+    });
     bestThb.addEventListener("input", () => {
       lastEditedCurrency = "thb";
+      if (document.body?.dataset) document.body.dataset.activeAmount = "thb";
       calculate();
     });
   }

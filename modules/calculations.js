@@ -1,4 +1,4 @@
-// ATM Cash v5.4 - price calculations and detail views
+// ATM Cash v5.5 - price calculations and detail views
 // v1.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
@@ -178,7 +178,14 @@ function getDeliveryForMethod(method, thbAmount) {
 function costForTargetThb(method, targetThb) {
   if (!targetThb || targetThb <= 0) return 0;
 
-  const cfg = data[method];
+  const cfg = data[method] || {};
+
+  if (method === "eurcash") {
+    const c = data.eurcash || {};
+    const rate = eurcashEffectiveRate(c);
+    return rate > 0 ? targetThb / rate : Infinity;
+  }
+
   const rate = cfg.rate || 0;
   if (!rate) return 0;
 
@@ -234,11 +241,6 @@ function costForTargetThb(method, targetThb) {
     return high;
   }
 
-  if (method === "eurcash") {
-    const c = data.eurcash || {};
-    const rate = eurcashEffectiveRate(c);
-    return rate > 0 ? targetThb / rate : Infinity;
-  }
 
   if (method === "visa" || method === "mastercard") {
     const c = data[method];
@@ -290,14 +292,21 @@ function calculate() {
   const thbInput = document.getElementById("bestThb");
   const currentDkkInput = amountToDkk(parseNumber(dkkInput?.value || "0"));
   const currentThbInput = parseNumber(thbInput?.value || "0");
+  const activeAmount = document.body?.dataset?.activeAmount || "";
+  const focusedId = document.activeElement?.id || "";
 
-  // v5.4: If the THB field contains an amount and the DKK field is empty/0,
-  // treat THB as the active input even after reload/cache restores values.
-  if (currentThbInput > 0 && currentDkkInput <= 0) {
+  // v5.5: Robust THB→DKK detection. The right THB field wins when it is focused,
+  // when its input handler marked it active, or when DKK is empty/0 and THB has a value.
+  const useThbInput = currentThbInput > 0 && (
+    activeAmount === "thb" ||
+    focusedId === "bestThb" ||
+    lastEditedCurrency === "thb" ||
+    currentDkkInput <= 0
+  );
+
+  if (useThbInput) {
     lastEditedCurrency = "thb";
-  }
-
-  if (lastEditedCurrency === "thb") {
+    if (document.body?.dataset) document.body.dataset.activeAmount = "thb";
     updateDirectionArrow();
 
     const targetThb = parseNumber(document.getElementById("bestThb").value);
