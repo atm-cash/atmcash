@@ -1,4 +1,4 @@
-// ATM Cash v5.8 - price calculations and detail views
+// ATM Cash v5.9 - price calculations and detail views
 // v1.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
@@ -62,31 +62,9 @@ function calculateResults(dkk) {
 
   const mastercard = data.mastercard;
   if (typeof applyMastercardModelToData === "function") applyMastercardModelToData();
-  const mastercardMaxPerWithdrawal = parseNumber(document.getElementById("mcMaxPerWithdrawal")?.value || "20000") || 20000;
-  let mastercardWithdrawalCount = 1;
-  let mastercardAtmFeeThb = 0;
-  let mastercardAtmFeeDkk = 0;
-  let mastercardBeforeFeeDkk = 0;
-  let mastercardGrossThb = 0;
-  let mastercardThb = 0;
-  for (let i = 0; i < 8; i += 1) {
-    mastercardAtmFeeThb = mastercardWithdrawalCount * mastercard.atm;
-    mastercardAtmFeeDkk = mastercardAtmFeeThb / mastercard.rate;
-    const afterAtmDkk = Math.max(0, dkk - mastercardAtmFeeDkk);
-    const minFee = (mastercard.fixedDkk || 0) * mastercardWithdrawalCount;
-    const percent = (mastercard.percent || 0) / 100;
-    if (percent > 0) {
-      const beforeByPercent = afterAtmDkk / (1 + percent);
-      mastercardBeforeFeeDkk = beforeByPercent * percent >= minFee ? beforeByPercent : Math.max(0, afterAtmDkk - minFee);
-    } else {
-      mastercardBeforeFeeDkk = Math.max(0, afterAtmDkk - minFee);
-    }
-    mastercardGrossThb = mastercardBeforeFeeDkk * mastercard.rate;
-    mastercardThb = Math.max(0, mastercardGrossThb - mastercardAtmFeeThb);
-    const nextCount = Math.max(1, Math.ceil(mastercardThb / mastercardMaxPerWithdrawal));
-    if (nextCount === mastercardWithdrawalCount) break;
-    mastercardWithdrawalCount = nextCount;
-  }
+  // v5.9: Mastercard skal bruge samme THB-beregning som Visa på forsiden.
+  // Kun Mastercard-gebyret adskiller sig i detaljevisningen.
+  const mastercardThb = visaThb;
 
   const loomisRate = cashSupplierRate("loomis", data.loomis.rate);
   const loomisFees = cashSupplierFees("loomis");
@@ -296,7 +274,7 @@ function calculate() {
   const activeAmount = document.body?.dataset?.activeAmount || "";
   const focusedId = document.activeElement?.id || "";
 
-  // v5.8: Robust THB→DKK detection. The right THB field wins when it is focused,
+  // v5.9: Robust THB→DKK detection. The right THB field wins when it is focused,
   // when its input handler marked it active, or when DKK is empty/0 and THB has a value.
   const useThbInput = currentThbInput > 0 && (
     activeAmount === "thb" ||
@@ -684,16 +662,19 @@ function calculateMastercardDetails() {
     finalTotalDkk = beforeBankFeeDkk + percentFeeDkk;
   } else {
     const dkk = amountToDkk(parseNumber(document.getElementById("dkkAmount").value));
-    withdrawalCount = 1;
+    const visaModel = data.visa || c;
+    const visaMaxPerWithdrawal = parseNumber(document.getElementById("visaMaxPerWithdrawal")?.value || "2000") || 2000;
+    withdrawalCount = Math.max(1, Math.ceil(dkk / visaMaxPerWithdrawal));
     for (let i = 0; i < 8; i += 1) {
       atmFeeThb = withdrawalCount * c.atm;
       const atmFeeDkk = atmFeeThb / c.rate;
-      beforeBankFeeDkk = getBeforeMastercardFeeDkkFromTotal(Math.max(0, dkk - atmFeeDkk), c, withdrawalCount);
+      // v5.9: Kontanter ønsket og total THB inkl. ATM skal være 100% samme som Visa.
+      beforeBankFeeDkk = getBeforeCardFeeDkkFromTotal(Math.max(0, dkk - atmFeeDkk), visaModel, withdrawalCount);
       totalThbWithFees = beforeBankFeeDkk * c.rate;
       wantedCashThb = Math.max(0, totalThbWithFees - atmFeeThb);
       percentFeeDkk = getMastercardFeeDkk(beforeBankFeeDkk, c, withdrawalCount);
       finalTotalDkk = beforeBankFeeDkk + percentFeeDkk + atmFeeDkk;
-      const nextCount = Math.max(1, Math.ceil(wantedCashThb / maxPerWithdrawal));
+      const nextCount = Math.max(1, Math.ceil(finalTotalDkk / visaMaxPerWithdrawal));
       if (nextCount === withdrawalCount) break;
       withdrawalCount = nextCount;
     }
