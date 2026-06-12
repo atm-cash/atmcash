@@ -160,7 +160,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v5.0";
+const RATE_VERSION = "v5.1";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 const NATIONALBANK_DEFAULT_RATES = { DKK: 1, THB: 5.086469989827060, EUR: 0.133791793211404, USD: 0.154356718376167, GBP: 0.115502783617085 };
 const NATIONALBANK_DEFAULT_RATE = NATIONALBANK_DEFAULT_RATES.THB;
@@ -436,11 +436,6 @@ function updateRateStatus() {
     el.appendChild(document.createTextNode(en ? `Last updated ${updated}` : `Sidst opdateret ${updated}`));
   }
 
-  el.appendChild(document.createElement("br"));
-  el.appendChild(document.createTextNode(en ? "Revolut: Nationalbank base rate" : "Revolut: Nationalbank grundkurs"));
-
-  el.appendChild(document.createElement("br"));
-  el.appendChild(document.createTextNode(en ? "Wise: Nationalbank base rate - 0.43%" : "Wise: Nationalbank grundkurs - 0,43%"));
   updateConverterStatus();
 }
 
@@ -450,12 +445,12 @@ function isWeekendToday() {
 }
 
 function revolutEffectiveRate(baseRate) {
-  // v5.0: Revolut estimeres ud fra Nationalbankens THB-grundkurs minus 0,95%.
+  // v5.1: Revolut estimeres ud fra Nationalbankens THB-grundkurs minus 0,95%.
   return baseRate * 0.9905;
 }
 
 function wiseEffectiveRate(baseRate) {
-  // v5.0: Wise estimeres ud fra Nationalbankens THB-grundkurs minus 0,43%.
+  // v5.1: Wise estimeres ud fra Nationalbankens THB-grundkurs minus 0,43%.
   return baseRate * 0.9957;
 }
 
