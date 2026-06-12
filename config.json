@@ -3,7 +3,7 @@
     "rate": 5.08646998982706,
     "date": "",
     "source": "nationalbanken",
-    "rateVersion": "v4.8",
+    "rateVersion": "v4.9",
     "rates": {
       "DKK": 1,
       "THB": 5.08646998982706,
@@ -42,13 +42,14 @@
     "rawRate": 5.08646998982706
   },
   "mastercard": {
-    "bank": "Danske Bank",
+    "bank": "Nordea",
     "type": "Mastercard Debit",
-    "rate": 5.08646998982706,
-    "spread": 0,
-    "percent": 1.75,
-    "fixedDkk": 0,
-    "atm": 220
+    "rate": 5.011300482588236,
+    "spread": 1.5,
+    "percent": 2,
+    "fixedDkk": 50,
+    "atm": 220,
+    "rawRate": 5.08646998982706
   },
   "loomis": {
     "place": "Loomis online",
@@ -135,5 +136,5 @@
     "eurToThb": 37.95,
     "maxDkkPerWithdrawal": 15000
   },
-  "version": "v4.8"
+  "version": "v4.9"
 }
