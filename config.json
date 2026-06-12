@@ -3,7 +3,7 @@
     "rate": 5.08646998982706,
     "date": "",
     "source": "nationalbanken",
-    "rateVersion": "v4.6",
+    "rateVersion": "v4.7",
     "rates": {
       "DKK": 1,
       "THB": 5.08646998982706,
@@ -17,10 +17,11 @@
   "revolut": {
     "plan": "Premium",
     "limit": 3000,
-    "rate": 5.08646998982706,
+    "rate": 5.038148524923702,
     "atm": 220,
     "over": 2,
-    "rateUnavailable": false
+    "rateUnavailable": false,
+    "referenceMargin": 0.95
   },
   "wise": {
     "limit": 1800,
@@ -140,5 +141,6 @@
     "dkkPerEur": 7.46,
     "eurToThb": 37.95,
     "maxDkkPerWithdrawal": 15000
-  }
+  },
+  "version": "v4.7"
 }
