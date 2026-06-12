@@ -1,4 +1,4 @@
-// ATM Cash v5.6 - price calculations and detail views
+// ATM Cash v5.7 - price calculations and detail views
 // v1.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
@@ -63,11 +63,12 @@ function calculateResults(dkk) {
   const mastercard = data.mastercard;
   if (typeof applyMastercardModelToData === "function") applyMastercardModelToData();
   const mastercardMaxPerWithdrawal = parseNumber(document.getElementById("mcMaxPerWithdrawal")?.value || "20000") || 20000;
-  let mastercardWithdrawalCount = Math.max(1, Math.ceil(dkk / mastercardMaxPerWithdrawal));
+  let mastercardWithdrawalCount = 1;
   let mastercardAtmFeeThb = 0;
   let mastercardAtmFeeDkk = 0;
   let mastercardBeforeFeeDkk = 0;
   let mastercardGrossThb = 0;
+  let mastercardThb = 0;
   for (let i = 0; i < 8; i += 1) {
     mastercardAtmFeeThb = mastercardWithdrawalCount * mastercard.atm;
     mastercardAtmFeeDkk = mastercardAtmFeeThb / mastercard.rate;
@@ -81,11 +82,11 @@ function calculateResults(dkk) {
       mastercardBeforeFeeDkk = Math.max(0, afterAtmDkk - minFee);
     }
     mastercardGrossThb = mastercardBeforeFeeDkk * mastercard.rate;
-    const nextCount = Math.max(1, Math.ceil((mastercardBeforeFeeDkk + Math.max(mastercardBeforeFeeDkk * percent, minFee) + mastercardAtmFeeDkk) / mastercardMaxPerWithdrawal));
+    mastercardThb = Math.max(0, mastercardGrossThb - mastercardAtmFeeThb);
+    const nextCount = Math.max(1, Math.ceil(mastercardThb / mastercardMaxPerWithdrawal));
     if (nextCount === mastercardWithdrawalCount) break;
     mastercardWithdrawalCount = nextCount;
   }
-  const mastercardThb = Math.max(0, mastercardGrossThb - mastercardAtmFeeThb);
 
   const loomisRate = cashSupplierRate("loomis", data.loomis.rate);
   const loomisFees = cashSupplierFees("loomis");
@@ -295,7 +296,7 @@ function calculate() {
   const activeAmount = document.body?.dataset?.activeAmount || "";
   const focusedId = document.activeElement?.id || "";
 
-  // v5.6: Robust THB→DKK detection. The right THB field wins when it is focused,
+  // v5.7: Robust THB→DKK detection. The right THB field wins when it is focused,
   // when its input handler marked it active, or when DKK is empty/0 and THB has a value.
   const useThbInput = currentThbInput > 0 && (
     activeAmount === "thb" ||
@@ -459,7 +460,7 @@ function calculateRevolutDetails() {
   if (formula) {
     formula.innerHTML = `
       <strong>1.</strong> Du har valgt ${formatNumber(wantedCashThb)} THB.<br>
-      <strong>2.</strong> Det kræver ${withdrawalCount} hævning${withdrawalCount === 1 ? "" : "er"} ved maks ${formatNumber(maxPerWithdrawal)} DKK pr. gang.<br>
+      <strong>2.</strong> Det kræver ${withdrawalCount} hævning${withdrawalCount === 1 ? "" : "er"} ved maks ${formatNumber(maxPerWithdrawal)} THB pr. gang.<br>
       <strong>3.</strong> ATM-gebyr: ${withdrawalCount} × ${formatNumber(r.atm)} THB = ${formatNumber(atmFeeThb)} THB.<br>
       <strong>4.</strong> Total inkl. ATM-gebyr: ${formatNumber(wantedCashThb)} + ${formatNumber(atmFeeThb)} = ${formatNumber(totalThbWithFees)} THB.<br>
       <strong>5.</strong> ${formatNumber(totalThbWithFees)} / ${formatDecimal(r.rate)} = ${formatNumber(beforeRevolutFeeDkk)} DKK.<br>
@@ -542,7 +543,7 @@ function calculateWiseDetails() {
   if (formula) {
     formula.innerHTML = `
       <strong>1.</strong> Du har valgt ${formatNumber(wantedCashThb)} THB.<br>
-      <strong>2.</strong> Det kræver ${withdrawalCount} hævning${withdrawalCount === 1 ? "" : "er"} ved maks ${formatNumber(maxPerWithdrawal)} DKK pr. gang.<br>
+      <strong>2.</strong> Det kræver ${withdrawalCount} hævning${withdrawalCount === 1 ? "" : "er"} ved maks ${formatNumber(maxPerWithdrawal)} THB pr. gang.<br>
       <strong>3.</strong> ATM-gebyr: ${withdrawalCount} × ${formatNumber(w.atm)} THB = ${formatNumber(atmFeeThb)} THB.<br>
       <strong>4.</strong> Total inkl. ATM-gebyr: ${formatNumber(wantedCashThb)} + ${formatNumber(atmFeeThb)} = ${formatNumber(totalThbWithFees)} THB.<br>
       <strong>5.</strong> ${formatNumber(totalThbWithFees)} / ${formatDecimal(w.rate)} = ${formatNumber(beforeWiseFeeDkk)} DKK.<br>
@@ -626,7 +627,7 @@ function calculateVisaDetails() {
   if (formula) {
     formula.innerHTML = `
       <strong>1.</strong> Du har valgt ${formatNumber(wantedCashThb)} THB.<br>
-      <strong>2.</strong> Det kræver ${withdrawalCount} hævning${withdrawalCount === 1 ? "" : "er"} ved maks ${formatNumber(maxPerWithdrawal)} DKK pr. gang.<br>
+      <strong>2.</strong> Det kræver ${withdrawalCount} hævning${withdrawalCount === 1 ? "" : "er"} ved maks ${formatNumber(maxPerWithdrawal)} THB pr. gang.<br>
       <strong>3.</strong> ATM-gebyr: ${withdrawalCount} × ${formatNumber(c.atm)} THB = ${formatNumber(atmFeeThb)} THB.<br>
       <strong>4.</strong> Total inkl. ATM-gebyr: ${formatNumber(wantedCashThb)} + ${formatNumber(atmFeeThb)} = ${formatNumber(totalThbWithFees)} THB.<br>
       <strong>5.</strong> Visa-kurs: ${formatDecimal(c.rawRate || c.rate)} THB/DKK (${c.manualRate ? "manuel" : "valutaomregner"}).<br>
@@ -675,20 +676,15 @@ function calculateMastercardDetails() {
 
   if (lastEditedCurrency === "thb") {
     wantedCashThb = parseNumber(document.getElementById("bestThb").value);
-    withdrawalCount = 1;
-    for (let i = 0; i < 8; i += 1) {
-      atmFeeThb = withdrawalCount * c.atm;
-      totalThbWithFees = wantedCashThb + atmFeeThb;
-      beforeBankFeeDkk = totalThbWithFees / c.rate;
-      percentFeeDkk = getMastercardFeeDkk(beforeBankFeeDkk, c, withdrawalCount);
-      finalTotalDkk = beforeBankFeeDkk + percentFeeDkk;
-      const nextCount = Math.max(1, Math.ceil(finalTotalDkk / maxPerWithdrawal));
-      if (nextCount === withdrawalCount) break;
-      withdrawalCount = nextCount;
-    }
+    withdrawalCount = Math.max(1, Math.ceil(wantedCashThb / maxPerWithdrawal));
+    atmFeeThb = withdrawalCount * c.atm;
+    totalThbWithFees = wantedCashThb + atmFeeThb;
+    beforeBankFeeDkk = totalThbWithFees / c.rate;
+    percentFeeDkk = getMastercardFeeDkk(beforeBankFeeDkk, c, withdrawalCount);
+    finalTotalDkk = beforeBankFeeDkk + percentFeeDkk;
   } else {
     const dkk = amountToDkk(parseNumber(document.getElementById("dkkAmount").value));
-    withdrawalCount = Math.max(1, Math.ceil(dkk / maxPerWithdrawal));
+    withdrawalCount = 1;
     for (let i = 0; i < 8; i += 1) {
       atmFeeThb = withdrawalCount * c.atm;
       const atmFeeDkk = atmFeeThb / c.rate;
@@ -697,7 +693,7 @@ function calculateMastercardDetails() {
       wantedCashThb = Math.max(0, totalThbWithFees - atmFeeThb);
       percentFeeDkk = getMastercardFeeDkk(beforeBankFeeDkk, c, withdrawalCount);
       finalTotalDkk = beforeBankFeeDkk + percentFeeDkk + atmFeeDkk;
-      const nextCount = Math.max(1, Math.ceil(finalTotalDkk / maxPerWithdrawal));
+      const nextCount = Math.max(1, Math.ceil(wantedCashThb / maxPerWithdrawal));
       if (nextCount === withdrawalCount) break;
       withdrawalCount = nextCount;
     }
@@ -726,7 +722,7 @@ function calculateMastercardDetails() {
   if (formula) {
     formula.innerHTML = `
       <strong>1.</strong> Du har valgt ${formatNumber(wantedCashThb)} THB.<br>
-      <strong>2.</strong> Det kræver ${withdrawalCount} hævning${withdrawalCount === 1 ? "" : "er"} ved maks ${formatNumber(maxPerWithdrawal)} DKK pr. gang.<br>
+      <strong>2.</strong> Det kræver ${withdrawalCount} hævning${withdrawalCount === 1 ? "" : "er"} ved maks ${formatNumber(maxPerWithdrawal)} THB pr. gang.<br>
       <strong>3.</strong> ATM-gebyr: ${withdrawalCount} × ${formatNumber(c.atm)} THB = ${formatNumber(atmFeeThb)} THB.<br>
       <strong>4.</strong> Total inkl. ATM-gebyr: ${formatNumber(wantedCashThb)} + ${formatNumber(atmFeeThb)} = ${formatNumber(totalThbWithFees)} THB.<br>
       <strong>5.</strong> Mastercard grundkurs: ${formatDecimal(c.rawRate || data.market?.rate || c.rate)} THB/DKK (Nationalbanken).<br>
