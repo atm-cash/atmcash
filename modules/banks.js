@@ -160,7 +160,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v4.7";
+const RATE_VERSION = "v4.8";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 const NATIONALBANK_DEFAULT_RATES = { DKK: 1, THB: 5.086469989827060, EUR: 0.133791793211404, USD: 0.154356718376167, GBP: 0.115502783617085 };
 const NATIONALBANK_DEFAULT_RATE = NATIONALBANK_DEFAULT_RATES.THB;
@@ -169,7 +169,7 @@ const NATIONALBANK_DEFAULT_RATE = NATIONALBANK_DEFAULT_RATES.THB;
 // Revolut has no fallback: it must be live from Revolut or unavailable.
 const FALLBACK_RATES = {
   revolut: NATIONALBANK_DEFAULT_RATE,
-  wise: NATIONALBANK_DEFAULT_RATE,
+  wise: NATIONALBANK_DEFAULT_RATE * 0.9957,
   visa: NATIONALBANK_DEFAULT_RATE,
   mastercard: NATIONALBANK_DEFAULT_RATE,
   loomis: 4.789071,
@@ -416,7 +416,8 @@ function isRevolutLiveRateAvailable() {
 function providerRate(provider) {
   const marketRate = data.market?.rate || NATIONALBANK_DEFAULT_RATE;
   if (provider === "revolut") return revolutEffectiveRate(marketRate);
-  if (["wise", "visa", "mastercard"].includes(provider)) return marketRate;
+  if (provider === "wise") return wiseEffectiveRate(marketRate);
+  if (["visa", "mastercard"].includes(provider)) return marketRate;
   const info = data.providerRates?.[provider];
   return info?.rate || FALLBACK_RATES[provider] || marketRate;
 }
@@ -439,7 +440,7 @@ function updateRateStatus() {
   el.appendChild(document.createTextNode(en ? "Revolut: Nationalbank base rate" : "Revolut: Nationalbank grundkurs"));
 
   el.appendChild(document.createElement("br"));
-  el.appendChild(document.createTextNode(en ? "Wise: Nationalbank base rate" : "Wise: Nationalbank grundkurs"));
+  el.appendChild(document.createTextNode(en ? "Wise: Nationalbank base rate - 0.43%" : "Wise: Nationalbank grundkurs - 0,43%"));
   updateConverterStatus();
 }
 
@@ -449,8 +450,13 @@ function isWeekendToday() {
 }
 
 function revolutEffectiveRate(baseRate) {
-  // v4.7: Revolut estimeres ud fra Nationalbankens THB-grundkurs minus 0,95%.
+  // v4.8: Revolut estimeres ud fra Nationalbankens THB-grundkurs minus 0,95%.
   return baseRate * 0.9905;
+}
+
+function wiseEffectiveRate(baseRate) {
+  // v4.8: Wise estimeres ud fra Nationalbankens THB-grundkurs minus 0,43%.
+  return baseRate * 0.9957;
 }
 
 function visaBaseRate() {
@@ -483,12 +489,12 @@ function applyMarketRates() {
   data.revolut.rate = revolutEffectiveRate(marketRate);
   data.revolut.rateUnavailable = false;
 
-  data.wise.referenceMargin = 0;
+  data.wise.referenceMargin = 0.43;
   data.wise.rate = providerRate("wise");
   data.providerRates = data.providerRates || {};
   data.providerRates.wise = {
     rate: data.wise.rate,
-    source: "nationalbanken",
+    source: "nationalbanken-minus-0.43",
     updatedAtHour: data.market?.updatedAtHour || hourlyKey(),
     lastLiveAt: data.market?.updatedAtHour || hourlyKey(),
     ok: true,
