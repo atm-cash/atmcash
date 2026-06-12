@@ -3,7 +3,7 @@
     "rate": 5.08646998982706,
     "date": "",
     "source": "nationalbanken",
-    "rateVersion": "v4.7",
+    "rateVersion": "v4.8",
     "rates": {
       "DKK": 1,
       "THB": 5.08646998982706,
@@ -25,9 +25,10 @@
   },
   "wise": {
     "limit": 1800,
-    "rate": 5.08646998982706,
+    "rate": 5.064598168870804,
     "atm": 220,
-    "over": 2.69
+    "over": 2.69,
+    "referenceMargin": 0.43
   },
   "visa": {
     "bank": "Danske Bank",
@@ -74,17 +75,9 @@
     "other": 0
   },
   "providerRates": {
-    "revolut": {
-      "rate": 5.08646998982706,
-      "source": "nationalbanken",
-      "updatedAtHour": "",
-      "lastLiveAt": "",
-      "ok": true,
-      "error": ""
-    },
     "wise": {
-      "rate": 5.08646998982706,
-      "source": "nationalbanken",
+      "rate": 5.064598168870804,
+      "source": "nationalbanken-minus-0.43",
       "updatedAtHour": "",
       "lastLiveAt": "",
       "ok": true,
@@ -142,5 +135,5 @@
     "eurToThb": 37.95,
     "maxDkkPerWithdrawal": 15000
   },
-  "version": "v4.7"
+  "version": "v4.8"
 }
