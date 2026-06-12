@@ -1,12 +1,12 @@
-// ATM Cash v4.5 - conversions, defaults, config, language and currency helpers
+// ATM Cash v4.6 - conversions, defaults, config, language and currency helpers
 let defaults = {
-  market: { rate: 5.05817, date: "", source: "nationalbanken", rateVersion: "v4.5", rates: { DKK: 1, THB: 5.05817, EUR: 0.134, USD: 0.146, GBP: 0.114 } },
+  market: { rate: 5.086469989827060, date: "", source: "nationalbanken", rateVersion: "v4.6", rates: { DKK: 1, THB: 5.086469989827060, EUR: 0.133791793211404, USD: 0.154356718376167, GBP: 0.115502783617085 } },
   homeCurrency: "DKK",
   language: "da",
-  revolut: { plan: "Premium", limit: 3000, rate: 0, atm: 220, over: 2, rateUnavailable: true },
-  wise: { limit: 1800, rate: 5.05817, atm: 220, over: 2.69 },
-  visa: { bank: "Danske Bank", type: "Visa Debit", manualRate: "", rawRate: 5.057, rate: 4.981145, spread: 1.5, percent: 1, fixedDkk: 30, atm: 220 },
-  mastercard: { bank: "Danske Bank", type: "Mastercard Debit", rate: 5.040382949333, spread: 0.329, percent: 1.75, fixedDkk: 0, atm: 220 },
+  revolut: { plan: "Premium", limit: 3000, rate: 5.086469989827060, atm: 220, over: 2, rateUnavailable: false },
+  wise: { limit: 1800, rate: 5.086469989827060, atm: 220, over: 2.69 },
+  visa: { bank: "Danske Bank", type: "Visa Debit", manualRate: "", rawRate: 5.086469989827060, rate: 5.010172939979654, spread: 1.5, percent: 1, fixedDkk: 30, atm: 220 },
+  mastercard: { bank: "Danske Bank", type: "Mastercard Debit", rate: 5.086469989827060, spread: 0, percent: 1.75, fixedDkk: 0, atm: 220 },
   loomis: { place: "Loomis online", rate: 4.789071, margin: 5.51, fixedDkk: 49.95, delivery: 0, other: 0 },
   forex: { place: "FOREX afhentning", rate: 4.724312730606, margin: 6.579, fixedDkk: 0, delivery: 0, other: 0 },
   tavex: { place: "Tavex webshop", rate: 4.840271055, margin: 4.299, fixedDkk: 0, delivery: 50, other: 0 },
@@ -272,11 +272,10 @@ function loadData() {
       loaded.forex.delivery = 0;
       loaded.forex.other = 0;
     }
-    // v4.5: Fjern gamle Revolut-kurser fra localStorage.
-    // Revolut må kun vise live-kurs fra Revolut-kilden.
+    // v4.6: Revolut bruger Nationalbankens grundkurs, ikke live scraping.
     if (loaded.revolut) {
-      loaded.revolut.rate = 0;
-      loaded.revolut.rateUnavailable = true;
+      loaded.revolut.rate = defaults.market.rate;
+      loaded.revolut.rateUnavailable = false;
     }
     if (loaded.providerRates?.revolut) {
       delete loaded.providerRates.revolut;
@@ -319,7 +318,7 @@ function formatCurrencyInput(value) {
 }
 
 function getCurrencyRates() {
-  const fallback = { DKK: 1, THB: data.market?.rate || 5.05441, EUR: 0.134, USD: 0.146, GBP: 0.114 };
+  const fallback = { DKK: 1, THB: data.market?.rate || 5.086469989827060, EUR: 0.133791793211404, USD: 0.154356718376167, GBP: 0.115502783617085 };
   return { ...fallback, ...(data.market?.rates || {}), DKK: 1 };
 }
 

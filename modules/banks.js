@@ -160,16 +160,18 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v4.5";
+const RATE_VERSION = "v4.6";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
+const NATIONALBANK_DEFAULT_RATES = { DKK: 1, THB: 5.086469989827060, EUR: 0.133791793211404, USD: 0.154356718376167, GBP: 0.115502783617085 };
+const NATIONALBANK_DEFAULT_RATE = NATIONALBANK_DEFAULT_RATES.THB;
 
 // Fallback values are only used if the provider page cannot be read.
 // Revolut has no fallback: it must be live from Revolut or unavailable.
 const FALLBACK_RATES = {
-  revolut: 0,
-  wise: 5.07720,
-  visa: 5.040756,
-  mastercard: 5.040382949333,
+  revolut: NATIONALBANK_DEFAULT_RATE,
+  wise: NATIONALBANK_DEFAULT_RATE,
+  visa: NATIONALBANK_DEFAULT_RATE,
+  mastercard: NATIONALBANK_DEFAULT_RATE,
   loomis: 4.789071,
   forex: 4.72589,
   tavex: 1 / 0.207
@@ -408,18 +410,14 @@ async function fetchProviderRates() {
 }
 
 function isRevolutLiveRateAvailable() {
-  const info = data.providerRates?.revolut;
-  return info?.ok === true && info.updatedAtHour === hourlyKey() && info.rate > 3 && info.rate < 7;
+  return (data.market?.rate || 0) > 3;
 }
 
 function providerRate(provider) {
-  if (provider === "wise") return data.market?.rate || FALLBACK_RATES.wise;
+  const marketRate = data.market?.rate || NATIONALBANK_DEFAULT_RATE;
+  if (["revolut", "wise", "visa", "mastercard"].includes(provider)) return marketRate;
   const info = data.providerRates?.[provider];
-  if (provider === "revolut") {
-    // Ingen fallback. Ingen gammel cache. Ingen hardcoded Revolut-kurs.
-    return isRevolutLiveRateAvailable() ? info.rate : 0;
-  }
-  return info?.rate || FALLBACK_RATES[provider];
+  return info?.rate || FALLBACK_RATES[provider] || marketRate;
 }
 
 function updateRateStatus() {
@@ -436,15 +434,8 @@ function updateRateStatus() {
     el.appendChild(document.createTextNode(en ? `Last updated ${updated}` : `Sidst opdateret ${updated}`));
   }
 
-  const revolutInfo = data.providerRates?.revolut;
-  if (revolutInfo) {
-    el.appendChild(document.createElement("br"));
-    if (revolutInfo.ok) {
-      el.appendChild(document.createTextNode(en ? "Revolut: live rate" : "Revolut: live kurs"));
-    } else {
-      el.appendChild(document.createTextNode(en ? "Revolut: live rate unavailable" : "Revolut: live kurs utilgængelig"));
-    }
-  }
+  el.appendChild(document.createElement("br"));
+  el.appendChild(document.createTextNode(en ? "Revolut: Nationalbank base rate" : "Revolut: Nationalbank grundkurs"));
 
   el.appendChild(document.createElement("br"));
   el.appendChild(document.createTextNode(en ? "Wise: Nationalbank base rate" : "Wise: Nationalbank grundkurs"));
@@ -464,7 +455,7 @@ function visaBaseRate() {
   const manualRate = parseNumber(data.visa?.manualRate || "");
   if (manualRate > 0) return manualRate;
   const rates = getCurrencyRates();
-  return rates.THB || data.market?.rate || 5.0570;
+  return rates.THB || data.market?.rate || NATIONALBANK_DEFAULT_RATE;
 }
 
 function updateVisaRateFromSettings() {
@@ -479,7 +470,7 @@ function updateVisaRateFromSettings() {
 
 function applyMarketRates() {
   applyVisaBankPresetToData();
-  const marketRate = data.market?.rate || 5.0570;
+  const marketRate = data.market?.rate || NATIONALBANK_DEFAULT_RATE;
   if (data.eurcash) {
     data.eurcash.dkkPerEur = data.eurcash.dkkPerEur || dkkPerEurRate();
     data.eurcash.eurToThb = data.eurcash.eurToThb || 37.95;
@@ -487,8 +478,8 @@ function applyMarketRates() {
   }
 
   data.revolut.referenceMargin = 0;
-  data.revolut.rate = providerRate("revolut");
-  data.revolut.rateUnavailable = !isRevolutLiveRateAvailable();
+  data.revolut.rate = marketRate;
+  data.revolut.rateUnavailable = false;
 
   data.wise.referenceMargin = 0;
   data.wise.rate = providerRate("wise");
@@ -504,8 +495,8 @@ function applyMarketRates() {
 
   updateVisaRateFromSettings();
 
-  data.mastercard.rate = FALLBACK_RATES.mastercard;
-  data.mastercard.spread = Math.max(0, (1 - data.mastercard.rate / marketRate) * 100);
+  data.mastercard.rate = marketRate;
+  data.mastercard.spread = 0;
   data.mastercard.fixedDkk = 0;
 
   data.loomis.place = "Loomis online";
@@ -546,10 +537,15 @@ async function updateMarketRateIfNeeded() {
   }
 
   if (data.market?.rateVersion !== RATE_VERSION) {
-    // Bevar sidst succesfuldt hentede provider-kurser, så Wise kan bruge seneste live-kurs
-    // hvis en ny live-hentning fejler efter versionsopdatering.
     data.providerRates = data.providerRates || {};
-    if (data.market) data.market.updatedAtHour = "";
+    data.market = {
+      rate: NATIONALBANK_DEFAULT_RATE,
+      date: todayKey(),
+      updatedAtHour: "",
+      source: "nationalbanken",
+      rateVersion: RATE_VERSION,
+      rates: { ...NATIONALBANK_DEFAULT_RATES }
+    };
   }
 
   if (data.market?.updatedAtHour === hourlyKey() && data.market?.rateVersion === RATE_VERSION && (data.market?.rate || 0) > 5) {
@@ -588,6 +584,13 @@ async function updateMarketRateIfNeeded() {
     updateRateStatus();
     calculate();
   } catch {
+    data.market = data.market || { rate: NATIONALBANK_DEFAULT_RATE, date: todayKey(), updatedAtHour: "", source: "nationalbanken", rateVersion: RATE_VERSION, rates: { ...NATIONALBANK_DEFAULT_RATES } };
+    if (!data.market.rate || data.market.rateVersion !== RATE_VERSION) {
+      data.market.rate = NATIONALBANK_DEFAULT_RATE;
+      data.market.rates = { ...NATIONALBANK_DEFAULT_RATES };
+      data.market.rateVersion = RATE_VERSION;
+      data.market.source = "nationalbanken";
+    }
     await fetchProviderRates().catch(() => {});
     applyMarketRates();
     updateRateStatus();

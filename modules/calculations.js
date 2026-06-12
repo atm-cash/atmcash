@@ -1,4 +1,4 @@
-// ATM Cash v4.5 - price calculations and detail views
+// ATM Cash v4.6 - price calculations and detail views
 // v1.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
@@ -48,7 +48,7 @@ function eurcashEffectiveRate(cfg) {
 function calculateResults(dkk) {
   updateVisaRateFromSettings();
   const revolut = data.revolut;
-  const revolutAvailable = revolut.rate > 3 && revolut.rate < 7 && revolut.rateUnavailable !== true;
+  const revolutAvailable = revolut.rate > 3 && revolut.rate < 7;
   const revolutOver = Math.max(0, dkk - revolut.limit);
   const revolutThb = revolutAvailable ? (dkk * revolut.rate - revolutOver * revolut.rate * (revolut.over / 100) - revolut.atm) : -Infinity;
 
