@@ -160,7 +160,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v4.6";
+const RATE_VERSION = "v4.7";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 const NATIONALBANK_DEFAULT_RATES = { DKK: 1, THB: 5.086469989827060, EUR: 0.133791793211404, USD: 0.154356718376167, GBP: 0.115502783617085 };
 const NATIONALBANK_DEFAULT_RATE = NATIONALBANK_DEFAULT_RATES.THB;
@@ -415,7 +415,8 @@ function isRevolutLiveRateAvailable() {
 
 function providerRate(provider) {
   const marketRate = data.market?.rate || NATIONALBANK_DEFAULT_RATE;
-  if (["revolut", "wise", "visa", "mastercard"].includes(provider)) return marketRate;
+  if (provider === "revolut") return revolutEffectiveRate(marketRate);
+  if (["wise", "visa", "mastercard"].includes(provider)) return marketRate;
   const info = data.providerRates?.[provider];
   return info?.rate || FALLBACK_RATES[provider] || marketRate;
 }
@@ -448,7 +449,8 @@ function isWeekendToday() {
 }
 
 function revolutEffectiveRate(baseRate) {
-  return baseRate;
+  // v4.7: Revolut estimeres ud fra Nationalbankens THB-grundkurs minus 0,95%.
+  return baseRate * 0.9905;
 }
 
 function visaBaseRate() {
@@ -477,8 +479,8 @@ function applyMarketRates() {
     data.eurcash.maxDkkPerWithdrawal = data.eurcash.maxDkkPerWithdrawal || 15000;
   }
 
-  data.revolut.referenceMargin = 0;
-  data.revolut.rate = marketRate;
+  data.revolut.referenceMargin = 0.95;
+  data.revolut.rate = revolutEffectiveRate(marketRate);
   data.revolut.rateUnavailable = false;
 
   data.wise.referenceMargin = 0;

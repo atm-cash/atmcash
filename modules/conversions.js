@@ -1,9 +1,9 @@
-// ATM Cash v4.6 - conversions, defaults, config, language and currency helpers
+// ATM Cash v4.7 - conversions, defaults, config, language and currency helpers
 let defaults = {
-  market: { rate: 5.086469989827060, date: "", source: "nationalbanken", rateVersion: "v4.6", rates: { DKK: 1, THB: 5.086469989827060, EUR: 0.133791793211404, USD: 0.154356718376167, GBP: 0.115502783617085 } },
+  market: { rate: 5.086469989827060, date: "", source: "nationalbanken", rateVersion: "v4.7", rates: { DKK: 1, THB: 5.086469989827060, EUR: 0.133791793211404, USD: 0.154356718376167, GBP: 0.115502783617085 } },
   homeCurrency: "DKK",
   language: "da",
-  revolut: { plan: "Premium", limit: 3000, rate: 5.086469989827060, atm: 220, over: 2, rateUnavailable: false },
+  revolut: { plan: "Premium", limit: 3000, rate: 5.086469989827060 * 0.9905, atm: 220, over: 2, rateUnavailable: false, referenceMargin: 0.95 },
   wise: { limit: 1800, rate: 5.086469989827060, atm: 220, over: 2.69 },
   visa: { bank: "Danske Bank", type: "Visa Debit", manualRate: "", rawRate: 5.086469989827060, rate: 5.010172939979654, spread: 1.5, percent: 1, fixedDkk: 30, atm: 220 },
   mastercard: { bank: "Danske Bank", type: "Mastercard Debit", rate: 5.086469989827060, spread: 0, percent: 1.75, fixedDkk: 0, atm: 220 },
@@ -272,7 +272,7 @@ function loadData() {
       loaded.forex.delivery = 0;
       loaded.forex.other = 0;
     }
-    // v4.6: Revolut bruger Nationalbankens grundkurs, ikke live scraping.
+    // v4.7: Revolut bruger Nationalbankens grundkurs, ikke live scraping.
     if (loaded.revolut) {
       loaded.revolut.rate = defaults.market.rate;
       loaded.revolut.rateUnavailable = false;
