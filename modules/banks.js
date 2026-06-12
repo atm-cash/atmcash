@@ -160,7 +160,7 @@ function setInputValue(id, value) {
 }
 
 
-const RATE_VERSION = "v4.2";
+const RATE_VERSION = "v4.4";
 const RATE_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 
 // Fallback values are only used if the provider page cannot be read.
@@ -177,11 +177,13 @@ const FALLBACK_RATES = {
 
 const PROVIDER_RATE_SOURCES = {
   revolut: "https://www.revolut.com/currency-converter/convert-dkk-to-thb-exchange-rate/?amount=1000",
-  wise: "https://wise.com/dk/currency-converter/dkk-to-thb-rate?amount=1",
+  wise: "Danmarks Nationalbank grundkurs",
   forex: "https://www.forexvaluta.dk/valuta/thb/",
   tavex: "https://tavex.dk/valuta-prisliste/",
   loomis: "https://nemvaluta.loomis.dk/"
 };
+
+const NATIONALBANK_RATES_URL = "https://www.nationalbanken.dk/api/currencyratesxml?lang=da";
 
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
@@ -210,6 +212,31 @@ function parseRateNumber(value) {
 
 function rateFromDkkPerThb(dkkPerThb) {
   return dkkPerThb > 0 ? 1 / dkkPerThb : 0;
+}
+
+function parseNationalbankXml(xmlText) {
+  const doc = new DOMParser().parseFromString(xmlText, "application/xml");
+  const parseCurrency = (code) => {
+    const node = doc.querySelector(`currency[code="${code}"]`);
+    const rawRate = node?.getAttribute("rate") || "";
+    const dkkPer100 = parseRateNumber(rawRate);
+    return dkkPer100 > 0 ? 100 / dkkPer100 : 0;
+  };
+  const thb = parseCurrency("THB");
+  if (!thb || thb < 3 || thb > 7) throw new Error("Nationalbank THB-kurs ikke fundet");
+  return {
+    THB: thb,
+    EUR: parseCurrency("EUR") || getCurrencyRates().EUR,
+    USD: parseCurrency("USD") || getCurrencyRates().USD,
+    GBP: parseCurrency("GBP") || getCurrencyRates().GBP
+  };
+}
+
+async function fetchNationalbankRates() {
+  const response = await fetch(NATIONALBANK_RATES_URL, { cache: "no-store" });
+  if (!response.ok) throw new Error(`Nationalbank HTTP ${response.status}`);
+  const text = await response.text();
+  return parseNationalbankXml(text);
 }
 
 async function fetchProviderText(url) {
@@ -326,7 +353,7 @@ async function fetchOneProviderRate(provider) {
 }
 
 async function fetchProviderRates() {
-  const providers = ["revolut", "wise", "forex", "tavex", "loomis"];
+  const providers = ["revolut", "forex", "tavex", "loomis"];
   data.providerRates = data.providerRates || {};
 
   const results = await Promise.all(providers.map(async (provider) => {
@@ -386,6 +413,7 @@ function isRevolutLiveRateAvailable() {
 }
 
 function providerRate(provider) {
+  if (provider === "wise") return data.market?.rate || FALLBACK_RATES.wise;
   const info = data.providerRates?.[provider];
   if (provider === "revolut") {
     // Ingen fallback. Ingen gammel cache. Ingen hardcoded Revolut-kurs.
@@ -418,22 +446,8 @@ function updateRateStatus() {
     }
   }
 
-  const wiseInfo = data.providerRates?.wise;
-  if (wiseInfo) {
-    el.appendChild(document.createElement("br"));
-    if (wiseInfo.ok) {
-      el.appendChild(document.createTextNode(en ? "Wise: live rate" : "Wise: live kurs"));
-    } else if (wiseInfo.source === "stale") {
-      const updated = formatRateUpdateTime(wiseInfo.lastLiveAt || wiseInfo.updatedAtHour || "");
-      el.appendChild(document.createTextNode(en ? `Wise: using last fetched rate ${updated}` : `Wise: bruger sidst hentede kurs ${updated}`));
-    } else {
-      el.appendChild(document.createTextNode(en ? "Wise: fallback rate" : "Wise: fallback-kurs"));
-    }
-    if (wiseInfo.error) {
-      el.appendChild(document.createElement("br"));
-      el.appendChild(document.createTextNode(`Wise fejl: ${wiseInfo.error}`));
-    }
-  }
+  el.appendChild(document.createElement("br"));
+  el.appendChild(document.createTextNode(en ? "Wise: Nationalbank base rate" : "Wise: Nationalbank grundkurs"));
   updateConverterStatus();
 }
 
@@ -478,6 +492,15 @@ function applyMarketRates() {
 
   data.wise.referenceMargin = 0;
   data.wise.rate = providerRate("wise");
+  data.providerRates = data.providerRates || {};
+  data.providerRates.wise = {
+    rate: data.wise.rate,
+    source: "nationalbanken",
+    updatedAtHour: data.market?.updatedAtHour || hourlyKey(),
+    lastLiveAt: data.market?.updatedAtHour || hourlyKey(),
+    ok: true,
+    error: ""
+  };
 
   updateVisaRateFromSettings();
 
@@ -530,7 +553,7 @@ async function updateMarketRateIfNeeded() {
   }
 
   if (data.market?.updatedAtHour === hourlyKey() && data.market?.rateVersion === RATE_VERSION && (data.market?.rate || 0) > 5) {
-    const providerCacheIsFresh = ["revolut", "wise", "forex", "tavex", "loomis"]
+    const providerCacheIsFresh = ["revolut", "forex", "tavex", "loomis"]
       .every((provider) => data.providerRates?.[provider]?.updatedAtHour === hourlyKey());
     if (!providerCacheIsFresh) await fetchProviderRates();
     applyMarketRates();
@@ -542,32 +565,28 @@ async function updateMarketRateIfNeeded() {
   }
 
   try {
-    const response = await fetch("https://open.er-api.com/v6/latest/DKK", { cache: "no-store" });
-    const json = await response.json();
-
-    if (json?.rates?.THB) {
-      data.market = {
-        rate: Number(json.rates.THB),
-        date: todayKey(),
-        updatedAtHour: hourlyKey(),
-        source: "open-er-api",
-        rateVersion: RATE_VERSION,
-        rates: {
-          DKK: 1,
-          THB: Number(json.rates.THB),
-          EUR: Number(json.rates.EUR || getCurrencyRates().EUR),
-          USD: Number(json.rates.USD || getCurrencyRates().USD),
-          GBP: Number(json.rates.GBP || getCurrencyRates().GBP)
-        }
-      };
-      await fetchProviderRates();
-      applyMarketRates();
-      persist();
-      syncInputs();
-      syncHomeCurrencyUi();
-      updateRateStatus();
-      calculate();
-    }
+    const rates = await fetchNationalbankRates();
+    data.market = {
+      rate: Number(rates.THB),
+      date: todayKey(),
+      updatedAtHour: hourlyKey(),
+      source: "nationalbanken",
+      rateVersion: RATE_VERSION,
+      rates: {
+        DKK: 1,
+        THB: Number(rates.THB),
+        EUR: Number(rates.EUR),
+        USD: Number(rates.USD),
+        GBP: Number(rates.GBP)
+      }
+    };
+    await fetchProviderRates();
+    applyMarketRates();
+    persist();
+    syncInputs();
+    syncHomeCurrencyUi();
+    updateRateStatus();
+    calculate();
   } catch {
     await fetchProviderRates().catch(() => {});
     applyMarketRates();
