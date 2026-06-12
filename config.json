@@ -1,15 +1,15 @@
 {
   "market": {
-    "rate": 5.058168942842691,
+    "rate": 5.08646998982706,
     "date": "",
     "source": "nationalbanken",
-    "rateVersion": "v4.5",
+    "rateVersion": "v4.6",
     "rates": {
       "DKK": 1,
-      "THB": 5.058168942842691,
-      "EUR": 0.134,
-      "USD": 0.146,
-      "GBP": 0.114
+      "THB": 5.08646998982706,
+      "EUR": 0.13379179321140441,
+      "USD": 0.15435671837616732,
+      "GBP": 0.11550278361708517
     }
   },
   "homeCurrency": "DKK",
@@ -17,33 +17,33 @@
   "revolut": {
     "plan": "Premium",
     "limit": 3000,
-    "rate": 0,
+    "rate": 5.08646998982706,
     "atm": 220,
     "over": 2,
-    "rateUnavailable": true
+    "rateUnavailable": false
   },
   "wise": {
     "limit": 1800,
-    "rate": 5.058168942842691,
+    "rate": 5.08646998982706,
     "atm": 220,
     "over": 2.69
   },
   "visa": {
     "bank": "Danske Bank",
     "type": "Visa Debit",
-    "rate": 4.9822964087000505,
+    "rate": 5.010172939979654,
     "spread": 1.5,
     "percent": 1,
     "fixedDkk": 30,
     "atm": 220,
     "manualRate": "",
-    "rawRate": 5.058168942842691
+    "rawRate": 5.08646998982706
   },
   "mastercard": {
     "bank": "Danske Bank",
     "type": "Mastercard Debit",
-    "rate": 5.040382949333,
-    "spread": 0.329,
+    "rate": 5.08646998982706,
+    "spread": 0,
     "percent": 1.75,
     "fixedDkk": 0,
     "atm": 220
@@ -74,16 +74,20 @@
   },
   "providerRates": {
     "revolut": {
-      "rate": 0,
-      "source": "unavailable",
+      "rate": 5.08646998982706,
+      "source": "nationalbanken",
       "updatedAtHour": "",
-      "ok": false
+      "lastLiveAt": "",
+      "ok": true,
+      "error": ""
     },
     "wise": {
-      "rate": 5.0772,
-      "source": "fallback",
+      "rate": 5.08646998982706,
+      "source": "nationalbanken",
       "updatedAtHour": "",
-      "ok": false
+      "lastLiveAt": "",
+      "ok": true,
+      "error": ""
     },
     "forex": {
       "rate": 4.72589,
@@ -102,6 +106,22 @@
       "source": "fallback",
       "updatedAtHour": "",
       "ok": false
+    },
+    "visa": {
+      "rate": 5.08646998982706,
+      "source": "nationalbanken",
+      "updatedAtHour": "",
+      "lastLiveAt": "",
+      "ok": true,
+      "error": ""
+    },
+    "mastercard": {
+      "rate": 5.08646998982706,
+      "source": "nationalbanken",
+      "updatedAtHour": "",
+      "lastLiveAt": "",
+      "ok": true,
+      "error": ""
     }
   },
   "visibleMethods": [
