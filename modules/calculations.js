@@ -1,4 +1,4 @@
-// ATM Cash v5.5 - price calculations and detail views
+// ATM Cash v5.6 - price calculations and detail views
 // v1.11: Mastercard uses one shared Mastercard rate with calculator bank fee removed.
 // Cash suppliers use fixed webshop prices in DKK per THB.
 const CASH_SUPPLIER_PRICES = {
@@ -295,7 +295,7 @@ function calculate() {
   const activeAmount = document.body?.dataset?.activeAmount || "";
   const focusedId = document.activeElement?.id || "";
 
-  // v5.5: Robust THB→DKK detection. The right THB field wins when it is focused,
+  // v5.6: Robust THB→DKK detection. The right THB field wins when it is focused,
   // when its input handler marked it active, or when DKK is empty/0 and THB has a value.
   const useThbInput = currentThbInput > 0 && (
     activeAmount === "thb" ||
@@ -314,7 +314,9 @@ function calculate() {
     const bestCost = results[0]?.dkkCost || 0;
     const bestHomeCost = dkkToHome(bestCost);
 
-    document.getElementById("dkkAmount").value = formatNumber(bestHomeCost);
+    if (focusedId !== "dkkAmount") {
+      document.getElementById("dkkAmount").value = formatNumber(bestHomeCost);
+    }
 
     document.getElementById("results").innerHTML = results.map((item, index) => {
       const diff = Math.max(0, item.dkkCost - bestCost);
@@ -349,7 +351,9 @@ function calculate() {
   const results = visibleResultsForDkk(dkk);
   const best = results[0]?.thb || 0;
 
-  document.getElementById("bestThb").value = formatNumber(best);
+  if (focusedId !== "bestThb") {
+    document.getElementById("bestThb").value = formatNumber(best);
+  }
 
   document.getElementById("results").innerHTML = results.map((item, index) => {
     const diff = Math.max(0, best - item.thb);
