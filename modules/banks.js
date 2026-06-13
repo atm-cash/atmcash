@@ -185,7 +185,7 @@ const PROVIDER_RATE_SOURCES = {
   loomis: "https://nemvaluta.loomis.dk/"
 };
 
-const NATIONALBANK_RATES_URL = "https://www.nationalbanken.dk/api/currencyratesxml?lang=da";
+const NATIONALBANK_RATES_URL = "https://openexchangerates.org/api/latest.json?app_id=360e6a1c394a49cabeeb7dbc1debe080";
 
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
@@ -216,29 +216,27 @@ function rateFromDkkPerThb(dkkPerThb) {
   return dkkPerThb > 0 ? 1 / dkkPerThb : 0;
 }
 
-function parseNationalbankXml(xmlText) {
-  const doc = new DOMParser().parseFromString(xmlText, "application/xml");
-  const parseCurrency = (code) => {
-    const node = doc.querySelector(`currency[code="${code}"]`);
-    const rawRate = node?.getAttribute("rate") || "";
-    const dkkPer100 = parseRateNumber(rawRate);
-    return dkkPer100 > 0 ? 100 / dkkPer100 : 0;
-  };
-  const thb = parseCurrency("THB");
-  if (!thb || thb < 3 || thb > 7) throw new Error("Nationalbank THB-kurs ikke fundet");
+function parseNationalbankXml(jsonText) {
+  const data = typeof jsonText === "string" ? JSON.parse(jsonText) : jsonText;
+  const rates = data?.rates || {};
+  const dkk = Number(rates.DKK);
+  const thbUsd = Number(rates.THB);
+  if (!dkk || !thbUsd) throw new Error("Open Exchange Rates mangler DKK eller THB");
+  const thb = thbUsd / dkk;
+  if (!thb || thb < 3 || thb > 7) throw new Error("Open Exchange Rates THB-kurs ikke fundet");
   return {
     THB: thb,
-    EUR: parseCurrency("EUR") || getCurrencyRates().EUR,
-    USD: parseCurrency("USD") || getCurrencyRates().USD,
-    GBP: parseCurrency("GBP") || getCurrencyRates().GBP
+    EUR: rates.EUR ? Number(rates.EUR) / dkk : getCurrencyRates().EUR,
+    USD: rates.USD ? Number(rates.USD) / dkk : getCurrencyRates().USD,
+    GBP: rates.GBP ? Number(rates.GBP) / dkk : getCurrencyRates().GBP
   };
 }
 
 async function fetchNationalbankRates() {
   const response = await fetch(NATIONALBANK_RATES_URL, { cache: "no-store" });
-  if (!response.ok) throw new Error(`Nationalbank HTTP ${response.status}`);
-  const text = await response.text();
-  return parseNationalbankXml(text);
+  if (!response.ok) throw new Error(`Open Exchange Rates HTTP ${response.status}`);
+  const json = await response.json();
+  return parseNationalbankXml(json);
 }
 
 async function fetchProviderText(url) {

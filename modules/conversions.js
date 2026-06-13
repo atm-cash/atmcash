@@ -1,6 +1,6 @@
-// ATM Cash v6.0 - conversions, defaults, config, language and currency helpers
+// ATM Cash v6.1 - conversions, defaults, config, language and currency helpers
 let defaults = {
-  market: { rate: 5.086469989827060, date: "", source: "nationalbanken", rateVersion: "v6.0", rates: { DKK: 1, THB: 5.086469989827060, EUR: 0.133791793211404, USD: 0.154356718376167, GBP: 0.115502783617085 } },
+  market: { rate: 5.086469989827060, date: "", source: "nationalbanken", rateVersion: "v6.1", rates: { DKK: 1, THB: 5.086469989827060, EUR: 0.133791793211404, USD: 0.154356718376167, GBP: 0.115502783617085 } },
   homeCurrency: "DKK",
   language: "da",
   revolut: { plan: "Premium", limit: 3000, rate: 5.086469989827060 * 0.9905, atm: 220, over: 2, rateUnavailable: false, referenceMargin: 0.95 },
@@ -275,7 +275,7 @@ function loadData() {
       loaded.forex.delivery = 0;
       loaded.forex.other = 0;
     }
-    // v6.0: Revolut og Wise bruger Nationalbankens grundkurs med fast justering, ikke live scraping.
+    // v6.1: Revolut og Wise bruger Nationalbankens grundkurs med fast justering, ikke live scraping.
     if (loaded.revolut) {
       loaded.revolut.rate = defaults.market.rate * 0.9905;
       loaded.revolut.rateUnavailable = false;
@@ -293,7 +293,7 @@ function loadData() {
     if (loaded.visa && loaded.visa.manualRate === undefined) {
       loaded.visa.manualRate = "";
     }
-    // v6.0: Mastercard skrives om som Visa-model: Nationalbank grundkurs, 1,5% valutakurstillæg, 2% / min. 50 DKK.
+    // v6.1: Mastercard skrives om som Visa-model: Nationalbank grundkurs, 1,5% valutakurstillæg, 2% / min. 50 DKK.
     if (loaded.mastercard) {
       loaded.mastercard.rawRate = defaults.market.rate;
       loaded.mastercard.spread = 1.5;
