@@ -1,6 +1,6 @@
-// ATM Cash v6.1 - conversions, defaults, config, language and currency helpers
+// ATM Cash v6.2 - conversions, defaults, config, language and currency helpers
 let defaults = {
-  market: { rate: 5.086469989827060, date: "", source: "nationalbanken", rateVersion: "v6.1", rates: { DKK: 1, THB: 5.086469989827060, EUR: 0.133791793211404, USD: 0.154356718376167, GBP: 0.115502783617085 } },
+  market: { rate: 5.086469989827060, date: "", source: "nationalbanken", rateVersion: "v6.2", rates: { DKK: 1, THB: 5.086469989827060, EUR: 0.133791793211404, USD: 0.154356718376167, GBP: 0.115502783617085 } },
   homeCurrency: "DKK",
   language: "da",
   revolut: { plan: "Premium", limit: 3000, rate: 5.086469989827060 * 0.9905, atm: 220, over: 2, rateUnavailable: false, referenceMargin: 0.95 },
@@ -36,7 +36,7 @@ const translations = {
   "↗ Resultat": "↗ Result",
   "☰ Vælg metoder": "☰ Choose methods",
   "Vælg metoder": "Choose methods",
-  "Kurser opdateres hvert 10 minut": "Rates update every 10 minutes",
+  "Kurskilde: Open Exchange Rates": "Rates update every 10 minutes",
   "Kurser og gebyrer er vejledende og kan ændres.": "Rates and fees are indicative and may change.",
   "Valuta": "Currency",
   "Tips": "Tips",
@@ -46,7 +46,7 @@ const translations = {
   "Thailandsk baht": "Thai baht",
   "Amerikansk dollar": "US dollar",
   "Britisk pund": "British pound",
-  "Kurserne er vejledende.": "Rates are indicative.",
+  "": "Rates are indicative.",
   "ATM tips": "ATM tips",
   "Kort guide til hævning i Thailand.": "Short guide to withdrawing cash in Thailand.",
   "Brug de gule Krungsri ATM’er": "Use the yellow Krungsri ATMs",
@@ -189,8 +189,8 @@ function setLanguage(lang) {
 function translateNodeText(text) {
   if (currentLanguage() !== "en") return text;
   if (translations[text]) return translations[text];
-  if (text.startsWith("Kurser opdateres hvert 10 minut Sidst opdateret ")) {
-    return text.replace("Kurser opdateres hvert 10 minut Sidst opdateret ", "Rates update every 10 minutes Last updated ");
+  if (text.startsWith("Kurskilde: Open Exchange Rates Sidst opdateret ")) {
+    return text.replace("Kurskilde: Open Exchange Rates Sidst opdateret ", "Rates update every 10 minutes Last updated ");
   }
   if (text.includes("Over grænse")) return text.replaceAll("Over grænse", "Over limit");
   if (text.includes("over grænse")) return text.replaceAll("over grænse", "over limit");
@@ -275,7 +275,7 @@ function loadData() {
       loaded.forex.delivery = 0;
       loaded.forex.other = 0;
     }
-    // v6.1: Revolut og Wise bruger Nationalbankens grundkurs med fast justering, ikke live scraping.
+    // v6.2: Revolut og Wise bruger Nationalbankens grundkurs med fast justering, ikke live scraping.
     if (loaded.revolut) {
       loaded.revolut.rate = defaults.market.rate * 0.9905;
       loaded.revolut.rateUnavailable = false;
@@ -293,7 +293,7 @@ function loadData() {
     if (loaded.visa && loaded.visa.manualRate === undefined) {
       loaded.visa.manualRate = "";
     }
-    // v6.1: Mastercard skrives om som Visa-model: Nationalbank grundkurs, 1,5% valutakurstillæg, 2% / min. 50 DKK.
+    // v6.2: Mastercard skrives om som Visa-model: Nationalbank grundkurs, 1,5% valutakurstillæg, 2% / min. 50 DKK.
     if (loaded.mastercard) {
       loaded.mastercard.rawRate = defaults.market.rate;
       loaded.mastercard.spread = 1.5;
@@ -382,8 +382,8 @@ function updateConverterStatus() {
   const en = currentLanguage() === "en";
   const updated = formatRateUpdateTime(data.market?.updatedAtHour || data.market?.date);
   el.textContent = updated
-    ? (en ? `Rates update every 10 minutes Last updated ${updated}` : `Kurser opdateres hvert 10 minut Sidst opdateret ${updated}`)
-    : (en ? "Rates update every 10 minutes" : "Kurser opdateres hvert 10 minut");
+    ? (en ? `Rates update every 10 minutes Last updated ${updated}` : `Kurskilde: Open Exchange Rates Sidst opdateret ${updated}`)
+    : (en ? "Rates update every 10 minutes" : "Kurskilde: Open Exchange Rates");
 }
 
 function updateConverterFrom(currency) {

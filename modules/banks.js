@@ -425,7 +425,7 @@ function updateRateStatus() {
   if (!el) return;
 
   const en = currentLanguage() === "en";
-  const prefix = en ? "Rates update every 10 minutes" : "Kurser opdateres hvert 10 minut";
+  const prefix = en ? "Rates update every 10 minutes" : "Kurskilde: Open Exchange Rates";
   el.textContent = "";
   el.appendChild(document.createTextNode(prefix));
   const updatedValue = data.market?.updatedAtHour || data.market?.date;
