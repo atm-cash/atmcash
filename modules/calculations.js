@@ -662,19 +662,16 @@ function calculateMastercardDetails() {
     finalTotalDkk = beforeBankFeeDkk + percentFeeDkk;
   } else {
     const dkk = amountToDkk(parseNumber(document.getElementById("dkkAmount").value));
-    const visaModel = data.visa || c;
-    const visaMaxPerWithdrawal = parseNumber(document.getElementById("visaMaxPerWithdrawal")?.value || "2000") || 2000;
-    withdrawalCount = Math.max(1, Math.ceil(dkk / visaMaxPerWithdrawal));
+    withdrawalCount = Math.max(1, Math.ceil((dkk * c.rate) / maxPerWithdrawal));
     for (let i = 0; i < 8; i += 1) {
       atmFeeThb = withdrawalCount * c.atm;
       const atmFeeDkk = atmFeeThb / c.rate;
-      // v6.0: Kontanter ønsket og total THB inkl. ATM skal være 100% samme som Visa.
-      beforeBankFeeDkk = getBeforeCardFeeDkkFromTotal(Math.max(0, dkk - atmFeeDkk), visaModel, withdrawalCount);
+      beforeBankFeeDkk = getBeforeMastercardFeeDkkFromTotal(Math.max(0, dkk - atmFeeDkk), c, withdrawalCount);
       totalThbWithFees = beforeBankFeeDkk * c.rate;
       wantedCashThb = Math.max(0, totalThbWithFees - atmFeeThb);
       percentFeeDkk = getMastercardFeeDkk(beforeBankFeeDkk, c, withdrawalCount);
-      finalTotalDkk = beforeBankFeeDkk + percentFeeDkk + atmFeeDkk;
-      const nextCount = Math.max(1, Math.ceil(finalTotalDkk / visaMaxPerWithdrawal));
+      finalTotalDkk = dkk;
+      const nextCount = Math.max(1, Math.ceil(totalThbWithFees / maxPerWithdrawal));
       if (nextCount === withdrawalCount) break;
       withdrawalCount = nextCount;
     }
