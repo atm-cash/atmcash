@@ -3,7 +3,7 @@
     "rate": 5.08646998982706,
     "date": "",
     "source": "nationalbanken",
-    "rateVersion": "v6.2",
+    "rateVersion": "v6.3",
     "rates": {
       "DKK": 1,
       "THB": 5.08646998982706,
@@ -136,5 +136,5 @@
     "eurToThb": 37.95,
     "maxDkkPerWithdrawal": 15000
   },
-  "version": "v6.2"
+  "version": "v6.3"
 }
